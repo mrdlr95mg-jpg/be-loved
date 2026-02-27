@@ -1,176 +1,105 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DNA & Human Design Gates Visualization</title>
+    <title>Be Loved - DNA Visualization</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #1a1a2e; } /* Глубокий темный фон */
-        canvas { display: block; }
-        #info {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            color: white;
-            font-family: Arial, sans-serif;
-            font-size: 14px;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px;
-            border-radius: 5px;
-            max-width: 300px;
+        body { margin: 0; background: #050505; color: white; font-family: 'Georgia', serif; overflow: hidden; }
+        #canvas-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        .ui-layer {
+            position: relative; z-index: 2; height: 100vh; display: flex; flex-direction: column;
+            justify-content: space-between; align-items: center; padding: 40px; box-sizing: border-box;
+            pointer-events: none;
         }
-        #info span { color: gold; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
+            padding: 25px; max-width: 400px; text-align: center; pointer-events: auto;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        }
+        h1 { font-size: 1.2rem; color: #d4af37; margin-bottom: 15px; letter-spacing: 1px; }
+        p { font-size: 0.9rem; line-height: 1.6; opacity: 0.8; }
+        .footer-phrase { color: #d4af37; font-style: italic; font-size: 1.1rem; margin-bottom: 20px; opacity: 0.9; }
+        .print-note { font-size: 0.75rem; opacity: 0.5; margin-top: 10px; }
     </style>
 </head>
 <body>
-    <div id="info">
-        <p>3D-визуализация ДНК и 64 Ворот Дизайна Человека.</p>
-        <p>Каждый сегмент спирали соответствует одной гексаграмме/кодону. Ваши определенные Ворота подсвечены <span>золотым</span> цветом.</p>
-        <p>Вы можете вращать спираль мышкой. <br>Ваши определенные Ворота: <span id="definedGatesDisplay"></span></p>
+    <div id="canvas-container"></div>
+    <div class="ui-layer">
+        <div class="glass-panel">
+            <h1>3D Визуализация ДНК</h1>
+            <p>Ваши 64 кодона выстроены в гармоничную спираль. Золотое свечение указывает на ваши определенные ворота.</p>
+            <p class="print-note">✨ Возможно, если вы распечатаете это на листе бумаги, вам будет гораздо приятнее на это смотреть</p>
+        </div>
+        <div class="footer-phrase">Будьте любимы жизнью...</div>
     </div>
-    
-    <!-- Подключаем Three.js с CDN - не нужно ничего скачивать! -->
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-
     <script>
-        // --- Настройки вашего профиля ---
-        // ВАЖНО: Укажите здесь номера своих определенных Ворот (гексаграмм) от 1 до 64.
-        // Например, если у вас определены 37, 21, 59 ворота, пишите:
-        let definedGates = [37]; // Ты упоминал 37-е ворота
-        // ---------------------------------
-
-        // Базовые настройки сцены
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-        // Управление камерой
-        const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true; // Для плавности
-        controls.dampingFactor = 0.05;
-        controls.screenSpacePanning = false;
-        controls.minDistance = 10;
-        controls.maxDistance = 50;
+        const group = new THREE.Group();
+        const segments = 64;        const myGates = [10, 25, 37, 51]; // Здесь будут твои ворота
 
-        // Добавляем свет
+        for (let i = 0; i < segments; i++) {
+            const angle = i * 0.4;
+            const y = (i - segments/2) * 0.5;
+            const x = Math.cos(angle) * 4;
+            const z = Math.sin(angle) * 4;
 
-        const ambientLight = new THREE.AmbientLight(0x404040, 2); // Мягкий рассеянный свет
-        scene.add(ambientLight);
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(1, 1, 1).normalize();
-        scene.add(directionalLight);
+            const isHighlighted = myGates.includes(i + 1);
+            const geometry = new THREE.SphereGeometry(isHighlighted ? 0.25 : 0.15, 16, 16);
+            const material = new THREE.MeshStandardMaterial({
+                color: isHighlighted ? 0xd4af37 : 0x333333,
+                emissive: isHighlighted ? 0xd4af37 : 0x000000,
+                emissiveIntensity: isHighlighted ? 0.5 : 0,
+                metalness: 1, roughness: 0.2
+            });
 
-        // Параметры спирали ДНК
-        const numSegments = 64; // Каждая "перекладина" = гексаграмма/кодон
-        const helixRadius = 5;
-        const segmentHeight = 0.5;
-        const totalHeight = numSegments * segmentHeight;
-        const turns = 3; // Количество полных оборотов спирали
-        const angleStep = (Math.PI * 2 * turns) / numSegments;
+            const sphere = new THREE.Mesh(geometry, material);
+            sphere.position.set(x, y, z);
+            group.add(sphere);
 
-        const helixGroup = new THREE.Group(); // Группа для всей спирали
-        scene.add(helixGroup);
-
-        // Создаем спираль
-        for (let i = 0; i < numSegments; i++) {
-            const angle = i * angleStep;
-            const y = i * segmentHeight - totalHeight / 2; // Центрируем по высоте
-
-            // Координаты для двух "оснований" (баз)
-            const x1 = helixRadius * Math.cos(angle);
-            const z1 = helixRadius * Math.sin(angle);
-            const x2 = helixRadius * Math.cos(angle + Math.PI); // С другой стороны спирали
-            const z2 = helixRadius * Math.sin(angle + Math.PI);
-
-            // Создаем объекты "оснований"
-            const baseGeometry = new THREE.SphereGeometry(0.3, 16, 16);
-            let material1, material2, connectorMaterial;
-
-            // Определяем материал в зависимости от того, является ли это определенным сегментом
-            const gateNumber = i + 1; // Ворота нумеруются с 1 до 64
-            const isDefined = definedGates.includes(gateNumber);
-
-            if (isDefined) {
-                material1 = new THREE.MeshStandardMaterial({ color: 0xffd700, emissive: 0xffd700, emissiveIntensity: 0.8 }); // Золотой, светящийся
-                material2 = new THREE.MeshStandardMaterial({ color: 0xffd700, emissive: 0xffd700, emissiveIntensity: 0.8 });
-                connectorMaterial = new THREE.MeshStandardMaterial({ color: 0xffa500, emissive: 0xffa500, emissiveIntensity: 0.5 }); // Оранжевый коннектор
-            } else {
-                material1 = new THREE.MeshStandardMaterial({ color: 0x666666, emissive: 0x111111, emissiveIntensity: 0.1 }); // Серый, слегка светящийся
-
-material2 = new THREE.MeshStandardMaterial({ color: 0x666666, emissive: 0x111111, emissiveIntensity: 0.1 });
-                connectorMaterial = new THREE.MeshStandardMaterial({ color: 0x444444, emissive: 0x050505, emissiveIntensity: 0.05 }); // Темно-серый коннектор
-            }
-            
-            const base1 = new THREE.Mesh(baseGeometry, material1);
-            base1.position.set(x1, y, z1);
-            helixGroup.add(base1);
-
-            const base2 = new THREE.Mesh(baseGeometry, material2);
-            base2.position.set(x2, y, z2);
-            helixGroup.add(base2);
-
-            // Создаем "перекладину" (кодон)
-            const midpoint = new THREE.Vector3((x1 + x2) / 2, y, (z1 + z2) / 2);
-            const distance = base1.position.distanceTo(base2.position);
-            const connectorGeometry = new THREE.CylinderGeometry(0.1, 0.1, distance, 8);
-            const connector = new THREE.Mesh(connectorGeometry, connectorMaterial);
-            connector.position.copy(midpoint);
-            connector.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), base2.position.clone().sub(base1.position).normalize());
-            helixGroup.add(connector);
-
-            // Создаем "хребет" спирали (фосфатно-сахарный остов)
             if (i > 0) {
-                const prevAngle = (i - 1) * angleStep;
-                const prevY = (i - 1) * segmentHeight - totalHeight / 2;
-                const prevX1 = helixRadius * Math.cos(prevAngle);
-                const prevZ1 = helixRa
-
-dius * Math.sin(prevAngle);
-                const prevX2 = helixRadius * Math.cos(prevAngle + Math.PI);
-                const prevZ2 = helixRadius * Math.sin(prevAngle + Math.PI);
-
-                // Левая сторона хребта
-                const backboneMaterial = new THREE.MeshStandardMaterial({ color: 0x333333, emissive: 0x080808, emissiveIntensity: 0.05 });
-                const path1 = new THREE.LineCurve3(new THREE.Vector3(prevX1, prevY, prevZ1), new THREE.Vector3(x1, y, z1));
-                const tubeGeometry1 = new THREE.TubeGeometry(path1, 20, 0.15, 8, false);
-                const backbone1 = new THREE.Mesh(tubeGeometry1, backboneMaterial);
-                helixGroup.add(backbone1);
-
-                // Правая сторона хребта
-                const path2 = new THREE.LineCurve3(new THREE.Vector3(prevX2, prevY, prevZ2), new THREE.Vector3(x2, y, z2));
-                const tubeGeometry2 = new THREE.TubeGeometry(path2, 20, 0.15, 8, false);
-                const backbone2 = new THREE.Mesh(tubeGeometry2, backboneMaterial);
-                helixGroup.add(backbone2);
+                const prevAngle = (i-1) * 0.4;
+                const prevY = (i-1 - segments/2) * 0.5;
+                const prevX = Math.cos(prevAngle) * 4;
+                const prevZ = Math.sin(prevAngle) * 4;
+                
+                const lineGeo = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(x, y, z), new THREE.Vector3(prevX, prevY, prevZ)
+                ]);
+                const lineMat = new THREE.LineBasicMaterial({ color: 0x333333, transparent: true, opacity: 0.3 });
+                group.add(new THREE.Line(lineGeo, lineMat));
             }
         }
+        scene.add(group);
+
+        const light1 = new THREE.PointLight(0xffffff, 1);
+        light1.position.set(10, 10, 10);
+        scene.add(light1);
+        scene.add(new THREE.AmbientLight(0x404040));
 
         camera.position.z = 20;
 
-        // Анимация
         function animate() {
             requestAnimationFrame(animate);
-            controls.update(); // Обновление контролов
-            helixGroup.rotation.y += 0.005; // Вращаем всю спираль
+            group.rotation.y += 0.005;
+            group.rotation.x += 0.002;
             renderer.render(scene, camera);
         }
         animate();
 
-        // Обработка изменения размера окна
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
-
-        // Отобразить определенные ворота в UI
-        document.getElementById('definedGatesDisplay').textContent = definedGates.join(', ');
-
     </script>
-<div style="color: #d4af37; text-align: center; font-family: 'serif'; margin-top: 20px; opacity: 0.8;">
-    <p>Будьте любимы жизнью...</p>
-</div>
 </body>
-  </html>
+</html>
