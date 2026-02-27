@@ -68,7 +68,22 @@
                 color === 0xd4af37 ? highlightedBondMaterial : bondMaterial // Use highlighted material if color matches gold
             );
             cylinder.position.copy(start).add(direction.multiplyScalar(0.5));
-            cylinder.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());            const pos1 = new THREE.Vector3(x1, y, z1);
+            cylinder.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
+            return cylinder;
+        }
+
+        // Generate DNA double helix
+        for (let i = 0; i < segments; i++) {
+            const angle = i * 0.4; // controls rotation and density
+            const y = (i - segments / 2) * helixHeight; // vertical position
+
+            // Determine if this 'rung' (base pair) needs to be highlighted
+            const isGateHighlighted = myGates.includes(i + 1);
+            const currentHighlightColor = isGateHighlighted ? 0xd4af37 : 0x000000; // Gold for highlight, black for no highlight
+
+            // --- Strand 1 components (Phosphate, Sugar) ---
+            const x1 = Math.cos(angle) * helixRadius;
+            const z1 = Math.sin(angle) * helixRadius;            const pos1 = new THREE.Vector3(x1, y, z1);
 
             const phosphate1 = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), new THREE.MeshStandardMaterial({ color: P_COLOR, roughness: 0.2 }));
             phosphate1.position.copy(pos1);
@@ -96,22 +111,7 @@
             const sugar2Pos = new THREE.Vector3(
                 Math.cos(angle + Math.PI + 0.5) * (helixRadius - 1), 
                 y, 
-                Math.sin(angle + Math.PI + 0.5
-            return cylinder;
-        }
-
-        // Generate DNA double helix
-        for (let i = 0; i < segments; i++) {
-            const angle = i * 0.4; // controls rotation and density
-            const y = (i - segments / 2) * helixHeight; // vertical position
-
-            // Determine if this 'rung' (base pair) needs to be highlighted
-            const isGateHighlighted = myGates.includes(i + 1);
-            const currentHighlightColor = isGateHighlighted ? 0xd4af37 : 0x000000; // Gold for highlight, black for no highlight
-
-            // --- Strand 1 components (Phosphate, Sugar) ---
-            const x1 = Math.cos(angle) * helixRadius;
-            const z1 = Math.sin(angle) * helixRadius;        const helixHeight = 0.5; // Vertical spacing per segment
+                Math.sin(angle + Math.PI + 0.5        const helixHeight = 0.5; // Vertical spacing per segment
         const totalHeight = segments * helixHeight;
         const myGates = [10, 25, 37, 51]; // Пример: твои определенные ворота (от 1 до 64)
 
@@ -260,4 +260,4 @@
         });
     </script>
 </body>
-</html>
+    </html>
