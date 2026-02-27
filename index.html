@@ -1,263 +1,60 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Be Loved - DNA Visualization</title>
+    <title>DNA 3D</title>
     <style>
-        body { margin: 0; background: #050505; color: white; font-family: 'Georgia', serif; overflow: hidden; }
-        #canvas-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-        .ui-layer {
-            position: relative; z-index: 2; height: 100vh; display: flex; flex-direction: column;
-            justify-content: space-between; align-items: center; padding: 40px; box-sizing: border-box;
-            pointer-events: none;
-        }
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
-            padding: 25px; max-width: 400px; text-align: center; pointer-events: auto;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-        }
-        h1 { font-size: 1.2rem; color: #d4af37; margin-bottom: 15px; letter-spacing: 1px; }
-        p { font-size: 0.9rem; line-height: 1.6; opacity: 0.8; }
-        .footer-phrase { color: #d4af37; font-style: italic; font-size: 1.1rem; margin-bottom: 20px; opacity: 0.9; }
-        .print-note { font-size: 0.75rem; opacity: 0.5; margin-top: 10px; }
+        body { margin: 0; background: #050505; color: #d4af37; font-family: serif; overflow: hidden; text-align: center; }
+        .info { position: absolute; width: 100%; top: 20%; z-index: 10; pointer-events: none; }
+        .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border-radius: 15px; padding: 20px; display: inline-block; border: 1px solid rgba(255,255,255,0.1); }
     </style>
 </head>
 <body>
-    <div id="canvas-container"></div>
-    <div class="ui-layer">
-        <div class="glass-panel">
-            <h1>3D Визуализация ДНК</h1>
-            <p>Ваши 64 кодона выстроены в гармоничную двойную спираль. Золотое свечение указывает на ваши определенные ворота.</p>
-            <p class="print-note">✨ Возможно, если вы распечатаете это на листе бумаги, вам будет гораздо приятнее на это смотреть</p>
+    <div class="info">
+        <div class="glass">
+            <h2>3D Визуализация ДНК</h2>
+            <p>Будьте любимы жизнью...</p>
         </div>
-        <div class="footer-phrase">Будьте любимы жизнью...</div>
     </div>
-
+    <div id="canvas"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        document.getElementById('canvas-container').appendChild(renderer.domElement);
+        document.getElementById('canvas').appendChild(renderer.domElement);
 
         const group = new THREE.Group();
-        const segments = 64; // 64 кодона
-        const helixRadius = 4;        const helixHeight = 0.5; // Vertical spacing per segment
-        const totalHeight = segments * helixHeight;
-        const myGates = [10, 25, 37, 51]; // Пример: твои определенные ворота (от 1 до 64)
-
-        // Atom colors (simplified standard colors for visual effect)
-        const C_COLOR = 0x666666; // Carbon - dark gray
-        const O_COLOR = 0xFF0000; // Oxygen - red
-        const N_COLOR = 0x0000FF; // Nitrogen - blue
-        const P_COLOR = 0xFFA500; // Phosphorus - orange (for phosphate)
-        // const H_COLOR = 0xFFFFFF; // Hydrogen - white - currently not rendered explicitly to keep it simpler
-
-        const bondMaterial = new THREE.MeshStandardMaterial({ color: 0xAAAAAA, roughness: 0.5, metalness: 0.5 });
-        const highlightedBondMaterial = new THREE.MeshStandardMaterial({ color: 0xd4af37, emissive: 0xd4af37, emissiveIntensity: 0.7, roughness: 0.2, metalness: 1 });
-
-        // Helper to create a bond (cylinder) between two points
-        function createBond(start, end, color, radius = 0.05) {
-            const direction = new THREE.Vector3().subVectors(end, start);
-            const length = direction.length();
-            const cylinder = new THREE.Mesh(
-                new THREE.CylinderGeometry(radius, radius, length, 8),
-                color === 0xd4af37 ? highlightedBondMaterial : bondMaterial // Use highlighted material if color matches gold
+        for (let i = 0; i < 64; i++) {
+            const angle = i * 0.4;
+            const y = (i - 32) * 0.4;
+            
+            const sphere = new THREE.Mesh(
+                new THREE.SphereGeometry(0.15, 12, 12),
+                new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 1, roughness: 0.2 })
             );
-            cylinder.position.copy(start).add(direction.multiplyScalar(0.5));
-            cylinder.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
-            return cylinder;
-        }
+            sphere.position.set(Math.cos(angle)*3, y, Math.sin(angle)*3);
+            group.add(sphere);
 
-        // Generate DNA double helix
-        for (let i = 0; i < segments; i++) {
-            const angle = i * 0.4; // controls rotation and density
-            const y = (i - segments / 2) * helixHeight; // vertical position
-
-            // Determine if this 'rung' (base pair) needs to be highlighted
-            const isGateHighlighted = myGates.includes(i + 1);
-            const currentHighlightColor = isGateHighlighted ? 0xd4af37 : 0x000000; // Gold for highlight, black for no highlight
-
-            // --- Strand 1 components (Phosphate, Sugar) ---
-            const x1 = Math.cos(angle) * helixRadius;
-            const z1 = Math.sin(angle) * helixRadius;            const pos1 = new THREE.Vector3(x1, y, z1);
-
-            const phosphate1 = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), new THREE.MeshStandardMaterial({ color: P_COLOR, roughness: 0.2 }));
-            phosphate1.position.copy(pos1);
-            group.add(phosphate1);
-
-            const sugar1Pos = new THREE.Vector3(
-                Math.cos(angle - 0.5) * (helixRadius - 1), 
-                y, 
-                Math.sin(angle - 0.5) * (helixRadius - 1)
+            const sphere2 = new THREE.Mesh(
+                new THREE.SphereGeometry(0.15, 12, 12),
+                new THREE.MeshStandardMaterial({ color: 0x666666 })
             );
-            const sugar1 = new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 16), new THREE.MeshStandardMaterial({ color: C_COLOR, roughness: 0.2 }));
-            sugar1.position.copy(sugar1Pos);
-            group.add(sugar1);
-            group.add(createBond(phosphate1.position, sugar1.position, C_COLOR));
-
-            // --- Strand 2 components (Phosphate, Sugar) ---
-            const x2 = Math.cos(angle + Math.PI) * helixRadius; // +PI for opposite side
-            const z2 = Math.sin(angle + Math.PI) * helixRadius;
-            const pos2 = new THREE.Vector3(x2, y, z2);
-
-            const phosphate2 = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), new THREE.MeshStandardMaterial({ color: P_COLOR, roughness: 0.2 }));
-            phosphate2.position.copy(pos2);
-            group.add(phosphate2);
-
-            const sugar2Pos = new THREE.Vector3(
-                Math.cos(angle + Math.PI + 0.5) * (helixRadius - 1), 
-                y, 
-                Math.sin(angle + Math.PI + 0.5        const helixHeight = 0.5; // Vertical spacing per segment
-        const totalHeight = segments * helixHeight;
-        const myGates = [10, 25, 37, 51]; // Пример: твои определенные ворота (от 1 до 64)
-
-        // Atom colors (simplified standard colors for visual effect)
-        const C_COLOR = 0x666666; // Carbon - dark gray
-        const O_COLOR = 0xFF0000; // Oxygen - red
-        const N_COLOR = 0x0000FF; // Nitrogen - blue
-        const P_COLOR = 0xFFA500; // Phosphorus - orange (for phosphate)
-        // const H_COLOR = 0xFFFFFF; // Hydrogen - white - currently not rendered explicitly to keep it simpler
-
-        const bondMaterial = new THREE.MeshStandardMaterial({ color: 0xAAAAAA, roughness: 0.5, metalness: 0.5 });
-        const highlightedBondMaterial = new THREE.MeshStandardMaterial({ color: 0xd4af37, emissive: 0xd4af37, emissiveIntensity: 0.7, roughness: 0.2, metalness: 1 });
-
-        // Helper to create a bond (cylinder) between two points
-        function createBond(start, end, color, radius = 0.05) {
-            const direction = new THREE.Vector3().subVectors(end, start);
-            const length = direction.length();
-            const cylinder = new THREE.Mesh(
-                new THREE.CylinderGeometry(radius, radius, length, 8),
-                color === 0xd4af37 ? highlightedBondMaterial : bondMaterial // Use highlighted material if color matches gold
-            );
-            cylinder.position.copy(start).add(direction.multiplyScalar(0.5));
-            cylinder.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
-            return cylinder;
-        }
-
-        // Generate DNA double helix
-        for (let i = 0; i < segments; i++) {
-            const angle = i * 0.4; // controls rotation and density
-            const y = (i - segments / 2) * helixHeight; // vertical position
-
-            // Determine if this 'rung' (base pair) needs to be highlighted
-            const isGateHighlighted = myGates.includes(i + 1);
-            const currentHighlightColor = isGateHighlighted ? 0xd4af37 : 0x000000; // Gold for highlight, black for no highlight
-
-            // --- Strand 1 components (Phosphate, Sugar) ---
-            const x1 = Math.cos(angle) * helixRadius;
-            const z1 = Math.sin(angle) * helixRadius;
-            const pos1 = new THREE.Vector3(x1, y, z1);
-
-            const phosphate1 = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), new THREE.MeshStandardMaterial({ color: P_COLOR, roughness: 0.2 }));
-            phosphate1.position.copy(pos1);
-            group.add(phosphate1);
-
-            const sugar1Pos = new THREE.Vector3(
-                Math.cos(angle - 0.5) * (helixRadius - 1), 
-                y, 
-                Math.sin(angle - 0.5) * (helixRadius - 1)
-            );
-            const sugar1 = new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 16), new THREE.MeshStandardMaterial({ color: C_COLOR, roughness: 0.2 }));
-            sugar1.position.copy(sugar1Pos);
-            group.add(sugar1);
-            group.add(createBond(phosphate1.position, sugar1.position, C_COLOR));
-
-            // --- Strand 2 components (Phosphate, Sugar) ---
-            const x2 = Math.cos(angle + Math.PI) * helixRadius; // +PI for opposite side
-            const z2 = Math.sin(angle + Math.PI) * helixRadius;
-            const pos2 = new THREE.Vector3(x2, y, z2);
-
-            const phosphate2 = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), new THREE.MeshStandardMaterial({ color: P_COLOR, roughness: 0.2 }));
-            phosphate2.position.copy(pos2);
-            group.add(phosphate2);
-
-            const sugar2Pos = new THREE.Vector3(
-                Math.cos(angle + Math.PI + 0.5) * (helixRadius - 1), 
-                y, 
-                Math.sin(angle + Math.PI + 0.5) * (helixRadius - 1)
-            );
-            const sugar2 = new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 16), new THREE.MeshStandardMaterial({ color: C_COLOR, roughness: 0.2 }));
-            sugar2.position.copy(sugar2Pos);
-            group.add(sugar2);
-            group.add(createBond(phosphate2.position, sugar2.position, C_COLOR));
-
-            // --- Base Pair (connecting the two strands - simplified for visual impact) ---
-            const baseCenter1 = new THREE.Vector3().lerpVectors(sugar1.position, sugar2.position, 0.4); // closer to sugar1
-            const baseCenter2 = new THREE.Vector3().lerpVectors(sugar1.position, sugar2.position, 0.6); // closer to sugar2
-
-            const baseMaterial = new THREE.MeshStandardMaterial({
-                color: N_COLOR, emissive: currentHighlightColor, emissiveIntensity: isGateHighlighted ? 1 : 0,
-                metalness: 0.5, roughness: 0.2
-            });
-
-            const baseSphere1 = new THREE.Mesh(new THREE.SphereGeometry(0.25, 16, 16), baseMaterial);
-            baseSphere1.position.copy(baseCenter1);
-            group.add(baseSphere1);
-
-            const baseSphere2 = new THREE.Mesh(new THREE.SphereGeometry(0.25, 16, 16), baseMaterial);
-            baseSphere2.position.copy(baseCenter2);
-            group.add(baseSphere2);
-
-            group.add(createBond(baseSphere1.position, baseSphere2.position, currentHighlightColor, 0.08)); // Connecting bond (rung)
-            group.add(createBond(sugar1.position, baseSphere1.position, currentHighlightColor)); // Bond from sugar to base
-            group.add(createBond(sugar2.position, baseSphere2.position, currentHighlightColor)); // Bond from sugar to base
-
-
-            // --- Connect previous segment's backbone to current one ---
-            if (i > 0) {
-                const prevAngle = (i-1) * 0.4;
-                const prevY = (i-1 - segments / 2) * helixHeight;
-
-                const prevPhosphate1Pos = new THREE.Vector3(Math.cos(prevAngle) * helixRadius, prevY, Math.sin(prevAngle) * helixRadius);
-                const prevSugar1Pos = new THREE.Vector3(
-                    Math.cos(prevAngle - 0.5) * (helixRadius - 1),
-                    prevY,
-                    Math.sin(prevAngle - 0.5) * (helixRadius - 1)
-                );
-                group.add(createBond(phosphate1.position, prevSugar1Pos, C_COLOR)); // Backbone strand 1
-
-                const prevPhosphate2Pos = new THREE.Vector3(Math.cos(prevAngle + Math.PI) * helixRadius, prevY, Math.sin(prevAngle + Math.PI) * helixRadius);
-                const prevSugar2Pos = new THREE.Vector3(
-                    Math.cos(prevAngle + Math.PI + 0.5) * (helixRadius - 1),
-                    prevY,
-                    Math.sin(prevAngle + Math.PI + 0.5) * (helixRadius - 1)
-                );
-                group.add(createBond(phosphate2.position, prevSugar2Pos, C_COLOR)); // Backbone strand 2
-            }
+            sphere2.position.set(Math.cos(angle + Math.PI)*3, y, Math.sin(angle + Math.PI)*3);
+            group.add(sphere2);
         }
         scene.add(group);
+        scene.add(new THREE.PointLight(0xffffff, 1, 100).clone().position.set(10,10,10));
+        scene.add(new THREE.AmbientLight(0x404040));
+        camera.position.z = 15;
 
-        // Lighting for better visibility of detailed structure
-        const light1 = new THREE.PointLight(0xffffff, 1.2);
-        light1.position.set(15, 15, 15);
-        scene.add(light1);
-        const light2 = new THREE.PointLight(0xffffff, 0.8);
-        light2.position.set(-15, -15, -15);
-        scene.add(light2);
-        const ambientLight = new THREE.AmbientLight(0x404040); // Soft overall light
-        scene.add(ambientLight);
-
-        camera.position.z = 25; // Zoom out a bit for full view
-
-        // Animation loop
         function animate() {
             requestAnimationFrame(animate);
-            group.rotation.y += 0.005;
-            group.rotation.x += 0.002;
+            group.rotation.y += 0.01;
             renderer.render(scene, camera);
         }
         animate();
-
-        // Handle window resizing
-        window.addEventListener('resize', () =>{
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
     </script>
 </body>
-    </html>
+</html>
