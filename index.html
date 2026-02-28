@@ -171,4 +171,55 @@
     }
   </script>
 </body>
-</html>
+</html><!-- ЭФФЕКТЫ ХРАМА, ОКЕАНА И МУЗЫКИ -->
+<style>
+  .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 50% 50%, rgba(20, 30, 48, 0.4), #000); z-index: 0; pointer-events: none; }
+  .mist { position: fixed; bottom: 0; left: 0; width: 100%; height: 45vh; background: linear-gradient(to top, rgba(212, 175, 55, 0.15), transparent); filter: blur(60px); z-index: 2; pointer-events: none; }
+  .temple-light { position: fixed; top: 0; width: 1px; height: 100%; background: linear-gradient(to bottom, transparent, rgba(212, 175, 55, 0.4), transparent); z-index: 1; pointer-events: none; }
+  .l1 { left: 10%; } .l2 { right: 10%; }
+  
+  /* Кнопка Музыки */
+  .music-control {
+    position: fixed; top: 20px; right: 20px; z-index: 150;
+    background: rgba(212, 175, 55, 0.2); border: 1px solid var(--gold);
+    color: var(--gold); border-radius: 50%; width: 45px; height: 45px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; backdrop-filter: blur(10px); font-size: 20px;
+  }
+</style>
+
+<div class="stars"></div>
+<div class="mist"></div>
+<div class="temple-light l1"></div>
+<div class="temple-light l2"></div>
+
+<button class="music-control" id="musicBtn" onclick="toggleMusic()">◈</button>
+
+<script>
+  // Ссылка на эмбиент-медитацию (безопасный источник)
+  const audio = new Audio('https://www.soundhelix.com');
+  audio.loop = true;
+  let isPlaying = false;
+
+  function toggleMusic() {
+    const btn = document.getElementById('musicBtn');
+    if (!isPlaying) {
+      audio.play();
+      btn.innerHTML = '◈'; // Символ активного звука
+      btn.style.boxShadow = '0 0 15px #d4af37';
+    } else {
+      audio.pause();
+      btn.innerHTML = '◇'; // Символ тишины
+      btn.style.boxShadow = 'none';
+    }
+    isPlaying = !isPlaying;
+  }
+
+  // Эффект легкого покачивания всей сцены (как на волнах)
+  document.addEventListener('deviceorientation', (event) => {
+    const x = event.beta / 5; 
+    const y = event.gamma / 5;
+    document.querySelector('.world').style.transform = `translate(${y}px, ${x}px)`;
+  });
+</script>
+
