@@ -34,7 +34,28 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);        const silverMat = new THREE.MeshStandardMaterial({ color: 0x555555, metalness: 0.8, roughness: 0.4 });
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        
+        function resizeRenderer() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            renderer.setSize(width, height);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+        }
+        window.addEventListener('resize', resizeRenderer);
+        resizeRenderer(); // Initial setup
+
+        document.getElementById('canvas').appendChild(renderer.domElement);
+
+        const group = new THREE.Group();
+        const count = 64; 
+        const radius = 3.5;
+        const heightStep = 0.45;
+
+        // Materials
+        const goldMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 1, roughness: 0.2, emissive: 0x221100 });        const silverMat = new THREE.MeshStandardMaterial({ color: 0x555555, metalness: 0.8, roughness: 0.4 });
         const bondMat = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.15 });
 
         function createAtom(x, y, z, mat, size) {
@@ -107,24 +128,3 @@
     </script>
 </body>
 </html>
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        
-        function resizeRenderer() {
-            const width = window.innerWidth;
-            const height = window.innerHeight;
-            renderer.setSize(width, height);
-            camera.aspect = width / height;
-            camera.updateProjectionMatrix();
-        }
-        window.addEventListener('resize', resizeRenderer);
-        resizeRenderer(); // Initial setup
-
-        document.getElementById('canvas').appendChild(renderer.domElement);
-
-        const group = new THREE.Group();
-        const count = 64; 
-        const radius = 3.5;
-        const heightStep = 0.45;
-
-        // Materials
-        const goldMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 1, roughness: 0.2, emissive: 0x221100 });
