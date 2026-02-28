@@ -2,42 +2,36 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>DNA Seduction</title>
+    <title>DNA Molecular Detail</title>
     <style>
-        body { margin: 0; background: #000000; font-family: 'Raleway', sans-serif; overflow: hidden; }
-        #canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-        .ui-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; justify-content: space-between; align-items: center;
-            padding: 50px 30px; box-sizing: border-box;
-            text-align: center; color: #e6d8ad; /* Золотисто-бежевый */
-            pointer-events: none; /* Чтобы UI не мешал вращать */
-        }
-        .ui-glass {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 30px;
-            padding: 30px 40px;
+        body { margin: 0; background: #020202; color: #d4af37; font-family: 'Raleway', sans-serif; overflow: hidden; }
+        .ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 50px 30px; box-sizing: border-box; pointer-events: none; text-align: center; }
+        .glass-card { 
+            background: rgba(255, 255, 255, 0.04); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(255, 255, 255, 0.12); 
+            border-radius: 30px; 
+            padding: 30px 40px; 
             box-shadow: 0 10px 40px rgba(0,0,0,0.7);
-            max-width: 500px;
-            pointer-events: auto; /* Чтобы кликать по элементам UI, если они будут */
+            max-width: 600px;
+            pointer-events: auto;
         }
-        h1 { font-size: 1.8rem; letter-spacing: 5px; margin: 0 0 15px 0; text-transform: uppercase; opacity: 0.9; }
-        p { font-size: 0.95rem; line-height: 1.7; opacity: 0.7; }
+        h1 { font-size: 1.6rem; letter-spacing: 4px; margin: 0 0 15px 0; text-transform: uppercase; opacity: 0.95; }
+        p { font-size: 1rem; line-height: 1.7; opacity: 0.7; }
         .footer-text {
-            font-size: 1.2rem; font-style: italic; opacity: 0.8;
-            text-shadow: 0 0 15px rgba(230, 216, 173, 0.7); /* Мягкое золотое свечение */
+            position: absolute; bottom: 30px; width: 100%;
+            font-size: 1.3rem; font-style: italic; opacity: 0.8;
+            text-shadow: 0 0 20px rgba(230, 216, 173, 0.8); /* Мягкое золотое свечение */
         }
         @import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
     </style>
 </head>
 <body>
     <div id="canvas"></div>
-    <div class="ui-overlay">
-        <div class="ui-glass">
-            <h1>Ядро бытия</h1>
-            <p>Ваши 64 кодона, пульсирующие в совершенной двойной спирали. Золотое сияние — это вы.</p>
+    <div class="ui">
+        <div class="glass-card">
+            <h1>Молекулярная основа</h1>
+            <p>Детальная структура ДНК, где каждый атом и связь несут свой смысл. Здесь рождается ваша уникальность.</p>
         </div>
         <div class="footer-text">Будьте любимы жизнью...</div>
     </div>
@@ -51,13 +45,13 @@
         function resizeRenderer() {
             const width = window.innerWidth;
             const height = window.innerHeight;
-            renderer.setSize(width, height);            camera.aspect = width / height;
+            renderer.setSize(width, height);
+            camera.aspect = width / height;
             camera.updateProjectionMatrix();
-            // Zoom adjustment for better view in different aspect ratios
-            if (width / height > 1.5) { // Wider screen
-                camera.position.z = 25;
-            } else { // Taller screen
-                camera.position.z = 20;
+            // Adjust camera Z position based on aspect ratio for better framing            if (width / height > 1.5) { // Wider screens
+                camera.position.z = 28;
+            } else { // Taller screens
+                camera.position.z = 24;
             }
         }
         window.addEventListener('resize', resizeRenderer);
@@ -66,103 +60,184 @@
         document.getElementById('canvas').appendChild(renderer.domElement);
 
         const group = new THREE.Group();
-        const segments = 64;
-        const radiusBase = 3.5;
-        const heightStep = 0.5; // Increased height for more separation
+        const numSegments = 64; // Corresponds to 64 codons/gates
+        const radiusBase = 3.0;
+        const segmentHeight = 0.55; // Increased height for better atom separation
+        const turns = 10; // Number of turns in the helix
 
-        // Materials with a bit more depth
-        const goldMat = new THREE.MeshStandardMaterial({ 
-            color: 0xe6d8ad, // Softer gold
-            metalness: 0.9, 
-            roughness: 0.1, 
-            emissive: 0x553300, 
-            emissiveIntensity: 0.5 
-        });
-        const darkMat = new THREE.MeshStandardMaterial({ 
-            color: 0x1a1a1a, // Very dark grey for the other strand
-            metalness: 0.7, 
-            roughness: 0.3
-        });
-        const bondMat = new THREE.MeshStandardMaterial({ 
-            color: 0xffffff, 
-            transparent: true, 
-            opacity: 0.1, // More subtle bonds
-            side: THREE.DoubleSide 
-        });
+        // Atom Colors (using common CPK coloring conventions for balls-and-sticks)
+        const ATOM_COLORS = {
+            C: 0x666666, // Carbon (Gray)
+            O: 0xFF0000, // Oxygen (Red)
+            N: 0x0000FF, // Nitrogen (Blue)
+            P: 0xFFA500, // Phosphorus (Orange - for phosphate backbone)
+            H: 0xFFFFFF  // Hydrogen (White - will be small)
+        };
 
-        function createAtom(x, y, z, mat, size) {
-            const sphere = new THREE.Mesh(new THREE.SphereGeometry(size, 18, 18), mat); // Increased detail
+        const bondMaterial = new THREE.MeshStandardMaterial({ color: 0x555555, transparent: true, opacity: 0.3, side: THREE.DoubleSide });
+        const highlightedBondMaterial = new THREE.MeshStandardMaterial({ color: 0xd4af37, emissive: 0x443300, emissiveIntensity: 1.5, metalness: 0.8, roughness: 0.1, side: THREE.DoubleSide });
+
+        function createAtom(x, y, z, color, radius, material) {
+            const geometry = new THREE.SphereGeometry(radius, 16, 16);
+            const mat = material ? material : new THREE.MeshStandardMaterial({ color: color, metalness: 0.7, roughness: 0.3 });
+            const sphere = new THREE.Mesh(geometry, mat);
             sphere.position.set(x, y, z);
             return sphere;
         }
 
         function createBond(v1, v2) {
-            const direction = v2.clone().sub(v1);
+            const direction = new THREE.Vector3().subVectors(v2, v1);
             const distance = direction.length();
-            const cylinder = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, distance, 10), bondMat);
-            cylinder.position.copy(v1).add(v2).multiplyScalar(0.5);
+            if (distance < 0.01) return null; // Avoid creating zero-length bonds
+            const cylinder = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, distance, 8), bondMaterial);
+            cylinder.position.copy(v1).add(direction.multiplyScalar(0.5));
             cylinder.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
             return cylinder;
         }
+                // Simplified representation of nucleotides and backbone for illustration
+        // We'll create a segment representing roughly one base pair + backbone connection
+        function createDNAPair(segmentIndex) {
+            const anglePerSegment = (Math.PI * 2 * turns) / numSegments;
+            const angle = segmentIndex * anglePerSegment;
+            const y = (segmentIndex - numSegments / 2) * segmentHeight;
+            
+            const helixTwist = angle * 0.5; // Twist factor for the helix
 
-        for (let i = 0; i < segments; i++) {
-            // Slightly tilted angle for a more dynamic helix
-            const angle = i * 0.45 + i * 0.02; 
-            const y = (i - segments/2) * heightStep;            const currentRadius = radiusBase * (1 + Math.sin(i * 0.1) * 0.1); // Slight pulsing effect on radius
+            // Define atom positions relative to segment center
+            // These are simplified for visual representation, actual molecular geometry is much more complex
+            
+            // Backbone atoms (Phosphate and Sugar)
+            // Phosphate group (P and O atoms)
+            const p1_pos = new THREE.Vector3(Math.cos(helixTwist + 0.3) * radiusBase, y, Math.sin(helixTwist + 0.3) * radiusBase);
+            const o1_pos = new THREE.Vector3(p1_pos.x + 0.2, y + 0.2, p1_pos.z);
+            const o2_pos = new THREE.Vector3(p1_pos.x - 0.2, y - 0.2, p1_pos.z);
+            const o3_pos = new THREE.Vector3(p1_pos.x, y, p1_pos.z + 0.3);
 
-            // Strand 1 (Gold)
-            const x1 = Math.cos(angle) * currentRadius;
-            const z1 = Math.sin(angle) * currentRadius;
-            const atom1 = createAtom(x1, y, z1, goldMat, 0.15); // Slightly smaller atoms for more detail
-            group.add(atom1);
+            // Sugar (Deoxyribose) - simplified
+            const sugar1_center_angle = helixTwist - 0.8;
+            const sugar1_radius_offset = radiusBase - 1.2;
+            const sugar1_x_base = Math.cos(sugar1_center_angle) * sugar1_radius_offset;
+            const sugar1_z_base = Math.sin(sugar1_center_angle) * sugar1_radius_offset;
 
-            // Strand 2 (Dark)
-            const x2 = Math.cos(angle + Math.PI) * currentRadius;
-            const z2 = Math.sin(angle + Math.PI) * currentRadius;
-            const atom2 = createAtom(x2, y, z2, darkMat, 0.15);
-            group.add(atom2);
+            const c1_sugar_pos = new THREE.Vector3(sugar1_x_base, y, sugar1_z_base); // Where base attaches
+            const c2_sugar_pos = new THREE.Vector3(sugar1_x_base + 0.4, y + 0.3, sugar1_z_base - 0.2); // Connects to P
+            const c3_sugar_pos = new THREE.Vector3(sugar1_x_base - 0.2, y - 0.4, sugar1_z_base + 0.1); // Connects to next P
+            const c4_sugar_pos = new THREE.Vector3(sugar1_x_base - 0.5, y - 0.1, sugar1_z_base - 0.3);
+            const c5_sugar_pos = new THREE.Vector3(sugar1_x_base + 0.1, y + 0.1, sugar1_z_base - 0.5); // Connects to P
 
-            // Base Pair bond
-            group.add(createBond(atom1.position, atom2.position));
+            // Base atoms (Nitrogenous bases - simplified representation)
+            // We'll just use a few representative atoms for each base type
+            const base1_center_angle = helixTwist - 0.3;
+            const base1_radius_offset = radiusBase - 0.5;
+            const base1_x = Math.cos(base1_center_angle) * base1_radius_offset;
+            const base1_z = Math.sin(base1_center_angle) * base1_radius_offset;
 
-            // Connect along the strand
-            if (i > 0) {
-                const prevAngle = (i-1) * 0.45 + (i-1) * 0.02;
-                const prevY = (i-1 - segments/2) * heightStep;
-                const prevRadius = radiusBase * (1 + Math.sin((i-1) * 0.1) * 0.1);
-                
-                const vPrev1 = new THREE.Vector3(Math.cos(prevAngle)*prevRadius, prevY, Math.sin(prevAngle)*prevRadius);
-                group.add(createBond(atom1.position, vPrev1));
+            const n1_pos = new THREE.Vector3(base1_x, y + 0.1, base1_z);
+            const n2_pos = new THREE.Vector3(base1_x - 0.3, y, base1_z + 0.2);
+            const n3_pos = new THREE.Vector3(base1_x + 0.2, y - 0.1, base1_z - 0.2);
 
-                const vPrev2 = new THREE.Vector3(Math.cos(prevAngle + Math.PI)*prevRadius, prevY, Math.sin(prevAngle + Math.PI)*prevRadius);
-                group.add(createBond(atom2.position, vPrev2));
-            }
+            // Base Pair 2 (opposite strand)
+            const base2_center_angle = helixTwist + Math.PI - 0.3;
+            const base2_radius_offset = radiusBase - 0.5;
+            const base2_x = Math.cos(base2_center_angle) * base2_radius_offset;
+            const base2_z = Math.sin(base2_center_angle) * base2_radius_offset;
+
+            const n4_pos = new THREE.Vector3(base2_x, y - 0.1, base2_z);
+            const n5_pos = new THREE.Vector3(base2_x + 0.3, y, base2_z - 0.2);
+            const n6_pos = new THREE.Vector3(base2_x - 0.2, y + 0.1, base2_z + 0.2);
+
+            // Add atoms and bonds
+            const atoms = [];
+            const bonds = [];
+
+            // Phosphate
+            atoms.push(createAtom(p1_pos.x, p1_pos.y, p1_pos.z, ATOM_COLORS.P, 0.15));
+            atoms.push(createAtom(o1_pos.x, o1_pos.y, o1_pos.z, ATOM_COLORS.O, 0.12));
+            atoms.push(createAtom(o2_pos.x, o2_pos.y, o2_pos.z, ATOM_COLORS.O, 0.12));
+            atoms.push(createAtom(o3_pos.x, o3_pos.y, o3_pos.z, ATOM_COLORS.O, 0.12));
+            bonds.push({ from: p1_pos, to: o1_pos });
+            bonds.push({ from: p1_pos, to: o2_pos });
+            bonds.push({ from: p1_pos, to: o3_pos });
+
+            // Sugar
+            atoms.push(createAtom(c1_sugar_pos.x, c1_sugar_pos.y, c1_sugar_pos.z, ATOM_COLORS.C, 0.1));
+            atoms.push(createAtom(c2_sugar_pos.x, c2_sugar_pos.y, c2_sugar_pos.z, ATOM_COLORS.C, 0.1));
+            atoms.push(createAtom(c3_sugar_pos.x, c3_sugar_pos.y, c3_sugar_pos.z, ATOM_COLORS.C, 0.1));
+            atoms.push(createAtom(c4_sugar_pos.x, c4_sugar_pos.y, c4_sugar_pos.z, ATOM_COLORS.C, 0.1));
+            atoms.push(createAtom(c5_sugar_pos.x, c5_sugar_pos.y, c5_sugar_pos.z, ATOM_COLORS.C, 0.1));
+            bonds.push({ from: p1_pos, to: c5_sugar_pos }); // P to C5
+            bonds.push({ from: c1_sugar_pos, to: c2_sugar_pos });
+            bonds.push({ from: c2_sugar_pos, to: c3_sugar_pos });
+            bonds.push({ from: c3_sugar_pos, to: c4_sugar_pos });
+            bonds.push({ from: c4_sugar_pos, to: c1_sugar_pos }); // Close the ring
+
+            // Base 1
+            atoms.push(createAtom(n1_pos.x, n1_pos.y, n1_pos.z, ATOM_COLORS.N, 0.1));
+            atoms.push(createAtom(n2_pos.x, n2_pos.y, n2_pos.z, ATOM_COLORS.N, 0.1));
+            atoms.push(createAtom(n3_pos.x, n3_pos.y, n3_pos.z, ATOM_COLORS.N, 0.1));
+            bonds.push({ from: c1_sugar_pos, to: n1_pos }); // Sugar to Base
+            bonds.push({ from: n1_pos, to: n2_pos });
+            bonds.push({ from: n1_pos, to: n3_pos });
+
+            // Base 2
+            atoms.push(createAtom(n4_pos.x, n4_pos.y, n4_pos.z, ATOM_COLORS.N, 0.1));
+            atoms.push(createAtom(n5_pos.x, n5_pos.y, n5_pos.z, ATOM_COLORS.N, 0.1));
+            atoms.push(createAtom(n6_pos.x, n6_pos.y, n6_pos.z, ATOM_COLORS.N, 0.1));
+            bonds.push({ from: c1_sugar_pos, to: n4_pos }); // Sugar to Base (opposite)
+            bonds.push({ from: n4_pos, to: n5_pos });
+            bonds.push({ from: n4_pos, to: n6_pos });
+
+            // Bonds connecting bases
+            bonds.push({ from: n2_pos, to: n5_pos });
+            bonds.push({ from: n3_pos, to: n6_pos });
+
+            // Add atoms and bonds to group
+            atoms.forEach(atom => group.add(atom));
+            bonds.forEach(bond => {
+                const cyl = createBond(bond.from, bond.to);
+                if (cyl) group.add(cyl);
+            });
         }
         scene.add(group);
 
-        // Dynamic lighting - subtle pulsing
-        const light1 = new THREE.PointLight(0xffffff, 0.8);
-        light1.position.set(15, 15, 15);
+        // Lighting: more dynamic and sophisticated
+        const light1 = new THREE.PointLight(0xffd700, 1.5, 50); // Stronger gold light
+        light1.position.set(20, 20, 20);
         scene.add(light1);
 
-        const light2 = new THREE.PointLight(0xd4af37, 1.2); // Brighter gold light
-        light2.position.set(-15, -15, -15);
+        const light2 = new THREE.PointLight(0x000000, 0.5, 50); // Darker ambient light
+        light2.position.set(-20, -20, -20);
         scene.add(light2);
 
-        scene.add(new THREE.AmbientLight(0x111111)); // Very subtle ambient light
+        const ambient = new THREE.AmbientLight(0x111111); // Very subtle ambient light
+        scene.add(ambient);
 
-        camera.position.z = 22; 
+        camera.position.z = 25; 
 
         function animate() {
             requestAnimationFrame(animate);
-            // Subtle rotation for dynamism
-            group.rotation.y += 0.002; 
-            // Subtle sway/bounce for life
-            group.rotation.x = Math.sin(Date.now() * 0.0004) * 0.05; 
-            group.rotation.z = Math.cos(Date.now() * 0.0003) * 0.03; 
+            // More complex rotation and sway
+            group.rotation.y += 0.002;
+            group.rotation.x = Math.sin(Date.now() * 0.0004) * 0.1 + Math.cos(Date.now() * 0.0003) * 0.05;
+            group.rotation.z = Math.cos(Date.now() * 0.0005) * 0.08;
+
             renderer.render(scene, camera);
         }
         animate();
+
+        // Ensure proper resizing and rendering
+        window.addEventListener('resize', () => {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            renderer.setSize(width, height);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            if (width / height > 1.5) {
+                camera.position.z = 28;
+            } else {
+                camera.position.z = 24;
+            }
+        });
     </script>
 </body>
 </html>
