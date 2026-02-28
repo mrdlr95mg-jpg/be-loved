@@ -4,159 +4,150 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-  /* Основной фон */
+  :root {
+    --gold: #ffd700;
+    --blue: #00d4ff;
+    --magenta: #ff0077;
+    --glass: rgba(255, 255, 255, 0.1);
+  }
+
   body { 
     margin: 0; 
-    background: #000; 
-    overflow: hidden; 
-    display: flex; 
-    flex-direction: column;
-    align-items: center; 
-    justify-content: center;
-    height: 100vh; 
+    background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%); 
+    overflow-x: hidden;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    color: white;
   }
 
-  /* Шапка с эффектом матового стекла */
-  .header-glass {
+  /* Шапка */
+  .header {
     position: fixed;
     top: 20px;
-    width: 85%;
-    max-width: 500px;
-    padding: 15px;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px); /* Размытие фона */
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 15px;
+    width: 90%;
+    left: 5%;
+    padding: 20px;
+    background: var(--glass);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
     text-align: center;
     z-index: 100;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   }
 
-  .header-glass h1 {
-    margin: 0;
-    color: #fff;
-    font-family: 'Segoe UI', sans-serif;
-    font-size: 18px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    font-weight: 300;
-  }
+  .header h1 { margin: 0; font-size: 1.2rem; letter-spacing: 3px; font-weight: 300; }
+  .header p { margin: 5px 0 0; font-size: 0.8rem; opacity: 0.7; }
 
-  /* Контейнер ДНК */
-  .dna-container {
-    perspective: 1000px;
-    margin-top: 50px;
+  /* Контейнер для 3D ДНК */
+  .scene {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    perspective: 1200px;
   }
 
   .dna {
     position: relative;
-    width: 160px;
-    height: 480px;
+    width: 200px;
+    height: 600px;
     transform-style: preserve-3d;
-    animation: rotateDNA 20s linear infinite;
+    animation: rotate 30s linear infinite;
   }
 
-  /* Стили ступеней */
   .strand {
     position: absolute;
-    left: 0;
-    width: 100%;
+    width: 180px;
     height: 2px;
-    background: rgba(255, 255, 255, 0.15);
-    transform-origin: center;
+    background: rgba(255,255,255,0.05);
+    left: 50%;
+    margin-left: -90px;
   }
 
-  /* Шарики */
+  /* Шарики-атомы */
   .strand::before, .strand::after {
     content: '';
     position: absolute;
-    width: 14px;
-    height: 14px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
-    top: -6px;
+    top: -4px;
   }
 
-  .strand::before {
-    left: -7px;
-    background: #00a2ff;
-    box-shadow: 0 0 15px #00a2ff;
+  .strand::before { left: 0; background: var(--blue); box-shadow: 0 0 10px var(--blue); }
+  .strand::after { right: 0; background: var(--magenta); box-shadow: 0 0 10px var(--magenta); }
+
+  /* Эффект активации (Золотые ворота) */
+  .active::before, .active::after {
+    background: var(--gold) !important;
+    box-shadow: 0 0 20px var(--gold) !important;
+    width: 14px; height: 14px; top: -6px;
   }
 
-  .strand::after {
-    right: -7px;
-    background: #ff0055;
-    box-shadow: 0 0 15px #ff0055;
-  }
-
-  @keyframes rotateDNA {
+  @keyframes rotate {
     from { transform: rotateY(0deg) rotateX(10deg); }
     to { transform: rotateY(360deg) rotateX(10deg); }
   }
 
-  /* Кодоны (автоматический расчет позиций) */
-  /* Здесь создано 32 пары (64 элемента суммарно) для плотности */
-  .s1 { transform: translateY(-160px) rotateY(0deg); }
-  .s2 { transform: translateY(-150px) rotateY(20deg); }
-  .s3 { transform: translateY(-140px) rotateY(40deg); }
-  .s4 { transform: translateY(-130px) rotateY(60deg); }
-  .s5 { transform: translateY(-120px) rotateY(80deg); }
-  .s6 { transform: translateY(-110px) rotateY(100deg); }
-  .s7 { transform: translateY(-100px) rotateY(120deg); }
-  .s8 { transform: translateY(-90px) rotateY(140deg); }
-  .s9 { transform: translateY(-80px) rotateY(160deg); }
-  .s10 { transform: translateY(-70px) rotateY(180deg); }
-  .s11 { transform: translateY(-60px) rotateY(200deg); }
-  .s12 { transform: translateY(-50px) rotateY(220deg); }
-  .s13 { transform: translateY(-40px) rotateY(240deg); }
-  .s14 { transform: translateY(-30px) rotateY(260deg); }
-  .s15 { transform: translateY(-20px) rotateY(280deg); }
-  .s16 { transform: translateY(-10px) rotateY(300deg); }
-  .s17 { transform: translateY(0px) rotateY(320deg); }
-  .s18 { transform: translateY(10px) rotateY(340deg); }
-  .s19 { transform: translateY(20px) rotateY(360deg); }
-  .s20 { transform: translateY(30px) rotateY(380deg); }
-  .s21 { transform: translateY(40px) rotateY(400deg); }
-  .s22 { transform: translateY(50px) rotateY(420deg); }
-  .s23 { transform: translateY(60px) rotateY(440deg); }
-  .s24 { transform: translateY(70px) rotateY(460deg); }
-  .s25 { transform: translateY(80px) rotateY(480deg); }
-  .s26 { transform: translateY(90px) rotateY(500deg); }
-  .s27 { transform: translateY(100px) rotateY(520deg); }
-  .s28 { transform: translateY(110px) rotateY(540deg); }
-  .s29 { transform: translateY(120px) rotateY(560deg); }
-  .s30 { transform: translateY(130px) rotateY(580deg); }
-  .s31 { transform: translateY(140px) rotateY(600deg); }
-  .s32 { transform: translateY(150px) rotateY(620deg); }
+  /* Кнопка действия */
+  .action-btn {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px 30px;
+    background: var(--gold);
+    color: black;
+    border: none;
+    border-radius: 50px;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(255,215,0,0.3);
+    z-index: 100;
+  }
 </style>
 </head>
 <body>
 
-  <div class="header-glass">
-    <h1>3D visualisation of your DNA</h1>
+  <div class="header">
+    <h1>3D GENETIC DESIGN</h1>
+    <p>Визуализация активации 64 кодонов</p>
   </div>
 
-  <div class="dna-container">
-    <div class="dna">
-      <!-- Генерируем кодоны -->
-      <div class="strand s1"></div><div class="strand s2"></div>
-      <div class="strand s3"></div><div class="strand s4"></div>
-      <div class="strand s5"></div><div class="strand s6"></div>
-      <div class="strand s7"></div><div class="strand s8"></div>
-      <div class="strand s9"></div><div class="strand s10"></div>
-      <div class="strand s11"></div><div class="strand s12"></div>
-      <div class="strand s13"></div><div class="strand s14"></div>
-      <div class="strand s15"></div><div class="strand s16"></div>
-      <div class="strand s17"></div><div class="strand s18"></div>
-      <div class="strand s19"></div><div class="strand s20"></div>
-      <div class="strand s21"></div><div class="strand s22"></div>
-      <div class="strand s23"></div><div class="strand s24"></div>
-      <div class="strand s25"></div><div class="strand s26"></div>
-      <div class="strand s27"></div><div class="strand s28"></div>
-      <div class="strand s29"></div><div class="strand s30"></div>
-      <div class="strand s31"></div><div class="strand s32"></div>
+  <div class="scene">
+    <div class="dna" id="dna-spiral">
+      <!-- Код сгенерирует 64 звена через скрипт ниже -->
     </div>
   </div>
+
+  <button class="action-btn" onclick="window.print()">Распечатать карту (А4)</button>
+
+  <script>
+    const dnaContainer = document.getElementById('dna-spiral');
+    const totalCodons = 64;
+    
+    // Номера ворот, которые мы "активируем" (для примера)
+    const activatedGates = [1, 10, 25, 34, 57, 64];
+
+    for (let i = 1; i <= totalCodons; i++) {
+      const strand = document.createElement('div');
+      strand.className = 'strand';
+      
+      // Рассчитываем положение каждого из 64 звеньев
+      const yPos = (i - (totalCodons/2)) * 12;
+      const rotation = i * 13.5; // Угол закручивания спирали
+      
+      strand.style.transform = `translateY(${yPos}px) rotateY(${rotation}deg)`;
+      
+      // Если номер итерации совпадает с "активированными воротами"
+      if (activatedGates.includes(i)) {
+        strand.classList.add('active');
+      }
+      
+      dnaContainer.appendChild(strand);
+    }
+  </script>
 
 </body>
 </html>
