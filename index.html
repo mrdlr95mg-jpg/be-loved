@@ -2,242 +2,110 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>DNA Molecular Detail</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNA 3D Immersion</title>
     <style>
-        body { margin: 0; background: #020202; color: #d4af37; font-family: 'Raleway', sans-serif; overflow: hidden; }
-        .ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 50px 30px; box-sizing: border-box; pointer-events: none; text-align: center; }
-        .glass-card { 
-            background: rgba(255, 255, 255, 0.04); 
-            backdrop-filter: blur(20px); 
-            border: 1px solid rgba(255, 255, 255, 0.12); 
-            border-radius: 30px; 
-            padding: 30px 40px; 
-            box-shadow: 0 10px 40px rgba(0,0,0,0.7);
-            max-width: 600px;
-            pointer-events: auto;
+        body { margin: 0; overflow: hidden; background-color: #000; }
+        canvas { display: block; }
+        
+        /* Заголовок поверх анимации */
+        .overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            text-align: center;
+            pointer-events: none; /* Чтобы не мешать вращению */
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            opacity: 0.8;
         }
-        h1 { font-size: 1.6rem; letter-spacing: 4px; margin: 0 0 15px 0; text-transform: uppercase; opacity: 0.95; }
-        p { font-size: 1rem; line-height: 1.7; opacity: 0.7; }
-        .footer-text {
-            position: absolute; bottom: 30px; width: 100%;
-            font-size: 1.3rem; font-style: italic; opacity: 0.8;
-            text-shadow: 0 0 20px rgba(230, 216, 173, 0.8); /* Мягкое золотое свечение */
-        }
-        @import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
     </style>
 </head>
 <body>
-    <div id="canvas"></div>
-    <div class="ui">
-        <div class="glass-card">
-            <h1>Молекулярная основа</h1>
-            <p>Детальная структура ДНК, где каждый атом и связь несут свой смысл. Здесь рождается ваша уникальность.</p>
-        </div>
-        <div class="footer-text">Будьте любимы жизнью...</div>
+
+    <div class="overlay">
+        <h2>Погружение в генезис</h2>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script>
+    <!-- Подключаем библиотеку Three.js из CDN -->
+    <script type="module">
+        import * as THREE from 'https://cdn.skypack.dev';
+
+        // Основные настройки
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        
-        function resizeRenderer() {
-            const width = window.innerWidth;
-            const height = window.innerHeight;
-            renderer.setSize(width, height);
-            camera.aspect = width / height;
-            camera.updateProjectionMatrix();
-            // Adjust camera Z position based on aspect ratio for better framing            if (width / height > 1.5) { // Wider screens
-                camera.position.z = 28;
-            } else { // Taller screens
-                camera.position.z = 24;
-            }
-        }
-        window.addEventListener('resize', resizeRenderer);
-        resizeRenderer();
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
 
-        document.getElementById('canvas').appendChild(renderer.domElement);
+        // Группа для всей спирали
+        const dna = new THREE.Group();
+        scene.add(dna);
 
-        const group = new THREE.Group();
-        const numSegments = 64; // Corresponds to 64 codons/gates
-        const radiusBase = 3.0;
-        const segmentHeight = 0.55; // Increased height for better atom separation
-        const turns = 10; // Number of turns in the helix
+        // Материалы
+        const sphereMat = new THREE.MeshPhongMaterial({ color: 0x3399ff, shininess: 100 });
+        const sphereMat2 = new THREE.MeshPhongMaterial({ color: 0xff3366, shininess: 100 });
+        const lineMat = new THREE.MeshPhongMaterial({ color: 0x555555 });
 
-        // Atom Colors (using common CPK coloring conventions for balls-and-sticks)
-        const ATOM_COLORS = {
-            C: 0x666666, // Carbon (Gray)
-            O: 0xFF0000, // Oxygen (Red)
-            N: 0x0000FF, // Nitrogen (Blue)
-            P: 0xFFA500, // Phosphorus (Orange - for phosphate backbone)
-            H: 0xFFFFFF  // Hydrogen (White - will be small)
-        };
+        // Создаем 64 кодона (пары)
+        const numPairs = 64;
+        for (let i = 0; i < numPairs; i++) {
+            const y = (i - numPairs / 2) * 0.5; // Расстояние по вертикали
+            const angle = i * 0.3; // Угол закручивания
+            const radius = 3;
 
-        const bondMaterial = new THREE.MeshStandardMaterial({ color: 0x555555, transparent: true, opacity: 0.3, side: THREE.DoubleSide });
-        const highlightedBondMaterial = new THREE.MeshStandardMaterial({ color: 0xd4af37, emissive: 0x443300, emissiveIntensity: 1.5, metalness: 0.8, roughness: 0.1, side: THREE.DoubleSide });
-
-        function createAtom(x, y, z, color, radius, material) {
-            const geometry = new THREE.SphereGeometry(radius, 16, 16);
-            const mat = material ? material : new THREE.MeshStandardMaterial({ color: color, metalness: 0.7, roughness: 0.3 });
-            const sphere = new THREE.Mesh(geometry, mat);
-            sphere.position.set(x, y, z);
-            return sphere;
-        }
-
-        function createBond(v1, v2) {
-            const direction = new THREE.Vector3().subVectors(v2, v1);
-            const distance = direction.length();
-            if (distance < 0.01) return null; // Avoid creating zero-length bonds
-            const cylinder = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, distance, 8), bondMaterial);
-            cylinder.position.copy(v1).add(direction.multiplyScalar(0.5));
-            cylinder.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
-            return cylinder;
-        }
-                // Simplified representation of nucleotides and backbone for illustration
-        // We'll create a segment representing roughly one base pair + backbone connection
-        function createDNAPair(segmentIndex) {
-            const anglePerSegment = (Math.PI * 2 * turns) / numSegments;
-            const angle = segmentIndex * anglePerSegment;
-            const y = (segmentIndex - numSegments / 2) * segmentHeight;
+            // Сферы (Шарики)
+            const sphereGeom = new THREE.SphereGeometry(0.2, 16, 16);
             
-            const helixTwist = angle * 0.5; // Twist factor for the helix
+            const ball1 = new THREE.Mesh(sphereGeom, sphereMat);
+            ball1.position.set(Math.cos(angle) * radius, y, Math.sin(angle) * radius);
+            dna.add(ball1);
 
-            // Define atom positions relative to segment center
-            // These are simplified for visual representation, actual molecular geometry is much more complex
-            
-            // Backbone atoms (Phosphate and Sugar)
-            // Phosphate group (P and O atoms)
-            const p1_pos = new THREE.Vector3(Math.cos(helixTwist + 0.3) * radiusBase, y, Math.sin(helixTwist + 0.3) * radiusBase);
-            const o1_pos = new THREE.Vector3(p1_pos.x + 0.2, y + 0.2, p1_pos.z);
-            const o2_pos = new THREE.Vector3(p1_pos.x - 0.2, y - 0.2, p1_pos.z);
-            const o3_pos = new THREE.Vector3(p1_pos.x, y, p1_pos.z + 0.3);
+            const ball2 = new THREE.Mesh(sphereGeom, sphereMat2);
+            ball2.position.set(Math.cos(angle + Math.PI) * radius, y, Math.sin(angle + Math.PI) * radius);
+            dna.add(ball2);
 
-            // Sugar (Deoxyribose) - simplified
-            const sugar1_center_angle = helixTwist - 0.8;
-            const sugar1_radius_offset = radiusBase - 1.2;
-            const sugar1_x_base = Math.cos(sugar1_center_angle) * sugar1_radius_offset;
-            const sugar1_z_base = Math.sin(sugar1_center_angle) * sugar1_radius_offset;
-
-            const c1_sugar_pos = new THREE.Vector3(sugar1_x_base, y, sugar1_z_base); // Where base attaches
-            const c2_sugar_pos = new THREE.Vector3(sugar1_x_base + 0.4, y + 0.3, sugar1_z_base - 0.2); // Connects to P
-            const c3_sugar_pos = new THREE.Vector3(sugar1_x_base - 0.2, y - 0.4, sugar1_z_base + 0.1); // Connects to next P
-            const c4_sugar_pos = new THREE.Vector3(sugar1_x_base - 0.5, y - 0.1, sugar1_z_base - 0.3);
-            const c5_sugar_pos = new THREE.Vector3(sugar1_x_base + 0.1, y + 0.1, sugar1_z_base - 0.5); // Connects to P
-
-            // Base atoms (Nitrogenous bases - simplified representation)
-            // We'll just use a few representative atoms for each base type
-            const base1_center_angle = helixTwist - 0.3;
-            const base1_radius_offset = radiusBase - 0.5;
-            const base1_x = Math.cos(base1_center_angle) * base1_radius_offset;
-            const base1_z = Math.sin(base1_center_angle) * base1_radius_offset;
-
-            const n1_pos = new THREE.Vector3(base1_x, y + 0.1, base1_z);
-            const n2_pos = new THREE.Vector3(base1_x - 0.3, y, base1_z + 0.2);
-            const n3_pos = new THREE.Vector3(base1_x + 0.2, y - 0.1, base1_z - 0.2);
-
-            // Base Pair 2 (opposite strand)
-            const base2_center_angle = helixTwist + Math.PI - 0.3;
-            const base2_radius_offset = radiusBase - 0.5;
-            const base2_x = Math.cos(base2_center_angle) * base2_radius_offset;
-            const base2_z = Math.sin(base2_center_angle) * base2_radius_offset;
-
-            const n4_pos = new THREE.Vector3(base2_x, y - 0.1, base2_z);
-            const n5_pos = new THREE.Vector3(base2_x + 0.3, y, base2_z - 0.2);
-            const n6_pos = new THREE.Vector3(base2_x - 0.2, y + 0.1, base2_z + 0.2);
-
-            // Add atoms and bonds
-            const atoms = [];
-            const bonds = [];
-
-            // Phosphate
-            atoms.push(createAtom(p1_pos.x, p1_pos.y, p1_pos.z, ATOM_COLORS.P, 0.15));
-            atoms.push(createAtom(o1_pos.x, o1_pos.y, o1_pos.z, ATOM_COLORS.O, 0.12));
-            atoms.push(createAtom(o2_pos.x, o2_pos.y, o2_pos.z, ATOM_COLORS.O, 0.12));
-            atoms.push(createAtom(o3_pos.x, o3_pos.y, o3_pos.z, ATOM_COLORS.O, 0.12));
-            bonds.push({ from: p1_pos, to: o1_pos });
-            bonds.push({ from: p1_pos, to: o2_pos });
-            bonds.push({ from: p1_pos, to: o3_pos });
-
-            // Sugar
-            atoms.push(createAtom(c1_sugar_pos.x, c1_sugar_pos.y, c1_sugar_pos.z, ATOM_COLORS.C, 0.1));
-            atoms.push(createAtom(c2_sugar_pos.x, c2_sugar_pos.y, c2_sugar_pos.z, ATOM_COLORS.C, 0.1));
-            atoms.push(createAtom(c3_sugar_pos.x, c3_sugar_pos.y, c3_sugar_pos.z, ATOM_COLORS.C, 0.1));
-            atoms.push(createAtom(c4_sugar_pos.x, c4_sugar_pos.y, c4_sugar_pos.z, ATOM_COLORS.C, 0.1));
-            atoms.push(createAtom(c5_sugar_pos.x, c5_sugar_pos.y, c5_sugar_pos.z, ATOM_COLORS.C, 0.1));
-            bonds.push({ from: p1_pos, to: c5_sugar_pos }); // P to C5
-            bonds.push({ from: c1_sugar_pos, to: c2_sugar_pos });
-            bonds.push({ from: c2_sugar_pos, to: c3_sugar_pos });
-            bonds.push({ from: c3_sugar_pos, to: c4_sugar_pos });
-            bonds.push({ from: c4_sugar_pos, to: c1_sugar_pos }); // Close the ring
-
-            // Base 1
-            atoms.push(createAtom(n1_pos.x, n1_pos.y, n1_pos.z, ATOM_COLORS.N, 0.1));
-            atoms.push(createAtom(n2_pos.x, n2_pos.y, n2_pos.z, ATOM_COLORS.N, 0.1));
-            atoms.push(createAtom(n3_pos.x, n3_pos.y, n3_pos.z, ATOM_COLORS.N, 0.1));
-            bonds.push({ from: c1_sugar_pos, to: n1_pos }); // Sugar to Base
-            bonds.push({ from: n1_pos, to: n2_pos });
-            bonds.push({ from: n1_pos, to: n3_pos });
-
-            // Base 2
-            atoms.push(createAtom(n4_pos.x, n4_pos.y, n4_pos.z, ATOM_COLORS.N, 0.1));
-            atoms.push(createAtom(n5_pos.x, n5_pos.y, n5_pos.z, ATOM_COLORS.N, 0.1));
-            atoms.push(createAtom(n6_pos.x, n6_pos.y, n6_pos.z, ATOM_COLORS.N, 0.1));
-            bonds.push({ from: c1_sugar_pos, to: n4_pos }); // Sugar to Base (opposite)
-            bonds.push({ from: n4_pos, to: n5_pos });
-            bonds.push({ from: n4_pos, to: n6_pos });
-
-            // Bonds connecting bases
-            bonds.push({ from: n2_pos, to: n5_pos });
-            bonds.push({ from: n3_pos, to: n6_pos });
-
-            // Add atoms and bonds to group
-            atoms.forEach(atom => group.add(atom));
-            bonds.forEach(bond => {
-                const cyl = createBond(bond.from, bond.to);
-                if (cyl) group.add(cyl);
-            });
+            // Соединительный стержень
+            const cylinderGeom = new THREE.CylinderGeometry(0.05, 0.05, radius * 2, 8);
+            const rod = new THREE.Mesh(cylinderGeom, lineMat);
+            rod.position.y = y;
+            rod.rotation.z = Math.PI / 2;
+            rod.rotation.y = -angle;
+            dna.add(rod);
         }
-        scene.add(group);
 
-        // Lighting: more dynamic and sophisticated
-        const light1 = new THREE.PointLight(0xffd700, 1.5, 50); // Stronger gold light
-        light1.position.set(20, 20, 20);
+        // Освещение
+        const light1 = new THREE.PointLight(0xffffff, 1, 100);
+        light1.position.set(10, 10, 10);
         scene.add(light1);
 
-        const light2 = new THREE.PointLight(0x000000, 0.5, 50); // Darker ambient light
-        light2.position.set(-20, -20, -20);
+        const light2 = new THREE.AmbientLight(0x404040); // Мягкий общий свет
         scene.add(light2);
 
-        const ambient = new THREE.AmbientLight(0x111111); // Very subtle ambient light
-        scene.add(ambient);
+        camera.position.z = 15;
 
-        camera.position.z = 25; 
-
+        // Анимация
         function animate() {
             requestAnimationFrame(animate);
-            // More complex rotation and sway
-            group.rotation.y += 0.002;
-            group.rotation.x = Math.sin(Date.now() * 0.0004) * 0.1 + Math.cos(Date.now() * 0.0003) * 0.05;
-            group.rotation.z = Math.cos(Date.now() * 0.0005) * 0.08;
+            
+            // Медленное спокойное вращение
+            dna.rotation.y += 0.005;
+            dna.rotation.x += 0.002;
 
             renderer.render(scene, camera);
         }
-        animate();
 
-        // Ensure proper resizing and rendering
+        // Подстройка под размер экрана
         window.addEventListener('resize', () => {
-            const width = window.innerWidth;
-            const height = window.innerHeight;
-            renderer.setSize(width, height);
-            camera.aspect = width / height;
+            camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
-            if (width / height > 1.5) {
-                camera.position.z = 28;
-            } else {
-                camera.position.z = 24;
-            }
+            renderer.setSize(window.innerWidth, window.innerHeight);
         });
+
+        animate();
     </script>
 </body>
 </html>
