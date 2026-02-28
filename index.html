@@ -1,104 +1,75 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DNA 3D Immersion</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #000; }
-        canvas { display: block; }
-        
-        /* Заголовок поверх анимации */
-        .overlay {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-family: 'Segoe UI', sans-serif;
-            text-align: center;
-            pointer-events: none; /* Чтобы не мешать вращению */
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            opacity: 0.8;
+        body { margin: 0; background: #000; overflow: hidden; }
+        .label {
+            position: absolute; width: 100%; text-align: center;
+            top: 15%; color: white; font-family: sans-serif;
+            letter-spacing: 4px; z-index: 10; opacity: 0.5;
         }
     </style>
 </head>
 <body>
 
-    <div class="overlay">
-        <h2>Погружение в генезис</h2>
-    </div>
+    <div class="label">ПОГРУЖЕНИЕ В ГЕНЕЗИС</div>
 
-    <!-- Подключаем библиотеку Three.js из CDN -->
-    <script type="module">
-        import * as THREE from 'https://cdn.skypack.dev';
+    <!-- Загружаем библиотеку Three.js -->
+    <script src="https://cdnjs.cloudflare.com"></script>
 
-        // Основные настройки
+    <script>
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
+        
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Группа для всей спирали
-        const dna = new THREE.Group();
-        scene.add(dna);
+        const dnaGroup = new THREE.Group();
+        scene.add(dnaGroup);
 
-        // Материалы
-        const sphereMat = new THREE.MeshPhongMaterial({ color: 0x3399ff, shininess: 100 });
-        const sphereMat2 = new THREE.MeshPhongMaterial({ color: 0xff3366, shininess: 100 });
-        const lineMat = new THREE.MeshPhongMaterial({ color: 0x555555 });
+        const ballGeo = new THREE.SphereGeometry(0.18, 12, 12);
+        const stickGeo = new THREE.CylinderGeometry(0.04, 0.04, 3, 8);
+        
+        const blueMat = new THREE.MeshPhongMaterial({ color: 0x0077ff });
+        const redMat = new THREE.MeshPhongMaterial({ color: 0xff0044 });
+        const stickMat = new THREE.MeshPhongMaterial({ color: 0x444444 });
 
-        // Создаем 64 кодона (пары)
-        const numPairs = 64;
-        for (let i = 0; i < numPairs; i++) {
-            const y = (i - numPairs / 2) * 0.5; // Расстояние по вертикали
-            const angle = i * 0.3; // Угол закручивания
-            const radius = 3;
+        // Создаем 64 звена ДНК
+        for (let i = 0; i < 64; i++) {
+            const y = (i - 32) * 0.4;
+            const dist = 1.5;
+            const angle = i * 0.25;
 
-            // Сферы (Шарики)
-            const sphereGeom = new THREE.SphereGeometry(0.2, 16, 16);
+            const b1 = new THREE.Mesh(ballGeo, blueMat);
+            b1.position.set(Math.cos(angle) * dist, y, Math.sin(angle) * dist);
             
-            const ball1 = new THREE.Mesh(sphereGeom, sphereMat);
-            ball1.position.set(Math.cos(angle) * radius, y, Math.sin(angle) * radius);
-            dna.add(ball1);
+            const b2 = new THREE.Mesh(ballGeo, redMat);
+            b2.position.set(Math.cos(angle + Math.PI) * dist, y, Math.sin(angle + Math.PI) * dist);
 
-            const ball2 = new THREE.Mesh(sphereGeom, sphereMat2);
-            ball2.position.set(Math.cos(angle + Math.PI) * radius, y, Math.sin(angle + Math.PI) * radius);
-            dna.add(ball2);
+            const stick = new THREE.Mesh(stickGeo, stickMat);
+            stick.position.y = y;
+            stick.rotation.z = Math.PI / 2;
+            stick.rotation.y = -angle;
 
-            // Соединительный стержень
-            const cylinderGeom = new THREE.CylinderGeometry(0.05, 0.05, radius * 2, 8);
-            const rod = new THREE.Mesh(cylinderGeom, lineMat);
-            rod.position.y = y;
-            rod.rotation.z = Math.PI / 2;
-            rod.rotation.y = -angle;
-            dna.add(rod);
+            dnaGroup.add(b1, b2, stick);
         }
 
-        // Освещение
-        const light1 = new THREE.PointLight(0xffffff, 1, 100);
-        light1.position.set(10, 10, 10);
-        scene.add(light1);
-
-        const light2 = new THREE.AmbientLight(0x404040); // Мягкий общий свет
-        scene.add(light2);
+        const light = new THREE.PointLight(0xffffff, 1, 100);
+        light.position.set(10, 10, 10);
+        scene.add(light, new THREE.AmbientLight(0x333333));
 
         camera.position.z = 15;
 
-        // Анимация
         function animate() {
             requestAnimationFrame(animate);
-            
-            // Медленное спокойное вращение
-            dna.rotation.y += 0.005;
-            dna.rotation.x += 0.002;
-
+            dnaGroup.rotation.y += 0.005; // Вращение вокруг оси
+            dnaGroup.rotation.x += 0.001; // Легкий наклон
             renderer.render(scene, camera);
         }
 
-        // Подстройка под размер экрана
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
@@ -109,3 +80,4 @@
     </script>
 </body>
 </html>
+
