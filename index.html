@@ -2,190 +2,173 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <style>
   :root {
-    /* Золотая палитра */
+    --gold: #d4af37;
     --gold-bright: #fff2ac;
-    --gold-main: #d4af37;
-    --gold-dark: #aa841e;
-    --glass: rgba(0, 0, 0, 0.7);
+    --glass: rgba(10, 10, 10, 0.85);
   }
 
-  body { 
-    margin: 0; 
-    background: radial-gradient(circle at center, #1a150a 0%, #000 100%); 
-    overflow-x: hidden;
-    font-family: 'Segoe UI', serif;
-    color: white;
+  body, html { 
+    margin: 0; padding: 0; background: #000; height: 100%; 
+    font-family: 'Segoe UI', sans-serif; overflow: hidden; color: white; 
   }
 
-  /* Слой 1: Живой фон ДНК */
-  .scene {
+  /* ФОНОВАЯ ЗОЛОТАЯ ДНК */
+  .world {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
     display: flex; justify-content: center; align-items: center;
-    perspective: 1200px;
+    perspective: 1000px;
     z-index: 1;
+    transition: transform 3s ease-in-out;
   }
 
   .dna {
     position: relative;
-    width: 150px;
-    height: 700px;
+    width: 200px;
+    height: 150vh;
     transform-style: preserve-3d;
-    animation: rotate 40s linear infinite;
+    animation: rotateDNA 40s linear infinite;
   }
 
   .strand {
     position: absolute;
-    width: 160px;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--gold-main), transparent);
+    width: 240px;
+    height: 2px;
     left: 50%;
-    margin-left: -80px;
+    margin-left: -120px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
   }
 
-  /* Золотые шарики (Стержневая модель) */
   .strand::before, .strand::after {
-    content: '';
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    top: -4px;
-    background: radial-gradient(circle at 30% 30%, var(--gold-bright), var(--gold-dark));
-    box-shadow: 0 0 10px var(--gold-main);
+    content: ''; position: absolute; width: 10px; height: 10px; border-radius: 50%;
+    top: -4px; background: radial-gradient(circle at 30% 30%, #fff, var(--gold));
+    box-shadow: 0 0 15px var(--gold);
   }
-
   .strand::before { left: 0; }
   .strand::after { right: 0; }
 
-  @keyframes rotate {
-    from { transform: rotateY(0deg) rotateX(15deg); }
-    to { transform: rotateY(360deg) rotateX(15deg); }
+  @keyframes rotateDNA {
+    from { transform: rotateY(0deg) rotateX(10deg); }
+    to { transform: rotateY(360deg) rotateX(10deg); }
   }
 
-  /* Слой 2: Интерфейс калькулятора */
-  .overlay-container {
+  /* ИНТЕРФЕЙС */
+  .container {
     position: relative;
     z-index: 10;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 50px;
-    min-height: 100vh;
+    justify-content: center;
+    transition: all 1.5s ease;
   }
 
-  .calc-card {
+  .glass-card {
     background: var(--glass);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    border: 1px solid var(--gold-dark);
-    padding: 30px;
-    border-radius: 25px;
-    width: 90%;
-    max-width: 400px;
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    padding: 35px 25px;
+    border-radius: 30px;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    width: 85%;
+    max-width: 360px;
     text-align: center;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.7);
   }
 
-  h1 { 
-    font-weight: 300; 
-    letter-spacing: 4px; 
-    color: var(--gold-main);
-    margin-bottom: 30px;
-    font-size: 1.4rem;
+  h1 { font-weight: 300; letter-spacing: 4px; color: var(--gold); margin: 0 0 25px; font-size: 1.3rem; }
+
+  .row { margin-bottom: 20px; text-align: left; }
+  label { font-size: 0.65rem; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin-left: 5px; }
+
+  input {
+    width: 100%; padding: 14px; background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 12px;
+    color: white; margin-top: 5px; box-sizing: border-box; font-size: 1rem;
   }
 
-  input, button {
-    width: 100%;
-    padding: 12px;
-    margin: 10px 0;
-    border-radius: 10px;
-    border: 1px solid var(--gold-dark);
-    background: rgba(255,255,255,0.05);
-    color: white;
-    outline: none;
-    box-sizing: border-box;
+  .gender-box { display: flex; gap: 10px; margin-top: 8px; }
+  .g-btn {
+    flex: 1; padding: 12px; border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 12px; background: none; color: white; cursor: pointer; transition: 0.3s;
+  }
+  .g-btn.active { background: var(--gold); color: black; font-weight: bold; }
+
+  .calculate-btn {
+    width: 100%; padding: 18px; background: var(--gold); border: none;
+    border-radius: 15px; font-weight: bold; margin-top: 15px;
+    cursor: pointer; box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3);
+    text-transform: uppercase; letter-spacing: 1px;
   }
 
-  button {
-    background: var(--gold-main);
-    color: black;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
-    margin-top: 20px;
-    text-transform: uppercase;
-  }
-
-  button:hover {
-    background: var(--gold-bright);
-    transform: scale(1.02);
-  }
-
-  /* Стиль для 64 кодонов (активации) */
-  .active-gate::before, .active-gate::after {
-    width: 12px; height: 12px; top: -6px;
-    box-shadow: 0 0 20px #fff;
-    background: #fff;
-  }
+  /* ЭФФЕКТ ПОГРУЖЕНИЯ */
+  .immersion .container { opacity: 0; transform: scale(0.5); pointer-events: none; }
+  .immersion .world { transform: scale(3) translateZ(500px); }
 </style>
 </head>
 <body>
 
-  <!-- Фон -->
-  <div class="scene">
-    <div class="dna" id="dna-spiral"></div>
+  <div class="world">
+    <div class="dna" id="dna"></div>
   </div>
 
-  <!-- Контент -->
-  <div class="overlay-container">
-    <div class="calc-card">
-      <h1>HUMAN DESIGN</h1>
-      <p style="opacity: 0.7; font-size: 0.9rem; margin-bottom: 20px;">Введите данные рождения для активации вашей ДНК</p>
+  <div class="container" id="ui">
+    <div class="glass-card">
+      <h1>DESIGN GENESIS</h1>
       
-      <input type="text" placeholder="Имя">
-      <input type="date">
-      <input type="time">
-      <input type="text" placeholder="Место рождения">
-      
-      <button onclick="calculate()">Рассчитать карту</button>
+      <div class="row">
+        <label>Ваш пол</label>
+        <div class="gender-box">
+          <button class="g-btn active" onclick="selectGender(this)">М</button>
+          <button class="g-btn" onclick="selectGender(this)">Ж</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <label>Дата рождения</label>
+        <input type="date">
+      </div>
+
+      <div class="row">
+        <label>Точное время</label>
+        <input type="time">
+      </div>
+
+      <button class="calculate-btn" onclick="goDeep()">АКТИВИРОВАТЬ ДНК</button>
     </div>
   </div>
 
   <script>
-    const dnaContainer = document.getElementById('dna-spiral');
-    const totalCodons = 64; // Ровно 64 звена
-
-    // Отрисовка золотой спирали
-    for (let i = 1; i <= totalCodons; i++) {
+    // Создаем 64 звена ДНК (кодоны)
+    const dnaBox = document.getElementById('dna');
+    for (let i = 0; i < 64; i++) {
       const strand = document.createElement('div');
       strand.className = 'strand';
-      
-      const yPos = (i - (totalCodons/2)) * 14; // Высота шага
-      const rotation = i * 13.5; // Угол спирали
-      
-      strand.style.transform = `translateY(${yPos}px) rotateY(${rotation}deg)`;
-      strand.id = `gate-${i}`;
-      
-      dnaContainer.appendChild(strand);
+      // Равномерно распределяем по всей высоте
+      strand.style.top = (i * 1.56) + "%"; 
+      strand.style.transform = "rotateY(" + (i * 13.5) + "deg)";
+      dnaBox.appendChild(strand);
     }
 
-    // Функция "Расчета"
-    function calculate() {
-      alert("Начинаю расчет активаций планет... Сейчас ваши ворота вспыхнут на спирали!");
+    function selectGender(btn) {
+      document.querySelectorAll('.g-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function goDeep() {
+      // Включаем режим погружения
+      document.body.classList.add('immersion');
       
-      // Имитация активации случайных ворот (кодонов)
-      const randomGates = [10, 25, 34, 57, 51, 61]; 
-      
-      randomGates.forEach(num => {
-        const el = document.getElementById(`gate-${num}`);
-        if(el) el.classList.add('active-gate');
-      });
+      // Через 2 секунды выдаем результат
+      setTimeout(() => {
+        alert("Генетический профиль рассчитан. Ваши 64 кодона синхронизированы с Бодиграфом.");
+        // Здесь в будущем можно перенаправить на страницу с Бодиграфом
+      }, 2500);
     }
   </script>
-
 </body>
 </html>
