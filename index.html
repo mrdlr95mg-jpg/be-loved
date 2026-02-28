@@ -1,151 +1,189 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
   :root {
-    --gold: #ffd700;
-    --blue: #00d4ff;
-    --magenta: #ff0077;
-    --glass: rgba(255, 255, 255, 0.1);
+    /* Золотая палитра */
+    --gold-bright: #fff2ac;
+    --gold-main: #d4af37;
+    --gold-dark: #aa841e;
+    --glass: rgba(0, 0, 0, 0.7);
   }
 
   body { 
     margin: 0; 
-    background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%); 
+    background: radial-gradient(circle at center, #1a150a 0%, #000 100%); 
     overflow-x: hidden;
-    font-family: 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Segoe UI', serif;
     color: white;
   }
 
-  /* Шапка */
-  .header {
-    position: fixed;
-    top: 20px;
-    width: 90%;
-    left: 5%;
-    padding: 20px;
-    background: var(--glass);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 20px;
-    text-align: center;
-    z-index: 100;
-  }
-
-  .header h1 { margin: 0; font-size: 1.2rem; letter-spacing: 3px; font-weight: 300; }
-  .header p { margin: 5px 0 0; font-size: 0.8rem; opacity: 0.7; }
-
-  /* Контейнер для 3D ДНК */
+  /* Слой 1: Живой фон ДНК */
   .scene {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    display: flex; justify-content: center; align-items: center;
     perspective: 1200px;
+    z-index: 1;
   }
 
   .dna {
     position: relative;
-    width: 200px;
-    height: 600px;
+    width: 150px;
+    height: 700px;
     transform-style: preserve-3d;
-    animation: rotate 30s linear infinite;
+    animation: rotate 40s linear infinite;
   }
 
   .strand {
     position: absolute;
-    width: 180px;
-    height: 2px;
-    background: rgba(255,255,255,0.05);
+    width: 160px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-main), transparent);
     left: 50%;
-    margin-left: -90px;
+    margin-left: -80px;
   }
 
-  /* Шарики-атомы */
+  /* Золотые шарики (Стержневая модель) */
   .strand::before, .strand::after {
     content: '';
     position: absolute;
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     top: -4px;
+    background: radial-gradient(circle at 30% 30%, var(--gold-bright), var(--gold-dark));
+    box-shadow: 0 0 10px var(--gold-main);
   }
 
-  .strand::before { left: 0; background: var(--blue); box-shadow: 0 0 10px var(--blue); }
-  .strand::after { right: 0; background: var(--magenta); box-shadow: 0 0 10px var(--magenta); }
-
-  /* Эффект активации (Золотые ворота) */
-  .active::before, .active::after {
-    background: var(--gold) !important;
-    box-shadow: 0 0 20px var(--gold) !important;
-    width: 14px; height: 14px; top: -6px;
-  }
+  .strand::before { left: 0; }
+  .strand::after { right: 0; }
 
   @keyframes rotate {
-    from { transform: rotateY(0deg) rotateX(10deg); }
-    to { transform: rotateY(360deg) rotateX(10deg); }
+    from { transform: rotateY(0deg) rotateX(15deg); }
+    to { transform: rotateY(360deg) rotateX(15deg); }
   }
 
-  /* Кнопка действия */
-  .action-btn {
-    position: fixed;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 15px 30px;
-    background: var(--gold);
+  /* Слой 2: Интерфейс калькулятора */
+  .overlay-container {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 50px;
+    min-height: 100vh;
+  }
+
+  .calc-card {
+    background: var(--glass);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--gold-dark);
+    padding: 30px;
+    border-radius: 25px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+  }
+
+  h1 { 
+    font-weight: 300; 
+    letter-spacing: 4px; 
+    color: var(--gold-main);
+    margin-bottom: 30px;
+    font-size: 1.4rem;
+  }
+
+  input, button {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 10px;
+    border: 1px solid var(--gold-dark);
+    background: rgba(255,255,255,0.05);
+    color: white;
+    outline: none;
+    box-sizing: border-box;
+  }
+
+  button {
+    background: var(--gold-main);
     color: black;
-    border: none;
-    border-radius: 50px;
     font-weight: bold;
-    text-transform: uppercase;
     cursor: pointer;
-    box-shadow: 0 10px 20px rgba(255,215,0,0.3);
-    z-index: 100;
+    transition: 0.3s;
+    margin-top: 20px;
+    text-transform: uppercase;
+  }
+
+  button:hover {
+    background: var(--gold-bright);
+    transform: scale(1.02);
+  }
+
+  /* Стиль для 64 кодонов (активации) */
+  .active-gate::before, .active-gate::after {
+    width: 12px; height: 12px; top: -6px;
+    box-shadow: 0 0 20px #fff;
+    background: #fff;
   }
 </style>
 </head>
 <body>
 
-  <div class="header">
-    <h1>3D GENETIC DESIGN</h1>
-    <p>Визуализация активации 64 кодонов</p>
+  <!-- Фон -->
+  <div class="scene">
+    <div class="dna" id="dna-spiral"></div>
   </div>
 
-  <div class="scene">
-    <div class="dna" id="dna-spiral">
-      <!-- Код сгенерирует 64 звена через скрипт ниже -->
+  <!-- Контент -->
+  <div class="overlay-container">
+    <div class="calc-card">
+      <h1>HUMAN DESIGN</h1>
+      <p style="opacity: 0.7; font-size: 0.9rem; margin-bottom: 20px;">Введите данные рождения для активации вашей ДНК</p>
+      
+      <input type="text" placeholder="Имя">
+      <input type="date">
+      <input type="time">
+      <input type="text" placeholder="Место рождения">
+      
+      <button onclick="calculate()">Рассчитать карту</button>
     </div>
   </div>
 
-  <button class="action-btn" onclick="window.print()">Распечатать карту (А4)</button>
-
   <script>
     const dnaContainer = document.getElementById('dna-spiral');
-    const totalCodons = 64;
-    
-    // Номера ворот, которые мы "активируем" (для примера)
-    const activatedGates = [1, 10, 25, 34, 57, 64];
+    const totalCodons = 64; // Ровно 64 звена
 
+    // Отрисовка золотой спирали
     for (let i = 1; i <= totalCodons; i++) {
       const strand = document.createElement('div');
       strand.className = 'strand';
       
-      // Рассчитываем положение каждого из 64 звеньев
-      const yPos = (i - (totalCodons/2)) * 12;
-      const rotation = i * 13.5; // Угол закручивания спирали
+      const yPos = (i - (totalCodons/2)) * 14; // Высота шага
+      const rotation = i * 13.5; // Угол спирали
       
       strand.style.transform = `translateY(${yPos}px) rotateY(${rotation}deg)`;
-      
-      // Если номер итерации совпадает с "активированными воротами"
-      if (activatedGates.includes(i)) {
-        strand.classList.add('active');
-      }
+      strand.id = `gate-${i}`;
       
       dnaContainer.appendChild(strand);
+    }
+
+    // Функция "Расчета"
+    function calculate() {
+      alert("Начинаю расчет активаций планет... Сейчас ваши ворота вспыхнут на спирали!");
+      
+      // Имитация активации случайных ворот (кодонов)
+      const randomGates = [10, 25, 34, 57, 51, 61]; 
+      
+      randomGates.forEach(num => {
+        const el = document.getElementById(`gate-${num}`);
+        if(el) el.classList.add('active-gate');
+      });
     }
   </script>
 
