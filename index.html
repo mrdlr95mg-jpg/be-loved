@@ -1,225 +1,140 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<style>
-  :root {
-    --gold: #d4af37;
-    --gold-bright: #fff2ac;
-    --glass: rgba(10, 10, 10, 0.85);
-  }
-
-  body, html { 
-    margin: 0; padding: 0; background: #000; height: 100%; 
-    font-family: 'Segoe UI', sans-serif; overflow: hidden; color: white; 
-  }
-
-  /* ФОНОВАЯ ЗОЛОТАЯ ДНК */
-  .world {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    display: flex; justify-content: center; align-items: center;
-    perspective: 1000px;
-    z-index: 1;
-    transition: transform 3s ease-in-out;
-  }
-
-  .dna {
-    position: relative;
-    width: 200px;
-    height: 150vh;
-    transform-style: preserve-3d;
-    animation: rotateDNA 40s linear infinite;
-  }
-
-  .strand {
-    position: absolute;
-    width: 240px;
-    height: 2px;
-    left: 50%;
-    margin-left: -120px;
-    background: linear-gradient(90deg, transparent, var(--gold), transparent);
-  }
-
-  .strand::before, .strand::after {
-    content: ''; position: absolute; width: 10px; height: 10px; border-radius: 50%;
-    top: -4px; background: radial-gradient(circle at 30% 30%, #fff, var(--gold));
-    box-shadow: 0 0 15px var(--gold);
-  }
-  .strand::before { left: 0; }
-  .strand::after { right: 0; }
-
-  @keyframes rotateDNA {
-    from { transform: rotateY(0deg) rotateX(10deg); }
-    to { transform: rotateY(360deg) rotateX(10deg); }
-  }
-
-  /* ИНТЕРФЕЙС */
-  .container {
-    position: relative;
-    z-index: 10;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    transition: all 1.5s ease;
-  }
-
-  .glass-card {
-    background: var(--glass);
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
-    padding: 35px 25px;
-    border-radius: 30px;
-    border: 1px solid rgba(212, 175, 55, 0.3);
-    width: 85%;
-    max-width: 360px;
-    text-align: center;
-    box-shadow: 0 25px 50px rgba(0,0,0,0.7);
-  }
-
-  h1 { font-weight: 300; letter-spacing: 4px; color: var(--gold); margin: 0 0 25px; font-size: 1.3rem; }
-
-  .row { margin-bottom: 20px; text-align: left; }
-  label { font-size: 0.65rem; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin-left: 5px; }
-
-  input {
-    width: 100%; padding: 14px; background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 12px;
-    color: white; margin-top: 5px; box-sizing: border-box; font-size: 1rem;
-  }
-
-  .gender-box { display: flex; gap: 10px; margin-top: 8px; }
-  .g-btn {
-    flex: 1; padding: 12px; border: 1px solid rgba(212, 175, 55, 0.2);
-    border-radius: 12px; background: none; color: white; cursor: pointer; transition: 0.3s;
-  }
-  .g-btn.active { background: var(--gold); color: black; font-weight: bold; }
-
-  .calculate-btn {
-    width: 100%; padding: 18px; background: var(--gold); border: none;
-    border-radius: 15px; font-weight: bold; margin-top: 15px;
-    cursor: pointer; box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3);
-    text-transform: uppercase; letter-spacing: 1px;
-  }
-
-  /* ЭФФЕКТ ПОГРУЖЕНИЯ */
-  .immersion .container { opacity: 0; transform: scale(0.5); pointer-events: none; }
-  .immersion .world { transform: scale(3) translateZ(500px); }
-</style>
+    <meta charset="UTF-8">
+    <title>3D Human Design Bodygraph</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #050505; font-family: sans-serif; }
+        #info {
+            position: absolute; top: 20px; left: 20px; color: white;
+            background: rgba(0,0,0,0.7); padding: 15px; border-radius: 8px;
+            pointer-events: none; max-width: 300px; border: 1px solid #444;
+        }
+        canvas { display: block; }
+        .controls-hint {
+            position: absolute; bottom: 20px; left: 20px; color: #888; font-size: 12px;
+        }
+    </style>
 </head>
 <body>
 
-  <div class="world">
-    <div class="dna" id="dna"></div>
-  </div>
-
-  <div class="container" id="ui">
-    <div class="glass-card">
-      <h1>DESIGN GENESIS</h1>
-      
-      <div class="row">
-        <label>Ваш пол</label>
-        <div class="gender-box">
-          <button class="g-btn active" onclick="selectGender(this)">М</button>
-          <button class="g-btn" onclick="selectGender(this)">Ж</button>
-        </div>
-      </div>
-
-      <div class="row">
-        <label>Дата рождения</label>
-        <input type="date">
-      </div>
-
-      <div class="row">
-        <label>Точное время</label>
-        <input type="time">
-      </div>
-
-      <button class="calculate-btn" onclick="goDeep()">АКТИВИРОВАТЬ ДНК</button>
+    <div id="info">
+        <h2 id="title">Bodygraph 3D</h2>
+        <p id="desc">Наведите на центр или участок мозга для анализа...</p>
+        <div id="activations" style="font-size: 0.8em; color: #aaa;"></div>
     </div>
-  </div>
 
-  <script>
-    // Создаем 64 звена ДНК (кодоны)
-    const dnaBox = document.getElementById('dna');
-    for (let i = 0; i < 64; i++) {
-      const strand = document.createElement('div');
-      strand.className = 'strand';
-      // Равномерно распределяем по всей высоте
-      strand.style.top = (i * 1.56) + "%"; 
-      strand.style.transform = "rotateY(" + (i * 13.5) + "deg)";
-      dnaBox.appendChild(strand);
-    }
+    <div class="controls-hint">Вращение: ЛКМ | Зум: Колесо | Панорама: ПКМ</div>
 
-    function selectGender(btn) {
-      document.querySelectorAll('.g-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-    }
+    <!-- Подключаем Three.js и OrbitControls -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com",
+                "three/addons/": "https://unpkg.com"
+            }
+        }
+    </script>
 
-    function goDeep() {
-      // Включаем режим погружения
-      document.body.classList.add('immersion');
-      
-      // Через 2 секунды выдаем результат
-      setTimeout(() => {
-        alert("Генетический профиль рассчитан. Ваши 64 кодона синхронизированы с Бодиграфом.");
-        // Здесь в будущем можно перенаправить на страницу с Бодиграфом
-      }, 2500);
-    }
-  </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // --- Инициализация сцены ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        camera.position.set(0, 1, 5);
+
+        // --- Свет ---
+        const light = new THREE.PointLight(0xffffff, 100);
+        light.position.set(5, 5, 5);
+        scene.add(light);
+        scene.add(new THREE.AmbientLight(0x404040, 2));
+
+        // --- Данные ---
+        const centers = [
+            { name: "Теменной", pos: [0, 2.5, 0], color: 0xffff00, info: "Шишковидная железа. Давление думать." },
+            { name: "Аджна", pos: [0, 2.0, 0.1], color: 0x00ff00, info: "Гипофиз. Обработка данных." },
+            { name: "Горловой", pos: [0, 1.4, 0], color: 0x8888ff, info: "Щитовидная железа. Манифестация." },
+            { name: "G-Центр", pos: [0, 0.7, 0], color: 0xffaa00, info: "Печень. Направление и любовь." },
+            { name: "Сердечный", pos: [0.4, 0.6, 0.1], color: 0xff0000, info: "Сердце. Воля и Эго." },
+            { name: "Селезенка", pos: [-0.8, 0, 0], color: 0x996633, info: "Лимфатическая система. Выживание." },
+            { name: "Сакрал", pos: [0, -0.5, 0], color: 0xff0000, info: "Репродуктивная система. Жизненная энергия." },
+            { name: "Эмоциональный", pos: [0.8, 0, 0], color: 0x996633, info: "Почки / Поджелудочная. Чувства." },
+            { name: "Корневой", pos: [0, -1.5, 0], color: 0x555555, info: "Надпочечники. Давление действовать." }
+        ];
+
+        // Группы объектов
+        const centerMeshes = [];
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        // --- Создание визуальных объектов ---
+        
+        // 1. Прозрачный силуэт человека (упрощенно)
+        const bodyGeo = new THREE.CapsuleGeometry(1, 4, 4, 16);
+        const bodyMat = new THREE.MeshPhongMaterial({ color: 0x222222, transparent: true, opacity: 0.15, wireframe: true });
+        const body = new THREE.Mesh(bodyGeo, bodyMat);
+        scene.add(body);
+
+        // 2. Создание Центров
+        centers.forEach(data => {
+            const geo = new THREE.OctahedronGeometry(0.2, 0);
+            const mat = new THREE.MeshPhongMaterial({ color: data.color, emissive: data.color, emissiveIntensity: 0.5 });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.set(...data.pos);
+            mesh.userData = data;
+            scene.add(mesh);
+            centerMeshes.push(mesh);
+        });
+
+        // 3. Создание Каналов (линии)
+        const lineMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.3 });
+        for(let i=0; i < centers.length - 1; i++) {
+            const points = [new THREE.Vector3(...centers[i].pos), new THREE.Vector3(...centers[i+1].pos)];
+            const geo = new THREE.BufferGeometry().setFromPoints(points);
+            const line = new THREE.Line(geo, lineMat);
+            scene.add(line);
+        }
+
+        // --- Интерактив (Hover) ---
+        window.addEventListener('mousemove', (event) => {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(centerMeshes);
+
+            if (intersects.length > 0) {
+                const obj = intersects[0].object;
+                document.getElementById('title').innerText = obj.userData.name;
+                document.getElementById('desc').innerText = obj.userData.info;
+                obj.scale.set(1.5, 1.5, 1.5);
+            } else {
+                centerMeshes.forEach(m => m.scale.set(1, 1, 1));
+            }
+        });
+
+        // --- Рендеринг ---
+        function animate() {
+            requestAnimationFrame(animate);
+            body.rotation.y += 0.002; // Медленное вращение для эффекта
+            centerMeshes.forEach(m => m.rotation.y += 0.01);
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Адаптивность
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
 </body>
-</html><!-- ЭФФЕКТЫ ХРАМА, ОКЕАНА И МУЗЫКИ -->
-<style>
-  .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 50% 50%, rgba(20, 30, 48, 0.4), #000); z-index: 0; pointer-events: none; }
-  .mist { position: fixed; bottom: 0; left: 0; width: 100%; height: 45vh; background: linear-gradient(to top, rgba(212, 175, 55, 0.15), transparent); filter: blur(60px); z-index: 2; pointer-events: none; }
-  .temple-light { position: fixed; top: 0; width: 1px; height: 100%; background: linear-gradient(to bottom, transparent, rgba(212, 175, 55, 0.4), transparent); z-index: 1; pointer-events: none; }
-  .l1 { left: 10%; } .l2 { right: 10%; }
-  
-  /* Кнопка Музыки */
-  .music-control {
-    position: fixed; top: 20px; right: 20px; z-index: 150;
-    background: rgba(212, 175, 55, 0.2); border: 1px solid var(--gold);
-    color: var(--gold); border-radius: 50%; width: 45px; height: 45px;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; backdrop-filter: blur(10px); font-size: 20px;
-  }
-</style>
-
-<div class="stars"></div>
-<div class="mist"></div>
-<div class="temple-light l1"></div>
-<div class="temple-light l2"></div>
-
-<button class="music-control" id="musicBtn" onclick="toggleMusic()">◈</button>
-
-<script>
-  // Ссылка на эмбиент-медитацию (безопасный источник)
-  const audio = new Audio('https://www.soundhelix.com');
-  audio.loop = true;
-  let isPlaying = false;
-
-  function toggleMusic() {
-    const btn = document.getElementById('musicBtn');
-    if (!isPlaying) {
-      audio.play();
-      btn.innerHTML = '◈'; // Символ активного звука
-      btn.style.boxShadow = '0 0 15px #d4af37';
-    } else {
-      audio.pause();
-      btn.innerHTML = '◇'; // Символ тишины
-      btn.style.boxShadow = 'none';
-    }
-    isPlaying = !isPlaying;
-  }
-
-  // Эффект легкого покачивания всей сцены (как на волнах)
-  document.addEventListener('deviceorientation', (event) => {
-    const x = event.beta / 5; 
-    const y = event.gamma / 5;
-    document.querySelector('.world').style.transform = `translate(${y}px, ${x}px)`;
-  });
-</script>
-
+</html>
