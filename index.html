@@ -2,63 +2,73 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Почему в кодоне 3 буквы?</title>
+    <title>Порядок кодонов в ДНК</title>
     <style>
-        body { margin: 0; background: #050505; color: #e0cc8d; font-family: sans-serif; overflow: hidden; }
-        .ui { position: absolute; width: 100%; text-align: center; top: 20px; z-index: 10; }
-        #container { perspective: 1200px; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; }
-        .scene { position: relative; width: 200px; height: 500px; transform-style: preserve-3d; animation: rot 20s linear infinite; }
-        @keyframes rot { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
+        body { margin: 0; background: #080a10; color: #fff; font-family: sans-serif; overflow: hidden; }
+        .info { position: absolute; top: 20px; width: 100%; text-align: center; z-index: 10; }
+        #dna { perspective: 1200px; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; }
+        .scene { position: relative; width: 40px; height: 100%; transform-style: preserve-3d; animation: rotate 25s linear infinite; }
+        @keyframes rotate { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
+
+        .nucleotide { position: absolute; width: 12px; height: 12px; border-radius: 50%; }
+        .connection { position: absolute; height: 2px; transform-origin: left center; opacity: 0.3; }
         
-        .base { position: absolute; width: 12px; height: 12px; border-radius: 50%; }
-        /* Активная сторона - та, что читается */
-        .side-a { background: gold; box-shadow: 0 0 15px gold; }
-        /* Зеркальная сторона - просто пара */
-        .side-b { background: #443300; opacity: 0.5; }
-        
-        .bond { position: absolute; height: 1px; background: rgba(255,215,0,0.2); transform-origin: left center; }
-        
-        /* Выделение трех букв одного кодона */
-        .highlight { background: #ff0055 !important; box-shadow: 0 0 25px #ff0055 !important; width: 16px; height: 16px; }
+        /* Цвета для разных кодонов в цепочке */
+        .codon-type-1 { background: #ff4d4d; box-shadow: 0 0 10px #ff4d4d; }
+        .codon-type-2 { background: #4dff88; box-shadow: 0 0 10px #4dff88; }
+        .codon-type-3 { background: #4db8ff; box-shadow: 0 0 10px #4db8ff; }
+        .codon-type-4 { background: #ffff4d; box-shadow: 0 0 10px #ffff4d; }
+
         .codon-label {
-            position: absolute; left: 40px; color: #ff0055; font-weight: bold; font-size: 20px;
-            transform: translateZ(20px); white-space: nowrap;
+            position: absolute; left: 100px; font-size: 12px; font-weight: bold;
+            text-transform: uppercase; letter-spacing: 2px; opacity: 0.8;
         }
     </style>
 </head>
 <body>
-    <div class="ui">
-        <h1>1 Кодон = 3 буквы на ОДНОЙ нити</h1>
-        <p>Ступенька парная, но информация считывается только с <b style="color:gold">Золотой стороны</b></p>
+
+    <div class="info">
+        <h1>Последовательность кодонов</h1>
+        <p>Каждые 3 ступеньки одного цвета — это отдельный кодон (слово)</p>
     </div>
-    <div id="container"><div class="scene" id="scene"></div></div>
+
+    <div id="dna">
+        <div class="scene" id="scene"></div>
+    </div>
 
     <script>
         const scene = document.getElementById('scene');
-        const steps = 50;
-        const radius = 90;
-        const highlighted = [22, 23, 24]; // 3 ступеньки для кодона
+        const totalNucleotides = 60; // 20 кодонов по 3 нуклеотида
+        const radius = 80;
 
-        for (let i = 0; i < steps; i++) {
+        for (let i = 0; i < totalNucleotides; i++) {
             const angle = i * 0.4;
-            const y = (i - steps/2) * 18;
-            const isTarget = highlighted.includes(i);
+            const y = (i - totalNucleotides / 2) * 20;
+            
+            // Определяем, к какому кодону относится нуклеотид (i / 3)
+            const codonIndex = Math.floor(i / 3);
+            const codonColorClass = `codon-type-${(codonIndex % 4) + 1}`;
 
-            // Нить А (Информационная)
-            createPoint(angle, y, radius, 'side-a' + (isTarget ? ' highlight' : ''), isTarget && i===23 ? "КОДОН (3 буквы)" : "");
-            // Нить Б (Вспомогательная - зеркальная)
-            createPoint(angle + Math.PI, y, radius, 'side-b', "");
-            // Ступенька
+            // Создаем основную нить (считываемую)
+            createPoint(angle, y, radius, codonColorClass, i % 3 === 1 ? `Кодон ${codonIndex + 1}` : "");
+            
+            // Создаем вторую нить (золотистая, вспомогательная)
+            createPoint(angle + Math.PI, y, radius, "secondary");
+
+            // Перекладина
             createLine(angle + Math.PI, y, radius);
         }
 
         function createPoint(a, y, r, cls, labelText) {
             const p = document.createElement('div');
-            p.className = 'base ' + cls;
+            p.className = 'nucleotide ' + cls;
+            if (cls === "secondary") p.style.background = "rgba(218,165,32,0.3)";
+            
             const x = Math.cos(a) * r;
             const z = Math.sin(a) * r;
             p.style.transform = `translate3d(${x}px, ${y}px, ${z}px)`;
-            if(labelText) {
+            
+            if (labelText) {
                 const l = document.createElement('div');
                 l.className = 'codon-label';
                 l.innerText = labelText;
@@ -69,8 +79,9 @@
 
         function createLine(a, y, r) {
             const l = document.createElement('div');
-            l.className = 'bond';
-            l.style.width = (r * 2) + 'px';
+            l.className = 'connection';
+            l.style.background = "white";
+            l.style.width = (r * 2) + "px";
             l.style.transform = `translate3d(${Math.cos(a)*r}px, ${y+6}px, ${Math.sin(a)*r}px) rotateY(${-a * 180 / Math.PI}deg)`;
             scene.appendChild(l);
         }
