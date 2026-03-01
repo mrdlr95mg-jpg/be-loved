@@ -2,89 +2,121 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Кодон GAC в деталях</title>
+    <title>64 Кодона ДНК: Исправленная модель</title>
     <style>
-        body { margin: 0; background: #0a0a0a; color: #fff; font-family: 'Courier New', monospace; overflow: hidden; }
-        #container { perspective: 1000px; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; flex-direction: column; }
-        .scene { position: relative; width: 300px; height: 300px; transform-style: preserve-3d; animation: rotate 10s linear infinite; }
+        body { margin: 0; background: #050508; color: #eee; font-family: 'Segoe UI', sans-serif; overflow: hidden; display: flex; }
+        
+        /* Боковая панель со списком */
+        #codon-list {
+            width: 250px; height: 100vh; overflow-y: auto; background: rgba(255,255,255,0.05);
+            padding: 20px; font-size: 13px; border-right: 1px solid #333;
+            scrollbar-width: thin; scrollbar-color: #555 transparent;
+        }
+        .list-item { margin-bottom: 5px; padding: 3px; border-radius: 3px; }
+        .list-item b { color: gold; }
+
+        /* Контейнер для 3D */
+        #viewport { flex-grow: 1; perspective: 1200px; height: 100vh; display: flex; justify-content: center; align-items: center; }
+        .scene { position: relative; width: 200px; height: 80vh; transform-style: preserve-3d; animation: rotate 30s linear infinite; }
+        
         @keyframes rotate { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
 
-        .step { position: absolute; width: 200px; height: 2px; transform-style: preserve-3d; }
-        
-        /* Стили для азотистых оснований */
-        .base { 
-            position: absolute; width: 40px; height: 40px; border-radius: 50%; 
-            display: flex; justify-content: center; align-items: center; 
-            font-weight: bold; font-size: 20px; border: 2px solid #fff;
-        }
+        /* Элементы ДНК */
+        .step { position: absolute; height: 4px; transform-style: preserve-3d; display: flex; align-items: center; justify-content: center; }
+        .rail { position: absolute; width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 0 10px currentColor; }
+        .bond { position: absolute; height: 2px; background: rgba(255,255,255,0.3); }
 
-        /* Цвета букв */
-        .G { background: #4dff88; color: #000; } /* Гуанин - зеленый */
-        .A { background: #ff4d4d; color: #fff; } /* Аденин - красный */
-        .C { background: #4db8ff; color: #000; } /* Цитозин - синий */
-        .T { background: #ffff4d; color: #000; } /* Тимин - желтый */
+        .label { position: absolute; font-size: 9px; color: white; width: 40px; text-align: center; pointer-events: none; }
 
-        .label-main { color: gold; position: absolute; top: -50px; width: 100%; text-align: center; font-size: 14px; }
-        .backbone { position: absolute; width: 4px; height: 400px; background: gold; border-radius: 10px; opacity: 0.3; }
+        .A { background: #ff4d4d; color: #ff4d4d; }
+        .U { background: #ffff4d; color: #ffff4d; }
+        .G { background: #4dff88; color: #4dff88; }
+        .C { background: #4db8ff; color: #4db8ff; }
     </style>
 </head>
 <body>
 
-    <div style="position:absolute; top:20px; text-align:center; width:100%;">
-        <h1 style="color:gold;">Кодон GAC (Аспарагиновая кислота)</h1>
-        <p>Информация считывается только с левой (яркой) стороны</p>
-    </div>
+<div id="codon-list">
+    <h3>Список 64 кодонов:</h3>
+    <div id="items-container"></div>
+</div>
 
-    <div id="container">
-        <div class="scene" id="scene">
-            <!-- Кодон GAC будет построен здесь через JS -->
-        </div>
-    </div>
+<div id="viewport">
+    <div class="scene" id="scene"></div>
+</div>
 
-    <script>
-        const scene = document.getElementById('scene');
-        const codon = ['G', 'A', 'C'];
-        const pairs = { 'G': 'C', 'A': 'T', 'C': 'G', 'T': 'A' };
+<script>
+    const scene = document.getElementById('scene');
+    const listContainer = document.getElementById('items-container');
+    const bases = ['A', 'U', 'G', 'C'];
+    const pairs = { 'A': 'U', 'U': 'A', 'G': 'C', 'C': 'G' };
+    
+    // 1. Генерируем все 64 комбинации
+    let allCodons = [];
+    for(let a of bases) for(let b of bases) for(let c of bases) allCodons.push(a+b+c);
 
-        codon.forEach((letter, i) => {
-            const step = document.createElement('div');
-            step.className = 'step';
-            
-            const angle = i * 0.5; // Смещение по спирали
-            const y = i * 80 - 80; // Расстояние между ступеньками
-            
-            // Левая сторона (Информационная)
-            const baseLeft = document.createElement('div');
-            baseLeft.className = `base ${letter}`;
-            baseLeft.style.left = '0';
-            baseLeft.innerText = letter;
-            if (i === 0) baseLeft.innerHTML += '<div class="label-main">Нить 1 (Код)</div>';
+    // 2. Строим спираль
+    const radius = 80;
+    const stepHeight = 25; // Расстояние между кодонами
 
-            // Правая сторона (Зеркальная)
-            const baseRight = document.createElement('div');
+    allCodons.forEach((name, i) => {
+        // Добавляем в текстовый список
+        const item = document.createElement('div');
+        item.className = 'list-item';
+        item.innerHTML = `${i+1}. <b>${name}</b> — кодон №${i+1}`;
+        listContainer.appendChild(item);
+
+        // Создаем 3D-группу для одного кодона (3 ступеньки)
+        for (let j = 0; j < 3; j++) {
+            const index = i * 3 + j;
+            const angle = index * 0.4;
+            const y = (index - (64*3)/2) * 8; // Вертикальное смещение
+
+            const letter = name[j];
             const pairLetter = pairs[letter];
-            baseRight.className = `base ${pairLetter}`;
-            baseRight.style.right = '0';
-            baseRight.style.opacity = '0.4'; // Тусклая, так как она вторична
-            baseRight.innerText = pairLetter;
-            if (i === 0) baseRight.innerHTML += '<div class="label-main" style="color:gray">Нить 2 (Копия)</div>';
 
-            // Перекладина (связь)
+            // Группа ступеньки
+            const stepWrap = document.createElement('div');
+            stepWrap.className = 'step';
+            stepWrap.style.width = (radius * 2) + 'px';
+            
+            // Левый край (основная нить)
+            const leftBase = document.createElement('div');
+            leftBase.className = `rail ${letter}`;
+            leftBase.style.left = '0';
+            
+            // Правый край (комплементарная нить)
+            const rightBase = document.createElement('div');
+            rightBase.className = `rail ${pairLetter}`;
+            rightBase.style.right = '0';
+            rightBase.style.opacity = "0.4"; // Вторая нить чуть тусклее
+
+            // Перекладина (внутри между ними)
             const bond = document.createElement('div');
-            bond.style.position = 'absolute';
+            bond.className = 'bond';
             bond.style.width = '100%';
-            bond.style.height = '4px';
-            bond.style.background = 'rgba(255,255,255,0.2)';
-            bond.style.top = '18px';
 
-            step.appendChild(baseLeft);
-            step.appendChild(baseRight);
-            step.appendChild(bond);
+            // Подпись буквы (только для центрального нуклеотида кодона для чистоты)
+            if (j === 1) {
+                const txt = document.createElement('div');
+                txt.className = 'label';
+                txt.innerText = name;
+                txt.style.left = '50%';
+                txt.style.transform = 'translateX(-50%)';
+                stepWrap.appendChild(txt);
+            }
 
-            step.style.transform = `translate3d(0, ${y}px, 0) rotateY(${angle * 50}deg)`;
-            scene.appendChild(step);
-        });
-    </script>
+            stepWrap.appendChild(leftBase);
+            stepWrap.appendChild(rightBase);
+            stepWrap.appendChild(bond);
+
+            // Позиционируем ступеньку в пространстве
+            // Смещение по X и Z за счет поворота всей группы вокруг центра
+            stepWrap.style.transform = `translate3d(-50%, ${y}px, 0) rotateY(${angle * 57.3}deg)`;
+            
+            scene.appendChild(stepWrap);
+        }
+    });
+</script>
 </body>
 </html>
-
