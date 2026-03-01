@@ -2,180 +2,161 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Анимированная спираль ДНК</title>
+    <title>64 Кодона в Спирали ДНК</title>
     <style>
         body {
+            margin: 0;
+            background-color: #0a0a0c;
+            color: #fff;
+            font-family: sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .info {
+            position: absolute;
+            top: 20px;
+            text-align: center;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        #dna-container {
+            perspective: 1000px;
+            width: 100vw;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #f8f8f8; /* Светлый фон, похожий на изображение */
-            font-family: 'Arial', sans-serif;
-            overflow: hidden; /* Скрываем полосы прокрутки, если 3D-элементы выходят за пределы */
-            perspective: 1500px; /* Задаем перспективу для 3D-эффекта */
         }
 
-        /* Контейнер для всей 3D-сцены ДНК */
-        .dna-container {
-            width: 300px; /* Общая ширина контейнера */
-            height: 800px; /* Общая высота контейнера */
+        .scene {
             position: relative;
-            transform-style: preserve-3d; /* Сохраняем 3D-трансформации дочерних элементов */
-            /* Небольшой начальный наклон для лучшего обзора 3D-модели */
-            transform: rotateX(-10deg) rotateY(0deg); 
-        }
-
-        /* Элемент, который будет вращаться, содержащий все части ДНК */
-        .dna-helix-rotator {
-            width: 100%;
-            height: 100%;
-            position: absolute;
+            width: 200px;
+            height: 400px;
             transform-style: preserve-3d;
-            animation: rotateDNA 20s linear infinite; /* Анимация вращения по оси Y */
-            transform-origin: center center; /* Точка вращения - центр */
+            animation: rotate DNA 20s linear infinite;
         }
 
-        /* CSS Custom Properties (переменные) для удобства расчетов */
-        :root {
-            --num-base-pairs: 12; /* Общее количество пар оснований */
-            --turns: 2; /* Количество полных витков спирали */
-            /* Угол поворота для каждой пары оснований, чтобы сформировать спираль */
-            --rotation-per-step: calc((360deg * var(--turns)) / var(--num-base-pairs)); 
-            --step-height: 45px; /* Вертикальное расстояние между парами оснований */
-            --radius: 70px; /* Радиус спирали */
-            --backbone-thickness: 10px; /* Толщина сахарно-фосфатного остова */
-        }
-
-        /* Стиль для каждой пары оснований (ступеньки) */
-        .base-pair {
+        .codon {
             position: absolute;
-            display: flex;
-            align-items: center;
-            justify-content: space-between; /* Распределяем A...T */
-            font-size: 1.1em;
-            font-weight: bold;
-            color: black;
-
-            background-color: white;
-            padding: 2px 8px;
-            box-sizing: border-box;
-            border: 1px solid black;
-            border-radius: 10px; /* Закругленные концы, как на изображении */
-            white-space: nowrap; /* Предотвращаем перенос текста */
-
-            width: 120px; /* Ширина элемента пары оснований */
-            height: 25px; /* Высота элемента пары оснований */
-
-            left: 50%; /* Центрируем по горизонтали */
-            /* Вертикальное позиционирование: центрируем всю спираль относительно родителя */
-            top: calc(50% + (var(--i) - var(--num-base-pairs) / 2 - 0.5) * var(--step-height));
-
-            /* 3D-трансформации для размещения элемента в виде спирали */
-            transform:
-                translateX(-50%) /* Смещаем влево на половину ширины, чтобы центрировать */
-                rotateY(calc(var(--i) * var(--rotation-per-step))) /* Вращаем вокруг оси Y для спирального скручивания */
-                translateZ(var(--radius)); /* Выдвигаем по оси Z, чтобы сформировать радиус спирали */
-            
-            /* z-index для правильного наложения элементов при вращении */
-            z-index: calc(var(--i)); 
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            transform-style: preserve-3d;
+            transition: all 0.3s;
         }
 
-        .base-pair .nucleobase {
-            user-select: none; /* Предотвращаем выделение текста */
-        }
-
-        .base-pair .dots {
-            flex-grow: 1; /* Точки занимают все доступное пространство */
-            text-align: center;
-            letter-spacing: 0.15em; /* Расстояние между точками */
-            color: #555; /* Более светлый цвет для точек (водородных связей) */
-            font-weight: normal;
-        }
-
-        /* Точки прикрепления (маленькие кружки) на концах пар оснований */
-        .base-pair::before,
-        .base-pair::after {
-            content: '';
+        .codon::after {
+            content: attr(data-label);
             position: absolute;
-            width: 8px;
-            height: 8px;
-            background-color: black;
-            border-radius: 50%; /* Делаем их круглыми */
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 10; /* Убедимся, что кружки всегда сверху */
+            font-size: 8px;
+            top: 15px;
+            left: -10px;
+            opacity: 0;
         }
-        .base-pair::before { left: -6px; } /* Смещение влево */
-        .base-pair::after { right: -6px; } /* Смещение вправо */
 
-        /* Сахарно-фосфатные остовы (бэкбоны) - упрощенное представление */
-        /* Эти элементы будут прямыми стержнями, но вращаться вместе со спиралью, 
-           создавая иллюзию изгиба и объема. */
-        .dna-strand {
+        .codon:hover::after {
+            opacity: 1;
+        }
+
+        .bond {
             position: absolute;
-            background-color: black;
-            width: var(--backbone-thickness); /* Толщина остова */
-            /* Высота охватывает все пары оснований плюс немного сверху и снизу */
-            height: calc(var(--num-base-pairs) * var(--step-height) + 4 * var(--step-height));
-            top: calc(50% - (var(--num-base-pairs) * var(--step-height) / 2) - 2 * var(--step-height));
-            left: 50%; /* Центрируем для transform-origin */
-            transform-origin: center center;
-            border-radius: 5px; /* Смягчаем края */
-            opacity: 0.9; /* Небольшая прозрачность */
+            height: 2px;
+            background: rgba(255,255,255,0.2);
+            transform-origin: left center;
         }
 
-        .dna-strand.left-strand {
-            /* Позиционируем левый остов, он будет вращаться вместе с rotator */
-            transform:
-                translateX(calc(-50% - var(--radius) + (var(--backbone-thickness)/2))) /* Смещение к левому краю спирали */
-                rotateY(-15deg) /* Небольшой статический поворот для визуального "закручивания" */
-                translateZ(var(--radius)); /* Размещаем на радиусе спирали */
-        }
-
-        .dna-strand.right-strand {
-            /* Позиционируем правый остов */
-            transform:
-                translateX(calc(-50% + var(--radius) - (var(--backbone-thickness)/2))) /* Смещение к правому краю
-
-спирали */
-                rotateY(15deg) /* Небольшой статический поворот */
-                translateZ(var(--radius)); /* Размещаем на радиусе спирали */
-        }
-
-        /* Анимация вращения всей спирали */
         @keyframes rotateDNA {
             from { transform: rotateY(0deg); }
             to { transform: rotateY(360deg); }
         }
+
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            display: flex;
+            gap: 20px;
+            background: rgba(255,255,255,0.1);
+            padding: 10px 20px;
+            border-radius: 20px;
+        }
     </style>
 </head>
 <body>
-    <div class="dna-container">
-        <div class="dna-helix-rotator">
-            <!-- Сахарно-фосфатные остовы (бэкбоны) -->
-            <!-- Эти элементы являются прямыми стержнями, которые вращаются вместе с helix-rotator. -->
-            <!-- Статические rotateY() и translateZ() дают им начальное смещение и перспективу, -->
-            <!-- что в сочетании с вращением создает иллюзию скручивания, как на изображении. -->
-            <div class="dna-strand left-strand"></div>
-            <div class="dna-strand right-strand"></div>
 
-            <!-- Пары оснований (ступеньки) ДНК -->
-            <!-- Каждая пара оснований позиционируется с использованием CSS-переменной --i -->
-            <div class="base-pair" style="--i:0;"><span class="nucleobase">A</span><span class="dots">. . .</span><span class="nucleobase">T</span></div>
-            <div class="base-pair" style="--i:1;"><span class="nucleobase">C</span><span class="dots">. . .</span><span class="nucleobase">G</span></div>
-            <div class="base-pair" style="--i:2;"><span class="nucleobase">T</span><span class="dots">. . .</span><span class="nucleobase">A</span></div>
-            <div class="base-pair" style="--i:3;"><span class="nucleobase">G</span><span class="dots">. . .</span><span class="nucleobase">C</span></div>
-            <div class="base-pair" style="--i:4;"><span class="nucleobase">A</span><span class="dots">. . .</span><span class="nucleobase">T</span></div>
-            <div class="base-pair" style="--i:5;"><span class="nucleobase">C</span><span class="dots">. . .</span><span class="nucleobase">G</span></div>
-            <div class="base-pair" style="--i:6;"><span class="nucleobase">T</span><span class="dots">. . .</span><span class="nucleobase">A</span></div>
-            <div class="base-pair" style="--i:7;"><span class="nucleobase">G</span><span class="dots">. . .</span><span class="nucleobase">C</span></div>
-            <div class="base-pair" style="--i:8;"><span class="nucleobase">A</span><span class="dots">. . .</span><span class="nucleobase">T</span></div>
-            <div class="base-pair" style="--i:9;"><span class="nucleobase">C</span><span class="dots">. . .</span><span class="nucleobase">G</span></div>
-            <div class="base-pair" style="--i:10;"><span class="nucleobase">T</span><span class="dots">. . .</span><span class="nucleobase">A</span></div>
-            <div class="base-pair" style="--i:11;"><span class="nucleobase">G</span><span class="dots">. . .</span><span class="nucleobase">C</span></div>
-        </div>
+    <div class="info">
+        <h1>Генетический код: 64 Кодона</h1>
+        <p>Каждая точка — это триплет (кодон). Всего 64 комбинации.</p>
     </div>
+
+    <div id="dna-container">
+        <div class="scene" id="scene"></div>
+    </div>
+
+    <div class="legend">
+        <div><span style="color: #ff4d4d">●</span> Аденин (A)</div>
+        <div><span style="color: #4dff88">●</span> Гуанин (G)</div>
+        <div><span style="color: #4db8ff">●</span> Цитозин (C)</div>
+        <div><span style="color: #ffff4d">●</span> Урацил/Тимин (U/T)</div>
+    </div>
+
+    <script>
+        const scene = document.getElementById('scene');
+        const totalCodons = 64;
+        const bases = ['A', 'U', 'G', 'C'];
+        const colors = { 'A': '#ff4d4d', 'U': '#ffff4d', 'G': '#4dff88', 'C': '#4db8ff' };
+
+        // Генерируем 64 кодона (триплеты)
+        let codons = [];
+        for(let i=0; i<4; i++) {
+            for(let j=0; j<4; j++) {
+                for(let k=0; k<4; k++) {
+                    codons.push(bases[i] + bases[j] + bases[k]);
+                }
+            }
+        }
+
+        // Размещаем их по спирали
+        codons.forEach((name, i) => {
+            const angle = i * 0.4; // Угол поворота
+            const yPos = (i - totalCodons/2) * 12; // Позиция по вертикали
+            const radius = 80;
+
+            // Нить 1
+            createNode(name, angle, yPos, radius, true);
+            // Нить 2 (комплементарная/зеркальная для симметрии)
+            createNode(name, angle + Math.PI, yPos, radius, false);
+            
+            // Создаем соединительную линию (связь)
+            createBond(angle, yPos, radius);
+        });
+
+        function createNode(name, angle, y, r, isMain) {
+            const node = document.createElement('div');
+            node.className = 'codon';
+            const x = Math.cos(angle) * r;
+            const z = Math.sin(angle) * r;
+            
+            // Цвет зависит от первой буквы кодона для визуализации
+            node.style.backgroundColor = colors[name[0]];
+            node.style.transform = `translate3d(${x}px, ${y}px, ${z}px)`;
+            node.setAttribute('data-label', name);
+            scene.appendChild(node);
+        }
+
+        function createBond(angle, y, r) {
+            const bond = document.createElement('div');
+            bond.className = 'bond';
+            bond.style.width = (r * 2) + 'px';
+            const x = Math.cos(angle + Math.PI) * r;
+            const z = Math.sin(angle + Math.PI) * r;
+            
+            bond.style.transform = `translate3d(${x}px, ${y+6}px, ${z}px) rotateY(${-angle * 180 / Math.PI}deg)`;
+            scene.appendChild(bond);
+        }
+    </script>
 </body>
 </html>
