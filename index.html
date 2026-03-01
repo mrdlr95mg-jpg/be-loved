@@ -2,172 +2,77 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Структура кодона в ДНК</title>
+    <title>Почему в кодоне 3 буквы?</title>
     <style>
-        body {
-            margin: 0;
-            background: radial-gradient(circle, #1a1a1a 0%, #000 100%);
-            color: #f0e68c;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .header {
-            position: absolute;
-            top: 30px;
-            text-align: center;
-            z-index: 10;
-        }
-
-        #dna-container {
-            perspective: 1200px;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .scene {
-            position: relative;
-            width: 200px;
-            height: 600px;
-            transform-style: preserve-3d;
-            animation: rotateDNA 15s linear infinite;
-        }
-
-        /* Основания (бусины) */
-        .base {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: gold;
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-        }
-
-        /* Перекладины (связи) */
-        .bond {
-            position: absolute;
-            height: 2px;
-            background: rgba(218, 165, 32, 0.4);
-            transform-origin: left center;
-        }
-
-        /* Специфическое выделение кодона */
-        .highlight-codon {
-            background: #00ffff !important;
-            box-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff;
-            width: 14px;
-            height: 14px;
-            z-index: 100;
-        }
-
-        .highlight-bond {
-            background: rgba(0, 255, 255, 0.8) !important;
-            height: 3px !important;
-        }
-
-        .label {
-            position: absolute;
-            left: 120px;
-            color: #00ffff;
-            font-weight: bold;
-            font-size: 18px;
-            white-space: nowrap;
-            text-shadow: 0 0 10px #00ffff;
-        }
-
-        @keyframes rotateDNA {
-            from { transform: rotateY(0deg); }
-            to { transform: rotateY(360deg); }
-        }
-
-        .legend {
-            position: absolute;
-            bottom: 40px;
-            padding: 15px;
-            border: 1px solid gold;
-            background: rgba(0,0,0,0.6);
-            border-radius: 8px;
-            max-width: 400px;
+        body { margin: 0; background: #050505; color: #e0cc8d; font-family: sans-serif; overflow: hidden; }
+        .ui { position: absolute; width: 100%; text-align: center; top: 20px; z-index: 10; }
+        #container { perspective: 1200px; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; }
+        .scene { position: relative; width: 200px; height: 500px; transform-style: preserve-3d; animation: rot 20s linear infinite; }
+        @keyframes rot { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
+        
+        .base { position: absolute; width: 12px; height: 12px; border-radius: 50%; }
+        /* Активная сторона - та, что читается */
+        .side-a { background: gold; box-shadow: 0 0 15px gold; }
+        /* Зеркальная сторона - просто пара */
+        .side-b { background: #443300; opacity: 0.5; }
+        
+        .bond { position: absolute; height: 1px; background: rgba(255,215,0,0.2); transform-origin: left center; }
+        
+        /* Выделение трех букв одного кодона */
+        .highlight { background: #ff0055 !important; box-shadow: 0 0 25px #ff0055 !important; width: 16px; height: 16px; }
+        .codon-label {
+            position: absolute; left: 40px; color: #ff0055; font-weight: bold; font-size: 20px;
+            transform: translateZ(20px); white-space: nowrap;
         }
     </style>
 </head>
 <body>
-
-    <div class="header">
-        <h1>Анатомия кодона</h1>
-        <p>Золотая спираль — вся цепь ДНК. <span style="color:#00ffff">Бирюзовый участок</span> — это 1 кодон (3 нуклеотида).</p>
+    <div class="ui">
+        <h1>1 Кодон = 3 буквы на ОДНОЙ нити</h1>
+        <p>Ступенька парная, но информация считывается только с <b style="color:gold">Золотой стороны</b></p>
     </div>
-
-    <div id="dna-container">
-        <div class="scene" id="scene"></div>
-    </div>
-
-    <div class="legend">
-        <b>Что мы видим:</b><br>
-        1. Вся спираль состоит из множества нуклеотидов.<br>
-        2. Один <b>кодон</b> — это группа из 3-х «ступенек» подряд.<br>
-        3. Именно эта тройка кодирует одну конкретную аминокислоту.
-    </div>
+    <div id="container"><div class="scene" id="scene"></div></div>
 
     <script>
         const scene = document.getElementById('scene');
-        const totalSteps = 60; // Общее кол-во нуклеотидов в визуализации
-        const radius = 80;
-        
-        // Индексы нуклеотидов, которые образуют наш "выделенный кодон" (например, с 25 по 27)
-        const highlightedIndices = [24, 25, 26];
+        const steps = 50;
+        const radius = 90;
+        const highlighted = [22, 23, 24]; // 3 ступеньки для кодона
 
-        for (let i = 0; i < totalSteps; i++) {
+        for (let i = 0; i < steps; i++) {
             const angle = i * 0.4;
-            const yPos = (i - totalSteps / 2) * 15;
-            
-            const isHighlighted = highlightedIndices.includes(i);
+            const y = (i - steps/2) * 18;
+            const isTarget = highlighted.includes(i);
 
-            // Создаем две нити
-            createBase(angle, yPos, radius, isHighlighted, i === 25);
-            createBase(angle + Math.PI, yPos, radius, false, false);
-            
-            // Создаем перекладину
-            createBond(angle, yPos, radius, isHighlighted);
+            // Нить А (Информационная)
+            createPoint(angle, y, radius, 'side-a' + (isTarget ? ' highlight' : ''), isTarget && i===23 ? "КОДОН (3 буквы)" : "");
+            // Нить Б (Вспомогательная - зеркальная)
+            createPoint(angle + Math.PI, y, radius, 'side-b', "");
+            // Ступенька
+            createLine(angle + Math.PI, y, radius);
         }
 
-        function createBase(angle, y, r, highlight, showLabel) {
-            const el = document.createElement('div');
-            el.className = 'base' + (highlight ? ' highlight-codon' : '');
-            
-            const x = Math.cos(angle) * r;
-            const z = Math.sin(angle) * r;
-            
-            el.style.transform = `translate3d(${x}px, ${y}px, ${z}px)`;
-            
-            if (showLabel) {
-                const label = document.createElement('div');
-                label.className = 'label';
-                label.innerHTML = "← Кодон (триплет)";
-                el.appendChild(label);
+        function createPoint(a, y, r, cls, labelText) {
+            const p = document.createElement('div');
+            p.className = 'base ' + cls;
+            const x = Math.cos(a) * r;
+            const z = Math.sin(a) * r;
+            p.style.transform = `translate3d(${x}px, ${y}px, ${z}px)`;
+            if(labelText) {
+                const l = document.createElement('div');
+                l.className = 'codon-label';
+                l.innerText = labelText;
+                p.appendChild(l);
             }
-            
-            scene.appendChild(el);
+            scene.appendChild(p);
         }
 
-        function createBond(angle, y, r, highlight) {
-            const bond = document.createElement('div');
-            bond.className = 'bond' + (highlight ? ' highlight-bond' : '');
-            bond.style.width = (r * 2) + 'px';
-            
-            const x = Math.cos(angle + Math.PI) * r;
-            const z = Math.sin(angle + Math.PI) * r;
-            
-            // Поворачиваем перекладину, чтобы она соединяла две точки
-            bond.style.transform = `translate3d(${x}px, ${y+5}px, ${z}px) rotateY(${-angle * 180 / Math.PI}deg)`;
-            
-            scene.appendChild(bond);
+        function createLine(a, y, r) {
+            const l = document.createElement('div');
+            l.className = 'bond';
+            l.style.width = (r * 2) + 'px';
+            l.style.transform = `translate3d(${Math.cos(a)*r}px, ${y+6}px, ${Math.sin(a)*r}px) rotateY(${-a * 180 / Math.PI}deg)`;
+            scene.appendChild(l);
         }
     </script>
 </body>
