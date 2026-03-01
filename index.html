@@ -2,131 +2,180 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>3D Human Design - Prototyp</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анимированная спираль ДНК</title>
     <style>
-        body { margin: 0; overflow: hidden; background: radial-gradient(circle, #1a1a2e 0%, #050505 100%); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        #ui {
-            position: absolute; top: 20px; left: 20px; color: white;
-            background: rgba(0, 0, 0, 0.8); padding: 20px; border-radius: 12px;
-            border: 1px solid #333; pointer-events: none; width: 280px;
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f8f8f8; /* Светлый фон, похожий на изображение */
+            font-family: 'Arial', sans-serif;
+            overflow: hidden; /* Скрываем полосы прокрутки, если 3D-элементы выходят за пределы */
+            perspective: 1500px; /* Задаем перспективу для 3D-эффекта */
         }
-        .gate-list { font-size: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 10px; }
-        .design { color: #ff4d4d; } /* Красный - Бессознательное */
-        .personality { color: #ffffff; } /* Белый/Черный - Личность */
-        canvas { display: block; }
+
+        /* Контейнер для всей 3D-сцены ДНК */
+        .dna-container {
+            width: 300px; /* Общая ширина контейнера */
+            height: 800px; /* Общая высота контейнера */
+            position: relative;
+            transform-style: preserve-3d; /* Сохраняем 3D-трансформации дочерних элементов */
+            /* Небольшой начальный наклон для лучшего обзора 3D-модели */
+            transform: rotateX(-10deg) rotateY(0deg); 
+        }
+
+        /* Элемент, который будет вращаться, содержащий все части ДНК */
+        .dna-helix-rotator {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            transform-style: preserve-3d;
+            animation: rotateDNA 20s linear infinite; /* Анимация вращения по оси Y */
+            transform-origin: center center; /* Точка вращения - центр */
+        }
+
+        /* CSS Custom Properties (переменные) для удобства расчетов */
+        :root {
+            --num-base-pairs: 12; /* Общее количество пар оснований */
+            --turns: 2; /* Количество полных витков спирали */
+            /* Угол поворота для каждой пары оснований, чтобы сформировать спираль */
+            --rotation-per-step: calc((360deg * var(--turns)) / var(--num-base-pairs)); 
+            --step-height: 45px; /* Вертикальное расстояние между парами оснований */
+            --radius: 70px; /* Радиус спирали */
+            --backbone-thickness: 10px; /* Толщина сахарно-фосфатного остова */
+        }
+
+        /* Стиль для каждой пары оснований (ступеньки) */
+        .base-pair {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Распределяем A...T */
+            font-size: 1.1em;
+            font-weight: bold;
+            color: black;
+
+            background-color: white;
+            padding: 2px 8px;
+            box-sizing: border-box;
+            border: 1px solid black;
+            border-radius: 10px; /* Закругленные концы, как на изображении */
+            white-space: nowrap; /* Предотвращаем перенос текста */
+
+            width: 120px; /* Ширина элемента пары оснований */
+            height: 25px; /* Высота элемента пары оснований */
+
+            left: 50%; /* Центрируем по горизонтали */
+            /* Вертикальное позиционирование: центрируем всю спираль относительно родителя */
+            top: calc(50% + (var(--i) - var(--num-base-pairs) / 2 - 0.5) * var(--step-height));
+
+            /* 3D-трансформации для размещения элемента в виде спирали */
+            transform:
+                translateX(-50%) /* Смещаем влево на половину ширины, чтобы центрировать */
+                rotateY(calc(var(--i) * var(--rotation-per-step))) /* Вращаем вокруг оси Y для спирального скручивания */
+                translateZ(var(--radius)); /* Выдвигаем по оси Z, чтобы сформировать радиус спирали */
+            
+            /* z-index для правильного наложения элементов при вращении */
+            z-index: calc(var(--i)); 
+        }
+
+        .base-pair .nucleobase {
+            user-select: none; /* Предотвращаем выделение текста */
+        }
+
+        .base-pair .dots {
+            flex-grow: 1; /* Точки занимают все доступное пространство */
+            text-align: center;
+            letter-spacing: 0.15em; /* Расстояние между точками */
+            color: #555; /* Более светлый цвет для точек (водородных связей) */
+            font-weight: normal;
+        }
+
+        /* Точки прикрепления (маленькие кружки) на концах пар оснований */
+        .base-pair::before,
+        .base-pair::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: black;
+            border-radius: 50%; /* Делаем их круглыми */
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10; /* Убедимся, что кружки всегда сверху */
+        }
+        .base-pair::before { left: -6px; } /* Смещение влево */
+        .base-pair::after { right: -6px; } /* Смещение вправо */
+
+        /* Сахарно-фосфатные остовы (бэкбоны) - упрощенное представление */
+        /* Эти элементы будут прямыми стержнями, но вращаться вместе со спиралью, 
+           создавая иллюзию изгиба и объема. */
+        .dna-strand {
+            position: absolute;
+            background-color: black;
+            width: var(--backbone-thickness); /* Толщина остова */
+            /* Высота охватывает все пары оснований плюс немного сверху и снизу */
+            height: calc(var(--num-base-pairs) * var(--step-height) + 4 * var(--step-height));
+            top: calc(50% - (var(--num-base-pairs) * var(--step-height) / 2) - 2 * var(--step-height));
+            left: 50%; /* Центрируем для transform-origin */
+            transform-origin: center center;
+            border-radius: 5px; /* Смягчаем края */
+            opacity: 0.9; /* Небольшая прозрачность */
+        }
+
+        .dna-strand.left-strand {
+            /* Позиционируем левый остов, он будет вращаться вместе с rotator */
+            transform:
+                translateX(calc(-50% - var(--radius) + (var(--backbone-thickness)/2))) /* Смещение к левому краю спирали */
+                rotateY(-15deg) /* Небольшой статический поворот для визуального "закручивания" */
+                translateZ(var(--radius)); /* Размещаем на радиусе спирали */
+        }
+
+        .dna-strand.right-strand {
+            /* Позиционируем правый остов */
+            transform:
+                translateX(calc(-50% + var(--radius) - (var(--backbone-thickness)/2))) /* Смещение к правому краю
+
+спирали */
+                rotateY(15deg) /* Небольшой статический поворот */
+                translateZ(var(--radius)); /* Размещаем на радиусе спирали */
+        }
+
+        /* Анимация вращения всей спирали */
+        @keyframes rotateDNA {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
     </style>
 </head>
 <body>
+    <div class="dna-container">
+        <div class="dna-helix-rotator">
+            <!-- Сахарно-фосфатные остовы (бэкбоны) -->
+            <!-- Эти элементы являются прямыми стержнями, которые вращаются вместе с helix-rotator. -->
+            <!-- Статические rotateY() и translateZ() дают им начальное смещение и перспективу, -->
+            <!-- что в сочетании с вращением создает иллюзию скручивания, как на изображении. -->
+            <div class="dna-strand left-strand"></div>
+            <div class="dna-strand right-strand"></div>
 
-<div id="ui">
-    <h3 id="part-name">Bodygraph 3D</h3>
-    <p id="part-info" style="font-size: 13px; color: #ccc;">Вращайте модель и наводите на центры</p>
-    <hr style="border: 0.5px solid #444">
-    <div style="font-size: 11px; margin-bottom: 5px;">Случайные активации (26):</div>
-    <div id="activations" class="gate-list"></div>
-</div>
-
-<!-- Подключаем Three.js через обычные скрипты для стабильности -->
-<script src="https://cdnjs.cloudflare.com"></script>
-<script src="https://cdn.jsdelivr.net"></script>
-
-<script>
-    // 1. Генерация 26 случайных активаций
-    const generateGates = () => {
-        const gates = [];
-        for(let i=0; i<13; i++) gates.push({ val: Math.floor(Math.random()*64)+1, type: 'personality' });
-        for(let i=0; i<13; i++) gates.push({ val: Math.floor(Math.random()*64)+1, type: 'design' });
-        return gates;
-    };
-    const myGates = generateGates();
-    const listDiv = document.getElementById('activations');
-    myGates.forEach(g => {
-        const span = document.createElement('span');
-        span.className = g.type;
-        span.innerText = (g.type === 'design' ? '🔴 ' : '⚪ ') + g.val + ' ворота';
-        listDiv.appendChild(span);
-    });
-
-    // 2. Сцена
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
-
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    camera.position.z = 5;
-
-    // 3. Объекты: Тело и Центры
-    const centersData = [
-        { name: "Теменной", pos: [0, 2.2, 0], color: 0xffffff, bio: "Шишковидная железа (Давление)" },
-        { name: "Аджна", pos: [0, 1.7, 0], color: 0x00ff00, bio: "Гипофиз (Обработка)" },
-        { name: "Горловой", pos: [0, 1.1, 0], color: 0x8888ff, bio: "Щитовидная железа (Выражение)" },
-        { name: "G-Центр", pos: [0, 0.4, 0], color: 0xffff00, bio: "Печень (Идентичность)" },
-        { name: "Сердце", pos: [0.3, 0.3, 0.2], color: 0xff0000, bio: "Сердечно-сосудистая система (Воля)" },
-        { name: "Селезенка", pos: [-0.7, -0.2, 0], color: 0x996633, bio: "Лимфатическая система (Инстинкт)" },
-        { name: "Сакрал", pos: [0, -0.6, 0], color: 0xff0000, bio: "Репродуктивные органы (Энергия)" },
-        { name: "Эмоции", pos: [0.7, -0.2, 0], color: 0xccaa00, bio: "Нервная система / Почки" },
-        { name: "Корневой", pos: [0, -1.4, 0], color: 0x555555, bio: "Надпочечники (Стресс)" }
-    ];
-
-    const centerMeshes = [];
-    
-    // Прозрачный силуэт
-    const bodyGeo = new THREE.IcosahedronGeometry(1.2, 2);
-    const bodyMat = new THREE.MeshBasicMaterial({ color: 0x4444ff, wireframe: true, transparent: true, opacity: 0.1 });
-    const body = new THREE.Mesh(bodyGeo, bodyMat);
-    body.scale.set(1, 2, 0.8);
-    scene.add(body);
-
-    // Отрисовка центров
-    centersData.forEach(d => {
-        const geo = new THREE.SphereGeometry(0.15, 16, 16);
-        const mat = new THREE.MeshPhongMaterial({ color: d.color, emissive: d.color, emissiveIntensity: 0.4 });
-        const sphere = new THREE.Mesh(geo, mat);
-        sphere.position.set(...d.pos);
-        sphere.userData = d;
-        scene.add(sphere);
-        centerMeshes.push(sphere);
-    });
-
-    // Свет
-    const light = new THREE.DirectionalLight(0xffffff, 1);
-    light.position.set(1, 1, 2);
-    scene.add(light);
-    scene.add(new THREE.AmbientLight(0x404040));
-
-    // 4. Raycaster (Интерактив)
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-
-    window.addEventListener('mousemove', (e) => {
-        mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-        
-        raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(centerMeshes);
-
-        if (intersects.length > 0) {
-            const o = intersects[0].object.userData;
-            document.getElementById('part-name').innerText = o.name;
-            document.getElementById('part-info').innerText = o.bio;
-        }
-    });
-
-    // 5. Цикл анимации
-    function animate() {
-        requestAnimationFrame(animate);
-        body.rotation.y += 0.003;
-        renderer.render(scene, camera);
-    }
-    animate();
-
-    window.onresize = () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    };
-</script>
+            <!-- Пары оснований (ступеньки) ДНК -->
+            <!-- Каждая пара оснований позиционируется с использованием CSS-переменной --i -->
+            <div class="base-pair" style="--i:0;"><span class="nucleobase">A</span><span class="dots">. . .</span><span class="nucleobase">T</span></div>
+            <div class="base-pair" style="--i:1;"><span class="nucleobase">C</span><span class="dots">. . .</span><span class="nucleobase">G</span></div>
+            <div class="base-pair" style="--i:2;"><span class="nucleobase">T</span><span class="dots">. . .</span><span class="nucleobase">A</span></div>
+            <div class="base-pair" style="--i:3;"><span class="nucleobase">G</span><span class="dots">. . .</span><span class="nucleobase">C</span></div>
+            <div class="base-pair" style="--i:4;"><span class="nucleobase">A</span><span class="dots">. . .</span><span class="nucleobase">T</span></div>
+            <div class="base-pair" style="--i:5;"><span class="nucleobase">C</span><span class="dots">. . .</span><span class="nucleobase">G</span></div>
+            <div class="base-pair" style="--i:6;"><span class="nucleobase">T</span><span class="dots">. . .</span><span class="nucleobase">A</span></div>
+            <div class="base-pair" style="--i:7;"><span class="nucleobase">G</span><span class="dots">. . .</span><span class="nucleobase">C</span></div>
+            <div class="base-pair" style="--i:8;"><span class="nucleobase">A</span><span class="dots">. . .</span><span class="nucleobase">T</span></div>
+            <div class="base-pair" style="--i:9;"><span class="nucleobase">C</span><span class="dots">. . .</span><span class="nucleobase">G</span></div>
+            <div class="base-pair" style="--i:10;"><span class="nucleobase">T</span><span class="dots">. . .</span><span class="nucleobase">A</span></div>
+            <div class="base-pair" style="--i:11;"><span class="nucleobase">G</span><span class="dots">. . .</span><span class="nucleobase">C</span></div>
+        </div>
+    </div>
 </body>
 </html>
