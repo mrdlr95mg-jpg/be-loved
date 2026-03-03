@@ -2,145 +2,55 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>64 Кодона ДНК: Полная модель</title>
+    <title>ДНК-Гексаграмма Визуализация</title>
     <style>
-        body { margin: 0; background: #050508; color: #eee; font-family: 'Segoe UI', sans-serif; overflow: hidden; display: flex; }
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f2f5; margin: 0; }
+        .container { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
         
-        #codon-list {
-            width: 250px; height: 100vh; overflow-y: auto; background: rgba(255,255,255,0.05);
-            padding: 20px; font-size: 13px; border-right: 1px solid #333;
-            scrollbar-width: thin; scrollbar-color: #555 transparent;
-            z-index: 10;
-        }
-        .list-item { margin-bottom: 5px; padding: 3px; border-radius: 3px; border-bottom: 1px solid #222; }
-        .list-item b { color: gold; }
-
-        #viewport { 
-            flex-grow: 1; 
-            perspective: 2000px; /* Увеличили перспективу для лучшего обзора */
-            height: 100vh; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            overflow: hidden;
-        }
-
-        .scene { 
-            position: relative; 
-            width: 200px; 
-            height: 200px; 
-            transform-style: preserve-3d; 
-            animation: rotate 30s linear infinite;
-            /* Масштабируем всю сцену, чтобы она влезла по вертикали */
-            transform: scale(0.45); 
-        }
+        /* Стили линий гексаграммы */
+        .hexagram { display: flex; flex-direction: column-reverse; gap: 8px; margin: 20px auto; width: 120px; }
+        .line { height: 12px; width: 100%; position: relative; }
         
-        @keyframes rotate { 
-            from { transform: scale(0.45) rotateY(0deg); } 
-            to { transform: scale(0.45) rotateY(360deg); } 
-        }
+        /* Сплошная линия (Ян) */
+        .yang { background-color: #2c3e50; }
+        
+        /* Прерывистая линия (Инь) */
+        .yin { display: flex; justify-content: space-between; }
+        .yin::before, .yin::after { content: ""; width: 45%; height: 100%; background-color: #e74c3c; }
 
-        .step { position: absolute; height: 2px; transform-style: preserve-3d; display: flex; align-items: center; justify-content: center; }
-        .rail { position: absolute; width: 14px; height: 14px; border-radius: 50%; box-shadow: 0 0 12px currentColor; }
-        .bond { position: absolute; height: 1px; background: rgba(255,255,255,0.2); }
-
-        .label { 
-            position: absolute; 
-            font-size: 12px; 
-            font-weight: bold;
-            color: white; 
-            width: 60px; 
-            text-align: center; 
-            pointer-events: none;
-            text-shadow: 0 0 5px black;
-        }
-
-        .A { background: #ff4d4d; color: #ff4d4d; }
-        .U { background: #ffff4d; color: #ffff4d; }
-        .G { background: #4dff88; color: #4dff88; }
-        .C { background: #4db8ff; color: #4db8ff; }
+        .label { font-size: 0.8rem; color: #7f8c8d; margin-top: 5px; }
+        .codon-text { font-size: 1.5rem; font-weight: bold; letter-spacing: 5px; color: #34495e; }
+        .divider { border-top: 1px solid #eee; margin: 15px 0; }
     </style>
 </head>
 <body>
 
-<div id="codon-list">
-    <h3>Список 64 кодонов:</h3>
-    <div id="items-container"></div>
-</div>
-
-<div id="viewport">
-    <div class="scene" id="scene"></div>
-</div>
-
-<script>
-    const scene = document.getElementById('scene');
-    const listContainer = document.getElementById('items-container');
-    const bases = ['A', 'U', 'G', 'C'];
-    const pairs = { 'A': 'U', 'U': 'A', 'G': 'C', 'C': 'G' };
+<div class="container">
+    <h2>Кодон ДНК: <span class="codon-text">GAC</span></h2>
+    <p>Структура из 6 линий (снизу вверх)</p>
     
-    let allCodons = [];
-    for(let a of bases) for(let b of bases) for(let c of bases) allCodons.push(a+b+c);
+    <div class="hexagram">
+        <!-- Нуклеотид 1: G (Основание гексаграммы) -->
+        <div class="line yang"></div>
+        <div class="line yin"></div>
+        
+        <!-- Нуклеотид 2: A -->
+        <div class="line yang"></div>
+        <div class="line yang"></div>
+        
+        <!-- Нуклеотид 3: C (Вершина гексаграммы) -->
+        <div class="line yin"></div>
+        <div class="line yang"></div>
+    </div>
 
-    const radius = 100;
-    const totalSteps = allCodons.length * 3; // 192 ступеньки
+    <div class="divider"></div>
+    
+    <div style="display: flex; justify-content: space-around; font-size: 0.9rem;">
+        <div><strong>C</strong><br>Линии 5-6</div>
+        <div><strong>A</strong><br>Линии 3-4</div>
+        <div><strong>G</strong><br>Линии 1-2</div>
+    </div>
+</div>
 
-    allCodons.forEach((name, i) => {
-        // Список слева
-        const item = document.createElement('div');
-        item.className = 'list-item';
-        item.innerHTML = `${i+1}. <b>${name}</b>`;
-        listContainer.appendChild(item);
-
-        // Создаем 3 нуклеотида для каждого кодона
-        for (let j = 0; j < 3; j++) {
-            const stepIndex = i * 3 + j;
-            
-            // Настройки расположения:
-            // angle: заставляем спираль сделать несколько полных оборотов
-            const angle = stepIndex * 0.25; 
-            // y: уменьшили множитель с 8 до 5.5, чтобы сжать по вертикали
-            const y = (stepIndex - totalSteps / 2) * 5.5; 
-
-            const letter = name[j];
-            const pairLetter = pairs[letter];
-
-            const stepWrap = document.createElement('div');
-            stepWrap.className = 'step';
-            stepWrap.style.width = (radius * 2) + 'px';
-            
-            const leftBase = document.createElement('div');
-            leftBase.className = `rail ${letter}`;
-            leftBase.style.left = '0';
-            
-            const rightBase = document.createElement('div');
-            rightBase.className = `rail ${pairLetter}`;
-            rightBase.style.right = '0';
-            rightBase.style.opacity = "0.3";
-
-            const bond = document.createElement('div');
-            bond.className = 'bond';
-            bond.style.width = '100%';
-
-            // Подпись кодона (только на центральном нуклеотиде триплета)
-            if (j === 1) {
-                const txt = document.createElement('div');
-                txt.className = 'label';
-                txt.innerText = name;
-                txt.style.left = '50%';
-                txt.style.transform = 'translateX(-50%)';
-                stepWrap.appendChild(txt);
-            }
-
-            stepWrap.appendChild(leftBase);
-            stepWrap.appendChild(rightBase);
-            stepWrap.appendChild(bond);
-
-            // Позиционирование в 3D
-            stepWrap.style.transform = `translate3d(-50%, ${y}px, 0) rotateY(${angle * 57.3}deg)`;
-            
-            scene.appendChild(stepWrap);
-        }
-    });
-</script>
 </body>
 </html>
