@@ -1,56 +1,84 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>ДНК-Гексаграмма Визуализация</title>
-    <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f2f5; margin: 0; }
-        .container { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
-        
-        /* Стили линий гексаграммы */
-        .hexagram { display: flex; flex-direction: column-reverse; gap: 8px; margin: 20px auto; width: 120px; }
-        .line { height: 12px; width: 100%; position: relative; }
-        
-        /* Сплошная линия (Ян) */
-        .yang { background-color: #2c3e50; }
-        
-        /* Прерывистая линия (Инь) */
-        .yin { display: flex; justify-content: space-between; }
-        .yin::before, .yin::after { content: ""; width: 45%; height: 100%; background-color: #e74c3c; }
+<style>
+    body { background: #0a0a0c; color: white; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; }
+    .scene { perspective: 800px; margin-top: 50px; }
+    
+    /* Спираль ДНК */
+    .dna { position: relative; width: 200px; height: 400px; transform-style: preserve-3d; animation: rotate 10s linear infinite; }
+    
+    @keyframes rotate { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
 
-        .label { font-size: 0.8rem; color: #7f8c8d; margin-top: 5px; }
-        .codon-text { font-size: 1.5rem; font-weight: bold; letter-spacing: 5px; color: #34495e; }
-        .divider { border-top: 1px solid #eee; margin: 15px 0; }
-    </style>
+    .step {
+        position: absolute; width: 160px; height: 4px;
+        left: 20px; border-radius: 2px;
+        transform-style: preserve-3d;
+        background: rgba(255,255,255,0.1);
+    }
+
+    /* Подсветка кодона (3 ступеньки) */
+    .codon-step { background: #00d4ff; box-shadow: 0 0 15px #00d4ff; height: 6px; }
+    
+    /* Шарики нуклеотидов */
+    .nucleotide { position: absolute; width: 12px; height: 12px; border-radius: 50%; top: -4px; }
+    .left { left: 0; background: #ff0055; }
+    .right { right: 0; background: #00d4ff; }
+
+    /* Гексаграмма сбоку */
+    .overlay {
+        position: absolute; left: 300px; top: 100px;
+        display: flex; flex-direction: column-reverse; gap: 10px;
+        padding: 20px; border-left: 2px solid #00d4ff;
+    }
+    .hex-line { width: 80px; height: 8px; border-radius: 2px; }
+    .yang { background: #00d4ff; }
+    .yin { display: flex; justify-content: space-between; width: 80px; }
+    .yin div { width: 35px; height: 8px; background: #ff0055; border-radius: 2px; }
+    
+    .caption { position: absolute; font-size: 12px; color: #888; width: 150px; left: 100px; }
+</style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Кодон ДНК: <span class="codon-text">GAC</span></h2>
-    <p>Структура из 6 линий (снизу вверх)</p>
-    
-    <div class="hexagram">
-        <!-- Нуклеотид 1: G (Основание гексаграммы) -->
-        <div class="line yang"></div>
-        <div class="line yin"></div>
-        
-        <!-- Нуклеотид 2: A -->
-        <div class="line yang"></div>
-        <div class="line yang"></div>
-        
-        <!-- Нуклеотид 3: C (Вершина гексаграммы) -->
-        <div class="line yin"></div>
-        <div class="line yang"></div>
+    <h2>Гексаграмма в структуре ДНК</h2>
+    <p style="color: #888; max-width: 500px; text-align: center;">
+        Один <b>кодон</b> (3 нуклеотида вдоль нити) формирует <b>6 линий</b> гексаграммы. 
+        Каждая ступенька спирали — это "диграмма" (2 линии).
+    </p>
+
+    <div class="scene">
+        <div class="dna" id="dna">
+            <!-- Ступеньки генерируются JS -->
+        </div>
+
+        <div class="overlay">
+            <div class="caption" style="bottom: 0;">Нуклеотид 1 (Линии 1-2)</div>
+            <div class="hex-line yang"></div><div class="yin"><div></div><div></div></div>
+            
+            <div class="caption" style="bottom: 40px;">Нуклеотид 2 (Линии 3-4)</div>
+            <div class="hex-line yang"></div><div class="hex-line yang"></div>
+            
+            <div class="caption" style="bottom: 85px;">Нуклеотид 3 (Линии 5-6)</div>
+            <div class="yin"><div></div><div></div></div><div class="hex-line yang"></div>
+            <h3 style="margin: 0; color: #00d4ff;">Гексаграмма</h3>
+        </div>
     </div>
 
-    <div class="divider"></div>
-    
-    <div style="display: flex; justify-content: space-around; font-size: 0.9rem;">
-        <div><strong>C</strong><br>Линии 5-6</div>
-        <div><strong>A</strong><br>Линии 3-4</div>
-        <div><strong>G</strong><br>Линии 1-2</div>
-    </div>
-</div>
-
+<script>
+    const dna = document.getElementById('dna');
+    for (let i = 0; i < 20; i++) {
+        const step = document.createElement('div');
+        step.className = 'step';
+        // Выделяем 3 ступеньки как один кодон
+        if (i >= 8 && i <= 10) step.classList.add('codon-step');
+        
+        step.style.top = (i * 20) + 'px';
+        step.style.transform = `rotateY(${i * 25}deg)`;
+        
+        step.innerHTML = `<div class="nucleotide left"></div><div class="nucleotide right"></div>`;
+        dna.appendChild(step);
+    }
+</script>
 </body>
 </html>
