@@ -2,79 +2,57 @@
 <html>
 <head>
 <style>
-    body { background: #08080a; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: 'Segoe UI', sans-serif; }
+    body { background: #050505; color: #eee; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
     
-    .mandala-container { position: relative; width: 500px; height: 500px; display: flex; align-items: center; justify-content: center; }
-
-    /* Отрисовка делений (64 сектора) */
-    .ticks { position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 1px solid #222; }
-    .tick { position: absolute; width: 2px; height: 15px; background: #333; left: 50%; transform-origin: 0 250px; }
-
-    /* Солнце (Земля всегда напротив) */
-    .celestial { position: absolute; border-radius: 50%; transition: all 0.5s; }
-    .sun { 
-        width: 24px; height: 24px; background: radial-gradient(circle, #fff, #ffaa00);
-        box-shadow: 0 0 30px #ff9900; z-index: 10;
-        animation: orbit 20s linear infinite;
-    }
-    .earth { 
-        width: 14px; height: 14px; background: #00d4ff; 
-        box-shadow: 0 0 15px #00d4ff;
-        animation: orbit 20s linear infinite reverse; /* Земля идет синхронно */
-    }
-
-    @keyframes orbit {
-        from { transform: rotate(0deg) translateY(-235px) rotate(0deg); }
-        to { transform: rotate(360deg) translateY(-235px) rotate(-360deg); }
-    }
-
-    /* Центральный символ (SVG вместо картинки) */
-    .center-symbol { width: 120px; height: 120px; opacity: 0.8; filter: drop-shadow(0 0 10px #00f2ff); }
+    .dna-stage { perspective: 1000px; width: 400px; height: 500px; }
+    .dna-strand { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; animation: rot 15s linear infinite; }
     
-    .stats { margin-top: 30px; text-align: center; border-top: 1px solid #222; padding-top: 20px; width: 300px; }
-    .highlight { color: #ffaa00; font-weight: bold; font-size: 1.2rem; }
+    @keyframes rot { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
+
+    .pair { position: absolute; width: 200px; height: 4px; left: 100px; transform-style: preserve-3d; }
+    
+    /* Шарики нуклеотидов */
+    .n { position: absolute; width: 14px; height: 14px; border-radius: 50%; top: -5px; }
+    
+    /* Личность (Черный/Сознательное - 2 линия) */
+    .personality { left: 0; background: #222; border: 2px solid #555; box-shadow: 0 0 10px rgba(255,255,255,0.2); }
+    
+    /* Дизайн (Красный/Тело - 4 линия) */
+    .design { right: 0; background: #ff4d4d; box-shadow: 0 0 15px #ff4d4d; }
+
+    .line-label { position: absolute; font-size: 10px; color: #888; width: 100px; }
+
+    .legend { margin-top: 40px; padding: 20px; border-radius: 10px; background: rgba(255,255,255,0.05); text-align: center; }
+    .title { color: #ff4d4d; font-weight: bold; letter-spacing: 2px; margin-bottom: 10px; }
 </style>
 </head>
 <body>
 
-    <div class="mandala-container">
-        <!-- Генерируем 64 метки -->
-        <div class="ticks" id="ticks"></div>
-        
-        <!-- Солнце -->
-        <div class="celestial sun"></div>
-        
-        <!-- Центральный паттерн (Триграммы) -->
-        <svg class="center-symbol" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="48" fill="none" stroke="#444" stroke-width="0.5"/>
-            <path d="M50 2 A48 48 0 0 1 50 98 A24 24 0 0 1 50 50 A24 24 0 0 0 50 2" fill="#fff" opacity="0.1"/>
-            <circle cx="50" cy="26" r="6" fill="#fff" opacity="0.5"/>
-            <circle cx="50" cy="74" r="6" fill="#000"/>
-            <text x="50" y="55" text-anchor="middle" fill="#00f2ff" font-size="8" font-weight="bold">ДНК</text>
-        </svg>
+    <div class="legend">
+        <div class="title">ПРОФИЛЬ 2 / 4</div>
+        <div style="font-size: 0.9rem;">Черная нить: 2-я линия (Интровертный разум)<br>
+        <span style="color: #ff4d4d;">Красная нить: 4-я линия (Общительное тело)</span></div>
     </div>
 
-    <div class="stats">
-        <div>Солнце в секторе (гексаграмме):</div>
-        <div class="highlight">~ 5.7 суток</div>
-        <div style="font-size: 0.8rem; color: #666; margin-top: 10px;">
-            Угол: 5° 37' 30"<br>
-            Линия гексаграммы: ~ 23 часа
-        </div>
+    <div class="dna-stage">
+        <div class="dna-strand" id="helix"></div>
     </div>
 
 <script>
-    // Создаем визуальные насечки для 64 гексаграмм
-    const ticksContainer = document.getElementById('ticks');
-    for (let i = 0; i < 64; i++) {
-        const tick = document.createElement('div');
-        tick.className = 'tick';
-        tick.style.transform = `rotate(${i * (360/64)}deg)`;
-        if (i % 8 === 0) {
-            tick.style.height = '25px';
-            tick.style.background = '#666';
-        }
-        ticksContainer.appendChild(tick);
+    const helix = document.getElementById('helix');
+    for (let i = 0; i < 30; i++) {
+        const pair = document.createElement('div');
+        pair.className = 'pair';
+        pair.style.top = (i * 16) + 'px';
+        pair.style.transform = `rotateY(${i * 24}deg)`;
+        
+        // Визуализируем "переплетенность" личности и дизайна
+        pair.innerHTML = `
+            <div class="n personality"></div>
+            <div style="width: 100%; height: 1px; background: rgba(255,255,255,0.1); margin-top: 1px;"></div>
+            <div class="n design"></div>
+        `;
+        helix.appendChild(pair);
     }
 </script>
 </body>
