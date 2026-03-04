@@ -2,58 +2,47 @@
 <html>
 <head>
 <style>
-    body { background: #050505; color: #eee; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+    body { background: #0a0a0c; color: white; font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
     
-    .dna-stage { perspective: 1000px; width: 400px; height: 500px; }
-    .dna-strand { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; animation: rot 15s linear infinite; }
+    .codon-focus { position: relative; width: 180px; display: flex; flex-direction: column-reverse; gap: 8px; padding: 20px; border: 1px solid #333; background: rgba(255,255,255,0.02); }
     
-    @keyframes rot { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
+    /* Базовый стиль линии */
+    .line { height: 14px; width: 100%; position: relative; border-radius: 2px; background: #222; display: flex; justify-content: center; align-items: center; font-size: 10px; color: #444; }
 
-    .pair { position: absolute; width: 200px; height: 4px; left: 100px; transform-style: preserve-3d; }
+    /* Линия 2 - Личность (Черная/Белая активация) */
+    .line-2 { background: #eee; color: #000; box-shadow: 0 0 15px #fff; border: 1px solid #fff; font-weight: bold; }
     
-    /* Шарики нуклеотидов */
-    .n { position: absolute; width: 14px; height: 14px; border-radius: 50%; top: -5px; }
-    
-    /* Личность (Черный/Сознательное - 2 линия) */
-    .personality { left: 0; background: #222; border: 2px solid #555; box-shadow: 0 0 10px rgba(255,255,255,0.2); }
-    
-    /* Дизайн (Красный/Тело - 4 линия) */
-    .design { right: 0; background: #ff4d4d; box-shadow: 0 0 15px #ff4d4d; }
+    /* Линия 4 - Дизайн (Красная активация) */
+    .line-4 { background: #ff4d4d; color: #fff; box-shadow: 0 0 15px #ff4d4d; font-weight: bold; }
 
-    .line-label { position: absolute; font-size: 10px; color: #888; width: 100px; }
-
-    .legend { margin-top: 40px; padding: 20px; border-radius: 10px; background: rgba(255,255,255,0.05); text-align: center; }
-    .title { color: #ff4d4d; font-weight: bold; letter-spacing: 2px; margin-bottom: 10px; }
+    .nucleotide-tag { position: absolute; left: -100px; font-size: 12px; color: #666; width: 80px; text-align: right; }
 </style>
 </head>
 <body>
 
-    <div class="legend">
-        <div class="title">ПРОФИЛЬ 2 / 4</div>
-        <div style="font-size: 0.9rem;">Черная нить: 2-я линия (Интровертный разум)<br>
-        <span style="color: #ff4d4d;">Красная нить: 4-я линия (Общительное тело)</span></div>
+    <h2 style="font-family: sans-serif; letter-spacing: 2px;">ВНУТРИ ОДНОГО КОДОНА</h2>
+    <p style="color: #888; font-size: 14px; margin-bottom: 30px;">Профиль 2/4 как внутренние уровни активации</p>
+
+    <div class="codon-focus">
+        <!-- Нуклеотид 3 (Линии 5-6) -->
+        <div class="line">Линия 6</div>
+        <div class="line">Линия 5</div>
+        <div class="nucleotide-tag" style="bottom: 80px;">Нуклеотид 3</div>
+
+        <!-- Нуклеотид 2 (Линии 3-4) -->
+        <div class="line line-4">ЛИНИЯ 4 (Красная)</div>
+        <div class="line">Линия 3</div>
+        <div class="nucleotide-tag" style="bottom: 40px;">Нуклеотид 2</div>
+
+        <!-- Нуклеотид 1 (Линии 1-2) -->
+        <div class="line line-2">ЛИНИЯ 2 (Черная)</div>
+        <div class="line">Линия 1</div>
+        <div class="nucleotide-tag" style="bottom: 0px;">Нуклеотид 1</div>
     </div>
 
-    <div class="dna-stage">
-        <div class="dna-strand" id="helix"></div>
+    <div style="margin-top: 40px; max-width: 400px; text-align: center; color: #aaa; font-size: 0.9rem;">
+        Линии — это не "края" спирали, а <b>вертикальные уровни</b> внутри каждого шага ДНК. Каждая линия — это ~0.9 градуса дуги (5.6° / 6).
     </div>
 
-<script>
-    const helix = document.getElementById('helix');
-    for (let i = 0; i < 30; i++) {
-        const pair = document.createElement('div');
-        pair.className = 'pair';
-        pair.style.top = (i * 16) + 'px';
-        pair.style.transform = `rotateY(${i * 24}deg)`;
-        
-        // Визуализируем "переплетенность" личности и дизайна
-        pair.innerHTML = `
-            <div class="n personality"></div>
-            <div style="width: 100%; height: 1px; background: rgba(255,255,255,0.1); margin-top: 1px;"></div>
-            <div class="n design"></div>
-        `;
-        helix.appendChild(pair);
-    }
-</script>
 </body>
 </html>
