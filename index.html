@@ -2,38 +2,87 @@
 <html>
 <head>
 <style>
-    body { background: #050608; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+    :root { --line-height: 40px; }
+    body { background: #050505; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
     
-    .dna-structure { display: flex; flex-direction: column-reverse; gap: 40px; margin-top: 50px; position: relative; }
-    
-    /* Ступенька кодона (Пара нуклеотидов) */
-    .step-pair {
-        display: flex; align-items: center; justify-content: center; gap: 10px;
-        padding: 15px; border: 1px dashed #333; border-radius: 10px; position: relative;
+    .scene { perspective: 1000px; width: 400px; height: 500px; }
+    .codon-column { 
+        position: relative; width: 200px; height: 300px; margin: 50px auto;
+        transform-style: preserve-3d; animation: rotate 12s linear infinite; 
     }
 
-    /* Нуклеотид как носитель линии */
-    .nucleotide {
-        width: 100px; height: 30px; display: flex; align-items: center; justify-content: center;
-        border-radius: 5px; font-weight: bold; font-size: 12px; position: relative;
+    @keyframes rotate { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
+
+    /* Линии как слои (диски) */
+    .line-layer {
+        position: absolute; width: 100%; height: var(--line-height);
+        border: 1px solid rgba(255,255,255,0.1);
+        display: flex; align-items: center; justify-content: center;
+        transform-style: preserve-3d;
     }
-    .left-side { background: rgba(0, 242, 255, 0.1); border: 1px solid #00f2ff; color: #00f2ff; }
-    .right-side { background: rgba(255, 0, 85, 0.1); border: 1px solid #ff0055; color: #ff0055; }
 
-    /* Сами линии внутри нуклеотидов */
-    .line-inner { width: 40px; height: 4px; border-radius: 2px; }
-    .yang { background: #00f2ff; box-shadow: 0 0 10px #00f2ff; }
-    .yin { display: flex; justify-content: space-between; width: 40px; }
-    .yin div { width: 18px; height: 4px; background: #ff0055; }
+    /* Подсветка Профиля 2/4 */
+    .line-2 { background: rgba(255, 255, 255, 0.15); border: 2px solid white; box-shadow: 0 0 20px white; color: white; }
+    .line-4 { background: rgba(255, 77, 77, 0.2); border: 2px solid #ff4d4d; box-shadow: 0 0 20px #ff4d4d; color: #ff4d4d; }
 
-    .bridge { width: 40px; height: 2px; background: linear-gradient(90deg, #00f2ff, #ff0055); opacity: 0.3; }
+    /* Нуклеотиды на краях слоев */
+    .n-ball { 
+        position: absolute; width: 15px; height: 15px; border-radius: 50%; 
+        background: #444; 
+    }
+    .left { left: -10px; }
+    .right { right: -10px; }
 
-    .label { position: absolute; left: -140px; font-size: 11px; color: #666; text-align: right; width: 120px; }
-    .hex-num { position: absolute; right: -80px; font-size: 20px; color: #444; font-weight: bold; }
+    .desc { position: absolute; left: 220px; font-size: 12px; white-space: nowrap; color: #666; }
 </style>
 </head>
 <body>
 
+    <h2 style="font-weight: 200;">ГЕОМЕТРИЯ КОДОНА: 6 ВЕРТИКАЛЬНЫХ ЛИНИЙ</h2>
+    <p style="color: #888; font-size: 0.9rem;">Каждая линия — это физический уровень ("этаж") в спирали</p>
+
+    <div class="scene">
+        <div class="codon-column">
+            <!-- Линия 6 -->
+            <div class="line-layer" style="bottom: calc(var(--line-height)*5)">
+                <div class="n-ball left"></div><div class="n-ball right"></div>
+                <span class="desc">Линия 6 (Переход)</span>
+            </div>
+            <!-- Линия 5 -->
+            <div class="line-layer" style="bottom: calc(var(--line-height)*4)">
+                <div class="n-ball left"></div><div class="n-ball right"></div>
+                <span class="desc">Линия 5 (Проекция)</span>
+            </div>
+            <!-- Линия 4 (ПРОФИЛЬ - ДИЗАЙН) -->
+            <div class="line-layer line-4" style="bottom: calc(var(--line-height)*3)">
+                <div class="n-ball left" style="background:#ff4d4d"></div><div class="n-ball right" style="background:#ff4d4d"></div>
+                <span class="desc" style="color:#ff4d4d">ЛИНИЯ 4 (ТЕЛО / КРАСНЫЙ)</span>
+            </div>
+            <!-- Линия 3 -->
+            <div class="line-layer" style="bottom: calc(var(--line-height)*2)">
+                <div class="n-ball left"></div><div class="n-ball right"></div>
+                <span class="desc">Линия 3 (Опыт)</span>
+            </div>
+            <!-- Линия 2 (ПРОФИЛЬ - ЛИЧНОСТЬ) -->
+            <div class="line-layer line-2" style="bottom: var(--line-height)">
+                <div class="n-ball left" style="background:white"></div><div class="n-ball right" style="background:white"></div>
+                <span class="desc" style="color:white">ЛИНИЯ 2 (УМ / ЧЕРНЫЙ)</span>
+            </div>
+            <!-- Линия 1 -->
+            <div class="line-layer" style="bottom: 0">
+                <div class="n-ball left"></div><div class="n-ball right"></div>
+                <span class="desc">Линия 1 (Основание)</span>
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-top: 20px; max-width: 500px; text-align: center; font-size: 0.85rem; line-height: 1.5; color: #aaa;">
+        <b>Как это читать:</b> Каждая пара нуклеотидов (ступенька) физически занимает высоту двух линий. <br>
+        Профиль 2/4 означает, что ваша энергия "зафиксирована" на 2-м и 4-м этажах этой конструкции во всех 64 кодонах тела.
+    </div>
+
+</body>
+</html>
     <h2>АНАТОМИЯ КОДОНА (3 ПАРЫ)</h2>
     <p style="color: #888; text-align: center; max-width: 500px;">
         Каждая "ступенька" ДНК — это <b>2 линии</b>. <br>Три ступеньки подряд формируют <b>Гексаграмму</b>.
