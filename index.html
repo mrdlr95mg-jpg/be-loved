@@ -2,42 +2,80 @@
 <html>
 <head>
 <style>
-    body { background: #000; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; font-family: sans-serif; }
-    .mandala { position: relative; width: 450px; height: 450px; border: 1px solid #222; border-radius: 50%; }
+    body { background: #08080a; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: 'Segoe UI', sans-serif; }
     
-    /* Солнце */
+    .mandala-container { position: relative; width: 500px; height: 500px; display: flex; align-items: center; justify-content: center; }
+
+    /* Отрисовка делений (64 сектора) */
+    .ticks { position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 1px solid #222; }
+    .tick { position: absolute; width: 2px; height: 15px; background: #333; left: 50%; transform-origin: 0 250px; }
+
+    /* Солнце (Земля всегда напротив) */
+    .celestial { position: absolute; border-radius: 50%; transition: all 0.5s; }
     .sun { 
-        position: absolute; width: 30px; height: 30px; background: #ffaa00; border-radius: 50%;
-        top: 50%; left: 50%; margin: -15px;
-        box-shadow: 0 0 30px #ffaa00;
-        offset-path: ray(45deg circle); /* Для анимации по кругу */
-        animation: orbit 10s linear infinite;
+        width: 24px; height: 24px; background: radial-gradient(circle, #fff, #ffaa00);
+        box-shadow: 0 0 30px #ff9900; z-index: 10;
+        animation: orbit 20s linear infinite;
+    }
+    .earth { 
+        width: 14px; height: 14px; background: #00d4ff; 
+        box-shadow: 0 0 15px #00d4ff;
+        animation: orbit 20s linear infinite reverse; /* Земля идет синхронно */
     }
 
     @keyframes orbit {
-        from { transform: rotate(0deg) translateX(210px) rotate(0deg); }
-        to { transform: rotate(360deg) translateX(210px) rotate(-360deg); }
+        from { transform: rotate(0deg) translateY(-235px) rotate(0deg); }
+        to { transform: rotate(360deg) translateY(-235px) rotate(-360deg); }
     }
 
-    .info { margin-top: 30px; text-align: center; color: #888; }
-    .timer { font-size: 24px; color: #ffaa00; font-weight: bold; }
+    /* Центральный символ (SVG вместо картинки) */
+    .center-symbol { width: 120px; height: 120px; opacity: 0.8; filter: drop-shadow(0 0 10px #00f2ff); }
+    
+    .stats { margin-top: 30px; text-align: center; border-top: 1px solid #222; padding-top: 20px; width: 300px; }
+    .highlight { color: #ffaa00; font-weight: bold; font-size: 1.2rem; }
 </style>
 </head>
 <body>
 
-    <div class="mandala">
-        <div class="sun"></div>
-        <!-- Здесь 64 деления -->
-        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.2;">
-            <img src="https://upload.wikimedia.org" width="300">
+    <div class="mandala-container">
+        <!-- Генерируем 64 метки -->
+        <div class="ticks" id="ticks"></div>
+        
+        <!-- Солнце -->
+        <div class="celestial sun"></div>
+        
+        <!-- Центральный паттерн (Триграммы) -->
+        <svg class="center-symbol" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="48" fill="none" stroke="#444" stroke-width="0.5"/>
+            <path d="M50 2 A48 48 0 0 1 50 98 A24 24 0 0 1 50 50 A24 24 0 0 0 50 2" fill="#fff" opacity="0.1"/>
+            <circle cx="50" cy="26" r="6" fill="#fff" opacity="0.5"/>
+            <circle cx="50" cy="74" r="6" fill="#000"/>
+            <text x="50" y="55" text-anchor="middle" fill="#00f2ff" font-size="8" font-weight="bold">ДНК</text>
+        </svg>
+    </div>
+
+    <div class="stats">
+        <div>Солнце в секторе (гексаграмме):</div>
+        <div class="highlight">~ 5.7 суток</div>
+        <div style="font-size: 0.8rem; color: #666; margin-top: 10px;">
+            Угол: 5° 37' 30"<br>
+            Линия гексаграммы: ~ 23 часа
         </div>
     </div>
 
-    <div class="info">
-        <div>Солнце в одной гексаграмме:</div>
-        <div class="timer">5 дней 17 часов</div>
-        <div style="margin-top: 10px;">Шаг по зодиаку: 5.62°</div>
-    </div>
-
+<script>
+    // Создаем визуальные насечки для 64 гексаграмм
+    const ticksContainer = document.getElementById('ticks');
+    for (let i = 0; i < 64; i++) {
+        const tick = document.createElement('div');
+        tick.className = 'tick';
+        tick.style.transform = `rotate(${i * (360/64)}deg)`;
+        if (i % 8 === 0) {
+            tick.style.height = '25px';
+            tick.style.background = '#666';
+        }
+        ticksContainer.appendChild(tick);
+    }
+</script>
 </body>
 </html>
