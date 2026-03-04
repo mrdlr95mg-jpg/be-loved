@@ -2,38 +2,68 @@
 <html>
 <head>
 <style>
-    :root { --line-height: 40px; }
-    body { background: #050505; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
+    body { background: #050505; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
     
-    .scene { perspective: 1000px; width: 400px; height: 500px; }
-    .codon-column { 
-        position: relative; width: 200px; height: 300px; margin: 50px auto;
-        transform-style: preserve-3d; animation: rotate 12s linear infinite; 
+    .dna-ladder { display: flex; flex-direction: column-reverse; gap: 50px; position: relative; }
+
+    /* Ступенька (Пара нуклеотидов) */
+    .step {
+        display: flex; align-items: center; justify-content: center; gap: 20px;
+        width: 300px; height: 60px; border: 1px solid #222; border-radius: 15px; position: relative;
     }
 
-    @keyframes rotate { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
-
-    /* Линии как слои (диски) */
-    .line-layer {
-        position: absolute; width: 100%; height: var(--line-height);
-        border: 1px solid rgba(255,255,255,0.1);
-        display: flex; align-items: center; justify-content: center;
-        transform-style: preserve-3d;
+    /* Место для линии внутри нуклеотида */
+    .nucleotide {
+        width: 120px; height: 40px; display: flex; align-items: center; justify-content: center;
+        border-radius: 8px; font-size: 11px; font-weight: bold; border: 1px solid #333;
+        transition: 0.5s;
     }
 
-    /* Подсветка Профиля 2/4 */
-    .line-2 { background: rgba(255, 255, 255, 0.15); border: 2px solid white; box-shadow: 0 0 20px white; color: white; }
-    .line-4 { background: rgba(255, 77, 77, 0.2); border: 2px solid #ff4d4d; box-shadow: 0 0 20px #ff4d4d; color: #ff4d4d; }
+    /* Активации Профиля */
+    .active-personality { background: #fff; color: #000; box-shadow: 0 0 20px #fff; border: none; }
+    .active-design { background: #ff4d4d; color: #fff; box-shadow: 0 0 20px #ff4d4d; border: none; }
 
-    /* Нуклеотиды на краях слоев */
-    .n-ball { 
-        position: absolute; width: 15px; height: 15px; border-radius: 50%; 
-        background: #444; 
-    }
-    .left { left: -10px; }
-    .right { right: -10px; }
+    .bridge { width: 40px; height: 2px; background: #333; }
+    .label { position: absolute; left: -120px; color: #666; font-size: 12px; }
+</style>
+</head>
+<body>
 
-    .desc { position: absolute; left: 220px; font-size: 12px; white-space: nowrap; color: #666; }
+    <h2 style="margin-bottom: 40px;">СТРУКТУРА ПРОФИЛЯ 2/4 В КОДОНЕ</h2>
+
+    <div class="dna-ladder">
+        <!-- ПАРА 3: Линии 5 и 6 -->
+        <div class="step">
+            <div class="label">Пара 3<br>(Верх кодона)</div>
+            <div class="nucleotide">Линия 5 (Лево)</div>
+            <div class="bridge"></div>
+            <div class="nucleotide">Линия 6 (Право)</div>
+        </div>
+
+        <!-- ПАРА 2: Линии 3 и 4 -->
+        <div class="step">
+            <div class="label">Пара 2<br>(Середина)</div>
+            <div class="nucleotide">Линия 3 (Лево)</div>
+            <div class="bridge"></div>
+            <div class="nucleotide active-design">ЛИНИЯ 4 (КРАСНАЯ)</div>
+        </div>
+
+        <!-- ПАРА 1: Линии 1 и 2 -->
+        <div class="step">
+            <div class="label">Пара 1<br>(Основание)</div>
+            <div class="nucleotide">Линия 1 (Лево)</div>
+            <div class="bridge"></div>
+            <div class="nucleotide active-personality">ЛИНИЯ 2 (ЧЕРНАЯ)</div>
+        </div>
+    </div>
+
+    <p style="margin-top: 50px; color: #888; text-align: center; max-width: 500px; font-size: 0.9rem;">
+        <b>Теперь всё на местах:</b> Кодон состоит из 3-х пар. В каждой паре — две линии. <br>
+        Ваш профиль — это "правая нить" (Ян-составляющая) первой и второй ступенек.
+    </p>
+
+</body>
+</html>
 </style>
 </head>
 <body>
