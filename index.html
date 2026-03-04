@@ -2,46 +2,77 @@
 <html>
 <head>
 <style>
-    body { background: #0a0a0c; color: white; font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+    body { background: #050608; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
     
-    .codon-focus { position: relative; width: 180px; display: flex; flex-direction: column-reverse; gap: 8px; padding: 20px; border: 1px solid #333; background: rgba(255,255,255,0.02); }
+    .dna-structure { display: flex; flex-direction: column-reverse; gap: 40px; margin-top: 50px; position: relative; }
     
-    /* Базовый стиль линии */
-    .line { height: 14px; width: 100%; position: relative; border-radius: 2px; background: #222; display: flex; justify-content: center; align-items: center; font-size: 10px; color: #444; }
+    /* Ступенька кодона (Пара нуклеотидов) */
+    .step-pair {
+        display: flex; align-items: center; justify-content: center; gap: 10px;
+        padding: 15px; border: 1px dashed #333; border-radius: 10px; position: relative;
+    }
 
-    /* Линия 2 - Личность (Черная/Белая активация) */
-    .line-2 { background: #eee; color: #000; box-shadow: 0 0 15px #fff; border: 1px solid #fff; font-weight: bold; }
-    
-    /* Линия 4 - Дизайн (Красная активация) */
-    .line-4 { background: #ff4d4d; color: #fff; box-shadow: 0 0 15px #ff4d4d; font-weight: bold; }
+    /* Нуклеотид как носитель линии */
+    .nucleotide {
+        width: 100px; height: 30px; display: flex; align-items: center; justify-content: center;
+        border-radius: 5px; font-weight: bold; font-size: 12px; position: relative;
+    }
+    .left-side { background: rgba(0, 242, 255, 0.1); border: 1px solid #00f2ff; color: #00f2ff; }
+    .right-side { background: rgba(255, 0, 85, 0.1); border: 1px solid #ff0055; color: #ff0055; }
 
-    .nucleotide-tag { position: absolute; left: -100px; font-size: 12px; color: #666; width: 80px; text-align: right; }
+    /* Сами линии внутри нуклеотидов */
+    .line-inner { width: 40px; height: 4px; border-radius: 2px; }
+    .yang { background: #00f2ff; box-shadow: 0 0 10px #00f2ff; }
+    .yin { display: flex; justify-content: space-between; width: 40px; }
+    .yin div { width: 18px; height: 4px; background: #ff0055; }
+
+    .bridge { width: 40px; height: 2px; background: linear-gradient(90deg, #00f2ff, #ff0055); opacity: 0.3; }
+
+    .label { position: absolute; left: -140px; font-size: 11px; color: #666; text-align: right; width: 120px; }
+    .hex-num { position: absolute; right: -80px; font-size: 20px; color: #444; font-weight: bold; }
 </style>
 </head>
 <body>
 
-    <h2 style="font-family: sans-serif; letter-spacing: 2px;">ВНУТРИ ОДНОГО КОДОНА</h2>
-    <p style="color: #888; font-size: 14px; margin-bottom: 30px;">Профиль 2/4 как внутренние уровни активации</p>
+    <h2>АНАТОМИЯ КОДОНА (3 ПАРЫ)</h2>
+    <p style="color: #888; text-align: center; max-width: 500px;">
+        Каждая "ступенька" ДНК — это <b>2 линии</b>. <br>Три ступеньки подряд формируют <b>Гексаграмму</b>.
+    </p>
 
-    <div class="codon-focus">
-        <!-- Нуклеотид 3 (Линии 5-6) -->
-        <div class="line">Линия 6</div>
-        <div class="line">Линия 5</div>
-        <div class="nucleotide-tag" style="bottom: 80px;">Нуклеотид 3</div>
+    <div class="dna-structure">
+        <!-- СТУПЕНЬ 3 (Верх кодона) -->
+        <div class="step-pair">
+            <div class="label">Пара 3<br>(Линии 5 и 6)</div>
+            <div class="nucleotide left-side">Линия 5 <div class="line-inner yang" style="margin-left:10px"></div></div>
+            <div class="bridge"></div>
+            <div class="nucleotide right-side"><div class="line-inner yin" style="margin-right:10px"><div></div><div></div></div> Линия 6</div>
+            <div class="hex-num">↑</div>
+        </div>
 
-        <!-- Нуклеотид 2 (Линии 3-4) -->
-        <div class="line line-4">ЛИНИЯ 4 (Красная)</div>
-        <div class="line">Линия 3</div>
-        <div class="nucleotide-tag" style="bottom: 40px;">Нуклеотид 2</div>
+        <!-- СТУПЕНЬ 2 (Середина) -->
+        <div class="step-pair" style="transform: rotateY(20deg);">
+            <div class="label">Пара 2<br>(Линии 3 и 4)</div>
+            <div class="nucleotide left-side">Линия 3 <div class="line-inner yang" style="margin-left:10px"></div></div>
+            <div class="bridge"></div>
+            <div class="nucleotide right-side"><div class="line-inner yang" style="margin-right:10px"></div> Линия 4</div>
+        </div>
 
-        <!-- Нуклеотид 1 (Линии 1-2) -->
-        <div class="line line-2">ЛИНИЯ 2 (Черная)</div>
-        <div class="line">Линия 1</div>
-        <div class="nucleotide-tag" style="bottom: 0px;">Нуклеотид 1</div>
+        <!-- СТУПЕНЬ 1 (Низ кодона) -->
+        <div class="step-pair" style="transform: rotateY(40deg);">
+            <div class="label">Пара 1<br>(Линии 1 и 2)</div>
+            <div class="nucleotide left-side">Линия 1 <div class="line-inner yin" style="margin-left:10px"><div></div><div></div></div></div>
+            <div class="bridge"></div>
+            <div class="nucleotide right-side"><div class="line-inner yang" style="margin-right:10px"></div> Линия 2</div>
+        </div>
     </div>
 
-    <div style="margin-top: 40px; max-width: 400px; text-align: center; color: #aaa; font-size: 0.9rem;">
-        Линии — это не "края" спирали, а <b>вертикальные уровни</b> внутри каждого шага ДНК. Каждая линия — это ~0.9 градуса дуги (5.6° / 6).
+    <div style="margin-top: 60px; padding: 20px; background: #111; border-radius: 10px; font-size: 14px; line-height: 1.6; max-width: 600px;">
+        <b>Как это "сидит" в спирали:</b>
+        <ul>
+            <li><b>Вертикаль:</b> Линии читаются снизу вверх (от 1 до 6). Это направление роста полинуклеотидной цепи.</li>
+            <li><b>Горизонталь:</b> Водородная связь (мостик) соединяет Инь и Ян энергии двух нитей.</li>
+            <li><b>Скручивание:</b> Каждая следующая пара повернута на ~34°. Поэтому гексаграмма в ДНК — это не плоская лестница, а <b>винтовая</b>.</li>
+        </ul>
     </div>
 
 </body>
