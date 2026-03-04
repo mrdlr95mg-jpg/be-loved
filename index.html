@@ -2,59 +2,42 @@
 <html>
 <head>
 <style>
-    body { background: #050505; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+    body { background: #000; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; font-family: sans-serif; }
+    .mandala { position: relative; width: 450px; height: 450px; border: 1px solid #222; border-radius: 50%; }
     
-    .orbit-container { position: relative; width: 500px; height: 500px; border: 1px dashed #333; border-radius: 50%; display: flex; justify-content: center; align-items: center; animation: rotate 60s linear infinite; }
-    
-    @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    /* Солнце */
+    .sun { 
+        position: absolute; width: 30px; height: 30px; background: #ffaa00; border-radius: 50%;
+        top: 50%; left: 50%; margin: -15px;
+        box-shadow: 0 0 30px #ffaa00;
+        offset-path: ray(45deg circle); /* Для анимации по кругу */
+        animation: orbit 10s linear infinite;
+    }
 
-    .gate { position: absolute; width: 40px; text-align: center; font-size: 10px; transition: 0.3s; }
-    .gate:hover { color: #00f2ff; transform: scale(1.5); font-weight: bold; cursor: pointer; }
+    @keyframes orbit {
+        from { transform: rotate(0deg) translateX(210px) rotate(0deg); }
+        to { transform: rotate(360deg) translateX(210px) rotate(-360deg); }
+    }
 
-    /* Линии гексаграммы внутри кольца */
-    .mini-hex { height: 12px; display: flex; flex-direction: column-reverse; gap: 1px; margin-bottom: 2px; }
-    .l { height: 1.5px; width: 15px; margin: 0 auto; }
-    .yang { background: #00f2ff; }
-    .yin { background: #ff0055; opacity: 0.6; }
-
-    .center-body { position: absolute; width: 120px; opacity: 0.7; filter: drop-shadow(0 0 10px #00f2ff); animation: pulse 3s ease-in-out infinite; }
-    @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.1); opacity: 0.8; } }
+    .info { margin-top: 30px; text-align: center; color: #888; }
+    .timer { font-size: 24px; color: #ffaa00; font-weight: bold; }
 </style>
 </head>
 <body>
 
-    <div class="orbit-container" id="wheel">
-        <!-- Гексаграммы-ворота генерируются здесь -->
-        <img src="https://upload.wikimedia.org" class="center-body" alt="Человек">
+    <div class="mandala">
+        <div class="sun"></div>
+        <!-- Здесь 64 деления -->
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.2;">
+            <img src="https://upload.wikimedia.org" width="300">
+        </div>
     </div>
 
-<script>
-    const wheel = document.getElementById('wheel');
-    const totalGates = 64;
-    const radius = 230;
+    <div class="info">
+        <div>Солнце в одной гексаграмме:</div>
+        <div class="timer">5 дней 17 часов</div>
+        <div style="margin-top: 10px;">Шаг по зодиаку: 5.62°</div>
+    </div>
 
-    for (let i = 1; i <= totalGates; i++) {
-        const angle = (i / totalGates) * 2 * Math.PI;
-        const x = Math.cos(angle) * radius + 250 - 20;
-        const y = Math.sin(angle) * radius + 250 - 10;
-        
-        const gate = document.createElement('div');
-        gate.className = 'gate';
-        gate.style.left = x + 'px';
-        gate.style.top = y + 'px';
-        gate.style.transform = `rotate(${angle + Math.PI/2}rad)`;
-        
-        // Рисуем упрощенную гексаграмму
-        let hex = '<div class="mini-hex">';
-        for(let j=0; j<6; j++) {
-            const type = Math.random() > 0.5 ? 'yang' : 'yin';
-            hex += `<div class="l ${type}"></div>`;
-        }
-        hex += '</div>';
-        
-        gate.innerHTML = hex + i;
-        wheel.appendChild(gate);
-    }
-</script>
 </body>
 </html>
