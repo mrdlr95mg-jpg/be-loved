@@ -1,66 +1,169 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-<style>
-    body { background: #050505; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
-    .canvas { perspective: 1200px; width: 500px; height: 600px; display: flex; align-items: center; justify-content: center; }
-    .codon-3d { position: relative; width: 200px; transform-style: preserve-3d; animation: rotate 15s linear infinite; }
-    
-    @keyframes rotate { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
+    <meta charset="UTF-8">
+    <title>Визуализация Гексаграммы ДНК</title>
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #00ffcc;
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
 
-    /* Пара нуклеотидов (Ступенька) */
-    .step { 
-        position: absolute; width: 240px; height: 2px; left: -20px;
-        display: flex; justify-content: space-between; align-items: center;
-        transform-style: preserve-3d; border-top: 1px solid rgba(255,255,255,0.1);
-    }
+        .container {
+            display: flex;
+            gap: 100px;
+            align-items: center;
+        }
 
-    /* Сами Линии (Нуклеотиды) */
-    .line-node { 
-        width: 100px; height: 35px; border-radius: 4px; border: 1px solid #333;
-        display: flex; align-items: center; justify-content: center; font-size: 10px;
-        background: rgba(255,255,255,0.05); color: #666;
-    }
+        /* Стиль для спирали (вид сбоку) */
+        .dna-side {
+            position: relative;
+            width: 60px;
+            height: 300px;
+            perspective: 1000px;
+        }
 
-    /* Активация ПРОФИЛЯ 2/4 */
-    .p-2 { background: #fff !important; color: #000 !important; box-shadow: 0 0 25px #fff; border: none; font-weight: bold; }
-    .d-4 { background: #ff4d4d !important; color: #fff !important; box-shadow: 0 0 25px #ff4d4d; border: none; font-weight: bold; }
+        .base-pair {
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            background: rgba(0, 255, 204, 0.2);
+            left: 0;
+            transform-style: preserve-3d;
+            animation: rotateDNA 4s linear infinite;
+        }
 
-    .tag { position: absolute; left: -140px; font-size: 12px; color: #444; width: 120px; text-align: right; }
-</style>
+        .base-pair::before, .base-pair::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            top: -3px;
+        }
+
+        .base-pair::before {
+            left: -5px;
+            background: #ff0077; /* Сахаро-фосфатный остов 1 */
+            box-shadow: 0 0 10px #ff0077;
+        }
+
+        .base-pair::after {
+            right: -5px;
+            background: #00ffcc; /* Сахаро-фосфатный остов 2 */
+            box-shadow: 0 0 10px #00ffcc;
+        }
+
+        @keyframes rotateDNA {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+
+        /* Генерация ступенек спирали */
+        .dna-side div:nth-child(1) { top: 0px; animation-delay: 0.0s; }
+        .dna-side div:nth-child(2) { top: 30px; animation-delay: 0.2s; }
+        .dna-side div:nth-child(3) { top: 60px; animation-delay: 0.4s; }
+        .dna-side div:nth-child(4) { top: 90px; animation-delay: 0.6s; }
+        .dna-side div:nth-child(5) { top: 120px; animation-delay: 0.8s; }
+        .dna-side div:nth-child(6) { top: 150px; animation-delay: 1.0s; }
+        .dna-side div:nth-child(7) { top: 180px; animation-delay: 1.2s; }
+        .dna-side div:nth-child(8) { top: 210px; animation-delay: 1.4s; }
+        .dna-side div:nth-child(9) { top: 240px; animation-delay: 1.6s; }
+        .dna-side div:nth-child(10) { top: 270px; animation-delay: 1.8s; }
+
+        /* Вид сверху - Гексаграмма */
+        .hexagram-view {
+            position: relative;
+            width: 250px;
+            height: 250px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .star {
+            position: absolute;
+            fill: none;
+            stroke: #00ffcc;
+            stroke-width: 2;
+            filter: drop-shadow(0 0 5px #00ffcc);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .dna-circle {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border: 1px dashed rgba(0, 255, 204, 0.3);
+            border-radius: 50%;
+        }@keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+        }
+
+        .label {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+    </style>
 </head>
 <body>
 
-    <h2 style="letter-spacing: 3px; color: #888;">КОДОН: ПРОФИЛЬ 2 / 4</h2>
+    <div class="container">
+        <!-- Вид сбоку -->
+        <div>
+            <div class="dna-side">
+                <div class="base-pair"></div>
+                <div class="base-pair"></div>
 
-    <div class="canvas">
-        <div class="codon-3d">
-            <!-- ПАРА 3 (Верх) -->
-            <div class="step" style="top: 0px; transform: rotateY(60deg);">
-                <div class="tag">Пара 3 (Топ)</div>
-                <div class="line-node">Линия 5 (Л)</div>
-                <div class="line-node">Линия 6 (П)</div>
+<div class="base-pair"></div>
+                <div class="base-pair"></div>
+                <div class="base-pair"></div>
+                <div class="base-pair"></div>
+                <div class="base-pair"></div>
+                <div class="base-pair"></div>
+                <div class="base-pair"></div>
+                <div class="base-pair"></div>
             </div>
+            <div class="label">Двойная спираль<br>(Вид сбоку)</div>
+        </div>
 
-            <!-- ПАРА 2 (Середина) -->
-            <div class="step" style="top: 100px; transform: rotateY(30deg);">
-                <div class="tag">Пара 2 (Мидл)</div>
-                <div class="line-node">Линия 3 (Л)</div>
-                <div class="line-node d-4">ЛИНИЯ 4 (П)</div>
+        <!-- Вид сверху -->
+        <div>
+            <div class="hexagram-view">
+                <div class="dna-circle"></div>
+                <svg class="star" viewBox="0 0 100 100" width="200" height="200">
+                    <!-- Гексаграмма (два треугольника) -->
+                    <polygon points="50,5 90,75 10,75" stroke="#ff0077" />
+                    <polygon points="50,95 10,25 90,25" />
+                    <!-- Точки пересечения (азотистые основания) -->
+                    <circle cx="50" cy="5" r="3" fill="#fff" />
+                    <circle cx="90" cy="75" r="3" fill="#fff" />
+                    <circle cx="10" cy="75" r="3" fill="#fff" />
+                    <circle cx="50" cy="95" r="3" fill="#fff" />
+                    <circle cx="10" cy="25" r="3" fill="#fff" />
+                    <circle cx="90" cy="25" r="3" fill="#fff" />
+                </svg>
             </div>
-
-            <!-- ПАРА 1 (Низ) -->
-            <div class="step" style="top: 200px; transform: rotateY(0deg);">
-                <div class="tag">Пара 1 (База)</div>
-                <div class="line-node">Линия 1 (Л)</div>
-                <div class="line-node p-2">ЛИНИЯ 2 (П)</div>
-            </div>
+            <div class="label">Осевая проекция<br>(Геометрия "Гексаграммы")</div>
         </div>
     </div>
 
-    <div style="text-align: center; max-width: 450px; font-size: 0.9rem; border-top: 1px solid #222; padding-top: 20px;">
-        <b style="color: #fff;">Итог:</b> Кодон — это 3 ступеньки. На каждой ступеньке 2 позиции (линии). <br>
-        Твоя <b>Личность (2)</b> и <b>Тело (4)</b> занимают правую сторону <br> нижней и средней пары нуклеотидов.
+    <div style="max-width: 600px; margin-top: 40px; font-size: 13px; color: #888; text-align: center;">
+        Гексаграмма в ДНК часто соотносится с 6-кратной симметрией молекулы при взгляде сверху. 
+        Один полный виток спирали содержит примерно 10-10.5 пар оснований, а геометрия связей 
+        внутри углеродных колец оснований (пуринов и пиримидинов) имеет гексагональную форму.
     </div>
 
 </body>
