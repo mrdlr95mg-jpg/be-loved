@@ -2,91 +2,83 @@
 <html>
 <head>
 <style>
-    body { background: #050505; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-    .helix-container { display: flex; flex-direction: column; gap: 15px; align-items: center; perspective: 1000px; }
+    body { background: #050505; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
     
-    .base-pair-row {
-        display: flex; align-items: center; gap: 20px;
-        transform: rotateX(20deg);
+    .dna-container { perspective: 1000px; width: 400px; height: 450px; position: relative; }
+    .codon-unit { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; animation: rotate 12s linear infinite; }
+    
+    @keyframes rotate { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
+
+    /* Пара нуклеотидов (Ступенька) */
+    .base-pair {
+        position: absolute; width: 220px; height: 4px; left: 90px;
+        display: flex; justify-content: space-between; align-items: center;
+        transform-style: preserve-3d;
     }
 
-    .strand {
-        width: 40px; height: 40px; border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        font-weight: bold; font-size: 18px;
+    /* Азотистое основание (Нуклеотид) */
+    .nucleotide {
+        width: 90px; height: 40px; border: 1px solid rgba(0, 242, 255, 0.3);
+        background: rgba(0, 242, 255, 0.05); border-radius: 4px;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        font-size: 10px; color: #00f2ff;
     }
 
-    .strand.left { background: #00f2ff; box-shadow: 0 0 15px #00f2ff; color: #000; }
-    .strand.right { background: #ff0077; box-shadow: 0 0 15px #ff0077; color: #000; }
+    /* Сплошная линия Ян (символ 1-х ворот) */
+    .yang-line { width: 40px; height: 4px; background: #00f2ff; margin-top: 5px; box-shadow: 0 0 5px #00f2ff; }
 
-    /* Линия гексаграммы как мост */
-    .bridge-line {
-        width: 120px; height: 10px;
-        position: relative;
-        display: flex; justify-content: center; align-items: center;
+    /* Акцент на 4-й линии */
+    .active-4 { 
+        background: #fff !important; border: 2px solid #fff !important; 
+        box-shadow: 0 0 30px #fff; color: #000 !important; transform: scale(1.1);
     }
+    .active-4 .yang-line { background: #000; box-shadow: none; }
 
-    .yang-bridge { background: linear-gradient(90deg, #00f2ff, #ff0077); border-radius: 5px; }
-    .yin-bridge { 
-        display: flex; width: 120px; justify-content: space-between;
-    }
-    .yin-part { width: 45px; height: 10px; background: #555; border-radius: 5px; }
+    .bridge { width: 40px; height: 1px; background: rgba(255,255,255,0.2); }
 
-    .label-pos { font-size: 10px; color: #888; width: 60px; text-align: center; }
+    .step-label { position: absolute; left: -110px; color: #555; font-size: 11px; width: 100px; text-align: right; }
 </style>
 </head>
 <body>
 
-<div class="helix-container">
-    <h2 style="color: #00f2ff; margin-bottom: 30px;">ПАРА НУКЛЕОТИДОВ = 1 ЛИНИЯ</h2>
+    <h2 style="font-weight: 200; letter-spacing: 4px;">ВОРОТА 1 <span style="color:#00f2ff">●</span> ЛИНИЯ 4</h2>
+    <p style="color: #666; font-size: 14px;">Кодон AAA (Лизин) в спирали ДНК</p>
 
-    <!-- Пара 3 (Дает линии 5 и 6) -->
-    <div class="base-pair-row">
-        <div class="strand left">A</div>
-        <div class="bridge-line yang-bridge"></div>
-        <div class="strand right">T</div>
-        <div class="label-pos">Линия 6</div>
-    </div>
-    <div class="base-pair-row" style="margin-top: -10px;">
-        <div style="width: 40px;"></div>
-        <div class="bridge-line yin-bridge"><div class="yin-part"></div><div class="yin-part"></div></div>
-        <div style="width: 40px;"></div>
-        <div class="label-pos">Линия 5</div>
-    </div>
+    <div class="dna-container">
+        <div class="codon-unit">
+            
+            <!-- Пара 3 (Линии 5 и 6) -->
+            <div class="base-pair" style="top: 50px; transform: rotateY(60deg);">
+                <div class="step-label">Пара 3 (A-T)</div>
+                <div class="nucleotide">Линия 5<div class="yang-line"></div></div>
+                <div class="bridge"></div>
+                <div class="nucleotide">Линия 6<div class="yang-line"></div></div>
+            </div>
 
-    <!-- Пара 2 (Дает линии 3 и 4) -->
-    <div class="base-pair-row">
-        <div class="strand left">G</div>
-        <div class="bridge-line yang-bridge"></div>
-        <div class="strand right">C</div>
-        <div class="label-pos">Линия 4</div>
-    </div>
-    <div class="base-pair-row" style="margin-top: -10px;">
-        <div style="width: 40px;"></div>
-        <div class="bridge-line yang-bridge"></div>
-        <div style="width: 40px;"></div>
-        <div class="label-pos">Линия 3</div>
-    </div>
+            <!-- Пара 2 (Линии 3 и 4) -->
+            <div class="base-pair" style="top: 150px; transform: rotateY(30deg);">
+                <div class="step-label">Пара 2 (A-T)</div>
+                <div class="nucleotide">Линия 3<div class="yang-line"></div></div>
+                <div class="bridge"></div>
+                <!-- ВОТ ОНА: АКТИВАЦИЯ 4 ЛИНИИ -->
+                <div class="nucleotide active-4">ЛИНИЯ 4<div class="yang-line"></div></div>
+            </div>
 
-    <!-- Пара 1 (Дает линии 1 и 2) -->
-    <div class="base-pair-row">
-        <div class="strand left">C</div>
-        <div class="bridge-line yin-bridge"><div class="yin-part"></div><div class="yin-part"></div></div>
-        <div class="strand right">G</div>
-        <div class="label-pos">Линия 2</div>
-    </div>
-    <div class="base-pair-row" style="margin-top: -10px;">
-        <div style="width: 40px;"></div>
-        <div class="bridge-line yang-bridge"></div>
-        <div style="width: 40px;"></div>
-        <div class="label-pos">Линия 1</div>
+            <!-- Пара 1 (Линии 1 и 2) -->
+            <div class="base-pair" style="top: 250px; transform: rotateY(0deg);">
+                <div class="step-label">Пара 1 (A-T)</div>
+                <div class="nucleotide">Линия 1<div class="yang-line"></div></div>
+                <div class="bridge"></div>
+                <div class="nucleotide">Линия 2<div class="yang-line"></div></div>
+            </div>
+
+        </div>
     </div>
 
-    <p style="color: #888; font-size: 12px; max-width: 300px; text-align: center; margin-top: 20px;">
-        В каждой паре оснований скрыто 2 информационных вопроса. <br>
-        3 пары = 6 ответов = 6 линий.
-    </p>
-</div>
+    <div style="margin-top: 30px; text-align: center; font-size: 0.9rem; color: #888; border-top: 1px solid #222; padding-top: 15px;">
+        <span style="color: #fff;">Геометрия:</span> Кодон AAA состоит из 6 линий Ян (сплошных). <br>
+        <b>4-я линия</b> находится на правой стороне средней ступеньки.
+    </div>
 
 </body>
 </html>
