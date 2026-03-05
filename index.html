@@ -2,76 +2,90 @@
 <html>
 <head>
 <style>
-    body { background: #000; color: #fff; font-family: 'Courier New', monospace; display: flex; justify-content: center; padding: 20px; }
-    .container { border: 1px solid #333; padding: 30px; border-radius: 15px; background: #050505; }
+    body { background: #050505; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+    .helix-container { display: flex; flex-direction: column; gap: 15px; align-items: center; perspective: 1000px; }
     
-    .dna-strand { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 30px; }
-    
-    /* Ступенька ДНК */
-    .base {
-        width: 200px; height: 40px;
-        border: 2px solid #00f2ff;
+    .base-pair-row {
+        display: flex; align-items: center; gap: 20px;
+        transform: rotateX(20deg);
+    }
+
+    .strand {
+        width: 40px; height: 40px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: bold; font-size: 18px;
+    }
+
+    .strand.left { background: #00f2ff; box-shadow: 0 0 15px #00f2ff; color: #000; }
+    .strand.right { background: #ff0077; box-shadow: 0 0 15px #ff0077; color: #000; }
+
+    /* Линия гексаграммы как мост */
+    .bridge-line {
+        width: 120px; height: 10px;
+        position: relative;
         display: flex; justify-content: center; align-items: center;
-        position: relative; font-weight: bold; font-size: 20px;
-        background: rgba(0, 242, 255, 0.1);
     }
 
-    /* Стрелки трансформации */
-    .arrow { color: #555; font-size: 24px; margin: 5px 0; }
-
-    /* Гексаграмма (6 линий) */
-    .hexagram { display: flex; flex-direction: column; gap: 8px; align-items: center; }
-    .line { width: 100px; height: 8px; border-radius: 2px; }
-    .yang { background: #00f2ff; box-shadow: 0 0 10px #00f2ff; }
-    .yin { 
-        background: transparent;
-        border-left: 40px solid #ff0077;
-        border-right: 40px solid #ff0077;
-        width: 100px; box-shadow: 0 0 5px #ff0077;
+    .yang-bridge { background: linear-gradient(90deg, #00f2ff, #ff0077); border-radius: 5px; }
+    .yin-bridge { 
+        display: flex; width: 120px; justify-content: space-between;
     }
+    .yin-part { width: 45px; height: 10px; background: #555; border-radius: 5px; }
 
-    .label { font-size: 10px; color: #888; text-transform: uppercase; margin-top: 5px; }
+    .label-pos { font-size: 10px; color: #888; width: 60px; text-align: center; }
 </style>
 </head>
 <body>
 
-<div class="container">
-    <h3 style="text-align:center; color:#00f2ff;">1 КОДОН = 6 ЛИНИЙ</h3>
-    
-    <div style="display: flex; align-items: center; gap: 40px;">
-        <!-- Слой ДНК -->
-        <div class="dna-strand">
-            <div class="label">Буква 3</div>
-            <div class="base">T</div>
-            <div class="arrow">↓</div>
-            <div class="label">Буква 2</div>
-            <div class="base">A</div>
-            <div class="arrow">↓</div>
-            <div class="label">Буква 1</div>
-            <div class="base">G</div>
-        </div>
+<div class="helix-container">
+    <h2 style="color: #00f2ff; margin-bottom: 30px;">ПАРА НУКЛЕОТИДОВ = 1 ЛИНИЯ</h2>
 
-        <!-- Слой Проекции -->
-        <div style="font-size: 30px; color: #333;">⇒</div>
-
-        <!-- Слой Гексаграммы -->
-        <div class="hexagram">
-            <div class="label">Линия 6</div><div class="line yin"></div>
-            <div class="label">Линия 5</div><div class="line yin"></div>
-            <div style="height: 10px;"></div>
-            <div class="label">Линия 4</div><div class="line yin"></div>
-            <div class="label">Линия 3</div><div class="line yang"></div>
-            <div style="height: 10px;"></div>
-            <div class="label">Линия 2</div><div class="line yang"></div>
-            <div class="label">Линия 1</div><div class="line yang"></div>
-        </div>
+    <!-- Пара 3 (Дает линии 5 и 6) -->
+    <div class="base-pair-row">
+        <div class="strand left">A</div>
+        <div class="bridge-line yang-bridge"></div>
+        <div class="strand right">T</div>
+        <div class="label-pos">Линия 6</div>
+    </div>
+    <div class="base-pair-row" style="margin-top: -10px;">
+        <div style="width: 40px;"></div>
+        <div class="bridge-line yin-bridge"><div class="yin-part"></div><div class="yin-part"></div></div>
+        <div style="width: 40px;"></div>
+        <div class="label-pos">Линия 5</div>
     </div>
 
-    <div style="margin-top: 30px; border-top: 1px solid #333; padding-top: 20px; font-size: 13px; line-height: 1.6;">
-        <span style="color: #00f2ff;">●</span> Каждая буква ДНК хранит <b>два бита</b> информации.<br>
-        <span style="color: #ff0077;">●</span> Три буквы подряд (кодон) — это ровно <b>шесть бит</b>.<br>
-        <span style="color: #fff;">●</span> Гексаграмма — это просто <b>визуальный способ</b> записать эти 6 бит информации, которые определяют, какую аминокислоту построит клетка.
+    <!-- Пара 2 (Дает линии 3 и 4) -->
+    <div class="base-pair-row">
+        <div class="strand left">G</div>
+        <div class="bridge-line yang-bridge"></div>
+        <div class="strand right">C</div>
+        <div class="label-pos">Линия 4</div>
     </div>
+    <div class="base-pair-row" style="margin-top: -10px;">
+        <div style="width: 40px;"></div>
+        <div class="bridge-line yang-bridge"></div>
+        <div style="width: 40px;"></div>
+        <div class="label-pos">Линия 3</div>
+    </div>
+
+    <!-- Пара 1 (Дает линии 1 и 2) -->
+    <div class="base-pair-row">
+        <div class="strand left">C</div>
+        <div class="bridge-line yin-bridge"><div class="yin-part"></div><div class="yin-part"></div></div>
+        <div class="strand right">G</div>
+        <div class="label-pos">Линия 2</div>
+    </div>
+    <div class="base-pair-row" style="margin-top: -10px;">
+        <div style="width: 40px;"></div>
+        <div class="bridge-line yang-bridge"></div>
+        <div style="width: 40px;"></div>
+        <div class="label-pos">Линия 1</div>
+    </div>
+
+    <p style="color: #888; font-size: 12px; max-width: 300px; text-align: center; margin-top: 20px;">
+        В каждой паре оснований скрыто 2 информационных вопроса. <br>
+        3 пары = 6 ответов = 6 линий.
+    </p>
 </div>
 
 </body>
