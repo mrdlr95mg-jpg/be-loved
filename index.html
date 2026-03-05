@@ -1,170 +1,69 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Визуализация Гексаграммы ДНК</title>
-    <style>
-        body {
-            background-color: #0a0a0a;
-            color: #00ffcc;
-            font-family: sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-        }
+<style>
+    body { background: #050505; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+    .scene { perspective: 800px; display: flex; flex-direction: column; align-items: center; }
+    
+    .dna { position: relative; width: 150px; height: 450px; transform-style: preserve-3d; animation: rotate 10s linear infinite; }
+    
+    @keyframes rotate { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
 
-        .container {
-            display: flex;
-            gap: 100px;
-            align-items: center;
-        }
+    /* Ступеньки (линии гексаграммы) */
+    .rung {
+        position: absolute; width: 140px; height: 6px;
+        background: rgba(255, 255, 255, 0.1);
+        left: 5px; transform-style: preserve-3d;
+        display: flex; justify-content:空间-between; align-items: center;
+    }
 
-        /* Стиль для спирали (вид сбоку) */
-        .dna-side {
-            position: relative;
-            width: 60px;
-            height: 300px;
-            perspective: 1000px;
-        }
+    /* Подсветка активной гексаграммы (6 линий) */
+    .rung.active { background: linear-gradient(90deg, #00f2ff, #7d2ae8); box-shadow: 0 0 15px rgba(0, 242, 255, 0.6); border-radius: 3px; }
+    
+    .node { width: 16px; height: 16px; border-radius: 50%; position: absolute; }
+    .node.left { left: -8px; background: #00f2ff; box-shadow: 0 0 10px #00f2ff; }
+    .node.right { right: -8px; background: #7d2ae8; box-shadow: 0 0 10px #7d2ae8; }
 
-        .base-pair {
-            position: absolute;
-            width: 100%;
-            height: 4px;
-            background: rgba(0, 255, 204, 0.2);
-            left: 0;
-            transform-style: preserve-3d;
-            animation: rotateDNA 4s linear infinite;
-        }
+    .line-label { position: absolute; right: -80px; font-size: 12px; color: #00f2ff; white-space: nowrap; transform: rotateY(-360deg); }
 
-        .base-pair::before, .base-pair::after {
-            content: '';
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            top: -3px;
-        }
-
-        .base-pair::before {
-            left: -5px;
-            background: #ff0077; /* Сахаро-фосфатный остов 1 */
-            box-shadow: 0 0 10px #ff0077;
-        }
-
-        .base-pair::after {
-            right: -5px;
-            background: #00ffcc; /* Сахаро-фосфатный остов 2 */
-            box-shadow: 0 0 10px #00ffcc;
-        }
-
-        @keyframes rotateDNA {
-            from { transform: rotateY(0deg); }
-            to { transform: rotateY(360deg); }
-        }
-
-        /* Генерация ступенек спирали */
-        .dna-side div:nth-child(1) { top: 0px; animation-delay: 0.0s; }
-        .dna-side div:nth-child(2) { top: 30px; animation-delay: 0.2s; }
-        .dna-side div:nth-child(3) { top: 60px; animation-delay: 0.4s; }
-        .dna-side div:nth-child(4) { top: 90px; animation-delay: 0.6s; }
-        .dna-side div:nth-child(5) { top: 120px; animation-delay: 0.8s; }
-        .dna-side div:nth-child(6) { top: 150px; animation-delay: 1.0s; }
-        .dna-side div:nth-child(7) { top: 180px; animation-delay: 1.2s; }
-        .dna-side div:nth-child(8) { top: 210px; animation-delay: 1.4s; }
-        .dna-side div:nth-child(9) { top: 240px; animation-delay: 1.6s; }
-        .dna-side div:nth-child(10) { top: 270px; animation-delay: 1.8s; }
-
-        /* Вид сверху - Гексаграмма */
-        .hexagram-view {
-            position: relative;
-            width: 250px;
-            height: 250px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .star {
-            position: absolute;
-            fill: none;
-            stroke: #00ffcc;
-            stroke-width: 2;
-            filter: drop-shadow(0 0 5px #00ffcc);
-            animation: pulse 3s ease-in-out infinite;
-        }
-
-        .dna-circle {
-            position: absolute;
-            width: 200px;
-            height: 200px;
-            border: 1px dashed rgba(0, 255, 204, 0.3);
-            border-radius: 50%;
-        }@keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.05); opacity: 1; }
-        }
-
-        .label {
-            margin-top: 20px;
-            text-align: center;
-            font-size: 14px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-    </style>
+    /* Генерация 12 ступенек, 6 из которых - гексаграмма */
+    .r1 { top: 20px; transform: rotateY(0deg); }
+    .r2 { top: 60px; transform: rotateY(30deg); }
+    .r3 { top: 100px; transform: rotateY(60deg); }
+    .r4 { top: 140px; transform: rotateY(90deg); active: true; } /* Начало гексаграммы */
+    .r5 { top: 180px; transform: rotateY(120deg); }
+    .r6 { top: 220px; transform: rotateY(150deg); }
+    .r7 { top: 260px; transform: rotateY(180deg); }
+    .r8 { top: 300px; transform: rotateY(210deg); }
+    .r9 { top: 340px; transform: rotateY(240deg); }
+    .r10 { top: 380px; transform: rotateY(270deg); }
+</style>
 </head>
 <body>
 
-    <div class="container">
-        <!-- Вид сбоку -->
-        <div>
-            <div class="dna-side">
-                <div class="base-pair"></div>
-                <div class="base-pair"></div>
-
-<div class="base-pair"></div>
-                <div class="base-pair"></div>
-                <div class="base-pair"></div>
-                <div class="base-pair"></div>
-                <div class="base-pair"></div>
-                <div class="base-pair"></div>
-                <div class="base-pair"></div>
-                <div class="base-pair"></div>
-            </div>
-            <div class="label">Двойная спираль<br>(Вид сбоку)</div>
-        </div>
-
-        <!-- Вид сверху -->
-        <div>
-            <div class="hexagram-view">
-                <div class="dna-circle"></div>
-                <svg class="star" viewBox="0 0 100 100" width="200" height="200">
-                    <!-- Гексаграмма (два треугольника) -->
-                    <polygon points="50,5 90,75 10,75" stroke="#ff0077" />
-                    <polygon points="50,95 10,25 90,25" />
-                    <!-- Точки пересечения (азотистые основания) -->
-                    <circle cx="50" cy="5" r="3" fill="#fff" />
-                    <circle cx="90" cy="75" r="3" fill="#fff" />
-                    <circle cx="10" cy="75" r="3" fill="#fff" />
-                    <circle cx="50" cy="95" r="3" fill="#fff" />
-                    <circle cx="10" cy="25" r="3" fill="#fff" />
-                    <circle cx="90" cy="25" r="3" fill="#fff" />
-                </svg>
-            </div>
-            <div class="label">Осевая проекция<br>(Геометрия "Гексаграммы")</div>
-        </div>
+<div class="scene">
+    <div class="dna" id="helix">
+        <!-- Каждая строка - это пара оснований -->
+        <div class="rung r1"><div class="node left"></div><div class="node right"></div></div>
+        <div class="rung r2"><div class="node left"></div><div class="node right"></div></div>
+        
+        <!-- СЕГМЕНТ ГЕКСАГРАММЫ (6 линий) -->
+        <div class="rung r3 active" style="top:100px; transform: rotateY(60deg);"><div class="node left"></div><div class="node right"></div><span class="line-label">Линия 6 (Верх)</span></div>
+        <div class="rung r4 active" style="top:140px; transform: rotateY(90deg);"><div class="node left"></div><div class="node right"></div><span class="line-label">Линия 5</span></div>
+        <div class="rung r5 active" style="top:180px; transform: rotateY(120deg);"><div class="node left"></div><div class="node right"></div><span class="line-label">Линия 4</span></div>
+        <div class="rung r6 active" style="top:220px; transform: rotateY(150deg);"><div class="node left"></div><div class="node right"></div><span class="line-label">Линия 3</span></div>
+        <div class="rung r7 active" style="top:260px; transform: rotateY(180deg);"><div class="node left"></div><div class="node right"></div><span class="line-label">Линия 2</span></div>
+        <div class="rung r8 active" style="top:300px; transform: rotateY(210deg);"><div class="node left"></div><div class="node right"></div><span class="line-label">Линия 1 (Низ)</span></div>
+        
+        <div class="rung r9" style="top:340px; transform: rotateY(240deg);"><div class="node left"></div><div class="node right"></div></div>
+        <div class="rung r10" style="top:380px; transform: rotateY(270deg);"><div class="node left"></div><div class="node right"></div></div>
     </div>
-
-    <div style="max-width: 600px; margin-top: 40px; font-size: 13px; color: #888; text-align: center;">
-        Гексаграмма в ДНК часто соотносится с 6-кратной симметрией молекулы при взгляде сверху. 
-        Один полный виток спирали содержит примерно 10-10.5 пар оснований, а геометрия связей 
-        внутри углеродных колец оснований (пуринов и пиримидинов) имеет гексагональную форму.
+    
+    <div style="margin-top: 50px; text-align: center; max-width: 400px;">
+        <h3 style="color: #00f2ff;">Блок Гексаграммы</h3>
+        <p style="font-size: 14px; color: #888;">Выделенный цветной сегмент — это 6 пар оснований. В биологическом смысле это 2 кодона, которые вместе образуют одну из 64 архетипических конфигураций (гексаграмм).</p>
     </div>
+</div>
 
 </body>
 </html>
