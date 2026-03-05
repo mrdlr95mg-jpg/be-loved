@@ -2,72 +2,75 @@
 <html>
 <head>
 <style>
-    body { background: #0a0a0a; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-    .codon-container { display: flex; flex-direction: column; gap: 20px; align-items: center; }
+    body { background: #000; color: #fff; font-family: 'Courier New', monospace; display: flex; justify-content: center; padding: 20px; }
+    .container { border: 1px solid #333; padding: 30px; border-radius: 15px; background: #050505; }
     
-    .base-pair {
-        width: 250px; height: 80px;
-        border: 2px solid #333;
-        display: flex; flex-direction: column;
-        position: relative;
-        background: rgba(255,255,255,0.05);
-        border-radius: 10px;
-        overflow: hidden;
+    .dna-strand { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 30px; }
+    
+    /* Ступенька ДНК */
+    .base {
+        width: 200px; height: 40px;
+        border: 2px solid #00f2ff;
+        display: flex; justify-content: center; align-items: center;
+        position: relative; font-weight: bold; font-size: 20px;
+        background: rgba(0, 242, 255, 0.1);
     }
 
-    /* Две линии внутри одной ступеньки ДНК */
-    .line {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        font-size: 12px;
-        letter-spacing: 2px;
-        transition: 0.3s;
+    /* Стрелки трансформации */
+    .arrow { color: #555; font-size: 24px; margin: 5px 0; }
+
+    /* Гексаграмма (6 линий) */
+    .hexagram { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+    .line { width: 100px; height: 8px; border-radius: 2px; }
+    .yang { background: #00f2ff; box-shadow: 0 0 10px #00f2ff; }
+    .yin { 
+        background: transparent;
+        border-left: 40px solid #ff0077;
+        border-right: 40px solid #ff0077;
+        width: 100px; box-shadow: 0 0 5px #ff0077;
     }
 
-    .line.yin { background: repeating-linear-gradient(90deg, #ff0077, #ff0077 40%, transparent 40%, transparent 60%, #ff0077 60%); height: 8px; margin: 10px 20px; }
-    .line.yang { background: #00f2ff; height: 8px; margin: 10px 20px; }
-
-    .label-base { position: absolute; left: -60px; top: 25px; color: #00f2ff; font-weight: bold; }
-    .label-info { position: absolute; right: -150px; font-size: 10px; color: #888; width: 140px; }
-
-    h2 { color: #00f2ff; text-shadow: 0 0 10px #00f2ff; margin-bottom: 40px; }
+    .label { font-size: 10px; color: #888; text-transform: uppercase; margin-top: 5px; }
 </style>
 </head>
 <body>
 
-<div class="codon-container">
-    <h2>СТРУКТУРА 1 КОДОНА (ГЕКСАГРАММА)</h2>
+<div class="container">
+    <h3 style="text-align:center; color:#00f2ff;">1 КОДОН = 6 ЛИНИЙ</h3>
     
-    <!-- Ступенька 3 -->
-    <div class="base-pair">
-        <div class="label-base">БАЗА 3</div>
-        <div class="line yang"></div> <!-- Линия 6 -->
-        <div class="line yin"></div>  <!-- Линия 5 -->
-        <div class="label-info">Линия 6: Тип связи<br>Линия 5: Тип молекулы</div>
+    <div style="display: flex; align-items: center; gap: 40px;">
+        <!-- Слой ДНК -->
+        <div class="dna-strand">
+            <div class="label">Буква 3</div>
+            <div class="base">T</div>
+            <div class="arrow">↓</div>
+            <div class="label">Буква 2</div>
+            <div class="base">A</div>
+            <div class="arrow">↓</div>
+            <div class="label">Буква 1</div>
+            <div class="base">G</div>
+        </div>
+
+        <!-- Слой Проекции -->
+        <div style="font-size: 30px; color: #333;">⇒</div>
+
+        <!-- Слой Гексаграммы -->
+        <div class="hexagram">
+            <div class="label">Линия 6</div><div class="line yin"></div>
+            <div class="label">Линия 5</div><div class="line yin"></div>
+            <div style="height: 10px;"></div>
+            <div class="label">Линия 4</div><div class="line yin"></div>
+            <div class="label">Линия 3</div><div class="line yang"></div>
+            <div style="height: 10px;"></div>
+            <div class="label">Линия 2</div><div class="line yang"></div>
+            <div class="label">Линия 1</div><div class="line yang"></div>
+        </div>
     </div>
 
-    <!-- Ступенька 2 -->
-    <div class="base-pair">
-        <div class="label-base">БАЗА 2</div>
-        <div class="line yin"></div>  <!-- Линия 4 -->
-        <div class="line yang"></div> <!-- Линия 3 -->
-        <div class="label-info">Линия 4: Тип связи<br>Линия 3: Тип молекулы</div>
-    </div>
-
-    <!-- Ступенька 1 -->
-    <div class="base-pair">
-        <div class="label-base">БАЗА 1</div>
-        <div class="line yang"></div> <!-- Линия 2 -->
-        <div class="line yang"></div> <!-- Линия 1 -->
-        <div class="label-info">Линия 2: Тип связи<br>Линия 1: Тип молекулы</div>
-    </div>
-
-    <div style="margin-top: 30px; text-align: center; color: #888; max-width: 400px; font-size: 14px;">
-        Каждая "ступенька" ДНК — это <b>двойной переключатель</b>. 
-        3 ступеньки кодона дают 2+2+2 = 6 линий гексаграммы.
+    <div style="margin-top: 30px; border-top: 1px solid #333; padding-top: 20px; font-size: 13px; line-height: 1.6;">
+        <span style="color: #00f2ff;">●</span> Каждая буква ДНК хранит <b>два бита</b> информации.<br>
+        <span style="color: #ff0077;">●</span> Три буквы подряд (кодон) — это ровно <b>шесть бит</b>.<br>
+        <span style="color: #fff;">●</span> Гексаграмма — это просто <b>визуальный способ</b> записать эти 6 бит информации, которые определяют, какую аминокислоту построит клетка.
     </div>
 </div>
 
