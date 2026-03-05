@@ -2,66 +2,72 @@
 <html>
 <head>
 <style>
-    body { background: #050505; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
-    .scene { perspective: 800px; display: flex; flex-direction: column; align-items: center; }
+    body { background: #0a0a0a; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+    .codon-container { display: flex; flex-direction: column; gap: 20px; align-items: center; }
     
-    .dna { position: relative; width: 150px; height: 450px; transform-style: preserve-3d; animation: rotate 10s linear infinite; }
-    
-    @keyframes rotate { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
-
-    /* Ступеньки (линии гексаграммы) */
-    .rung {
-        position: absolute; width: 140px; height: 6px;
-        background: rgba(255, 255, 255, 0.1);
-        left: 5px; transform-style: preserve-3d;
-        display: flex; justify-content:空间-between; align-items: center;
+    .base-pair {
+        width: 250px; height: 80px;
+        border: 2px solid #333;
+        display: flex; flex-direction: column;
+        position: relative;
+        background: rgba(255,255,255,0.05);
+        border-radius: 10px;
+        overflow: hidden;
     }
 
-    /* Подсветка активной гексаграммы (6 линий) */
-    .rung.active { background: linear-gradient(90deg, #00f2ff, #7d2ae8); box-shadow: 0 0 15px rgba(0, 242, 255, 0.6); border-radius: 3px; }
-    
-    .node { width: 16px; height: 16px; border-radius: 50%; position: absolute; }
-    .node.left { left: -8px; background: #00f2ff; box-shadow: 0 0 10px #00f2ff; }
-    .node.right { right: -8px; background: #7d2ae8; box-shadow: 0 0 10px #7d2ae8; }
+    /* Две линии внутри одной ступеньки ДНК */
+    .line {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 12px;
+        letter-spacing: 2px;
+        transition: 0.3s;
+    }
 
-    .line-label { position: absolute; right: -80px; font-size: 12px; color: #00f2ff; white-space: nowrap; transform: rotateY(-360deg); }
+    .line.yin { background: repeating-linear-gradient(90deg, #ff0077, #ff0077 40%, transparent 40%, transparent 60%, #ff0077 60%); height: 8px; margin: 10px 20px; }
+    .line.yang { background: #00f2ff; height: 8px; margin: 10px 20px; }
 
-    /* Генерация 12 ступенек, 6 из которых - гексаграмма */
-    .r1 { top: 20px; transform: rotateY(0deg); }
-    .r2 { top: 60px; transform: rotateY(30deg); }
-    .r3 { top: 100px; transform: rotateY(60deg); }
-    .r4 { top: 140px; transform: rotateY(90deg); active: true; } /* Начало гексаграммы */
-    .r5 { top: 180px; transform: rotateY(120deg); }
-    .r6 { top: 220px; transform: rotateY(150deg); }
-    .r7 { top: 260px; transform: rotateY(180deg); }
-    .r8 { top: 300px; transform: rotateY(210deg); }
-    .r9 { top: 340px; transform: rotateY(240deg); }
-    .r10 { top: 380px; transform: rotateY(270deg); }
+    .label-base { position: absolute; left: -60px; top: 25px; color: #00f2ff; font-weight: bold; }
+    .label-info { position: absolute; right: -150px; font-size: 10px; color: #888; width: 140px; }
+
+    h2 { color: #00f2ff; text-shadow: 0 0 10px #00f2ff; margin-bottom: 40px; }
 </style>
 </head>
 <body>
 
-<div class="scene">
-    <div class="dna" id="helix">
-        <!-- Каждая строка - это пара оснований -->
-        <div class="rung r1"><div class="node left"></div><div class="node right"></div></div>
-        <div class="rung r2"><div class="node left"></div><div class="node right"></div></div>
-        
-        <!-- СЕГМЕНТ ГЕКСАГРАММЫ (6 линий) -->
-        <div class="rung r3 active" style="top:100px; transform: rotateY(60deg);"><div class="node left"></div><div class="node right"></div><span class="line-label">Линия 6 (Верх)</span></div>
-        <div class="rung r4 active" style="top:140px; transform: rotateY(90deg);"><div class="node left"></div><div class="node right"></div><span class="line-label">Линия 5</span></div>
-        <div class="rung r5 active" style="top:180px; transform: rotateY(120deg);"><div class="node left"></div><div class="node right"></div><span class="line-label">Линия 4</span></div>
-        <div class="rung r6 active" style="top:220px; transform: rotateY(150deg);"><div class="node left"></div><div class="node right"></div><span class="line-label">Линия 3</span></div>
-        <div class="rung r7 active" style="top:260px; transform: rotateY(180deg);"><div class="node left"></div><div class="node right"></div><span class="line-label">Линия 2</span></div>
-        <div class="rung r8 active" style="top:300px; transform: rotateY(210deg);"><div class="node left"></div><div class="node right"></div><span class="line-label">Линия 1 (Низ)</span></div>
-        
-        <div class="rung r9" style="top:340px; transform: rotateY(240deg);"><div class="node left"></div><div class="node right"></div></div>
-        <div class="rung r10" style="top:380px; transform: rotateY(270deg);"><div class="node left"></div><div class="node right"></div></div>
-    </div>
+<div class="codon-container">
+    <h2>СТРУКТУРА 1 КОДОНА (ГЕКСАГРАММА)</h2>
     
-    <div style="margin-top: 50px; text-align: center; max-width: 400px;">
-        <h3 style="color: #00f2ff;">Блок Гексаграммы</h3>
-        <p style="font-size: 14px; color: #888;">Выделенный цветной сегмент — это 6 пар оснований. В биологическом смысле это 2 кодона, которые вместе образуют одну из 64 архетипических конфигураций (гексаграмм).</p>
+    <!-- Ступенька 3 -->
+    <div class="base-pair">
+        <div class="label-base">БАЗА 3</div>
+        <div class="line yang"></div> <!-- Линия 6 -->
+        <div class="line yin"></div>  <!-- Линия 5 -->
+        <div class="label-info">Линия 6: Тип связи<br>Линия 5: Тип молекулы</div>
+    </div>
+
+    <!-- Ступенька 2 -->
+    <div class="base-pair">
+        <div class="label-base">БАЗА 2</div>
+        <div class="line yin"></div>  <!-- Линия 4 -->
+        <div class="line yang"></div> <!-- Линия 3 -->
+        <div class="label-info">Линия 4: Тип связи<br>Линия 3: Тип молекулы</div>
+    </div>
+
+    <!-- Ступенька 1 -->
+    <div class="base-pair">
+        <div class="label-base">БАЗА 1</div>
+        <div class="line yang"></div> <!-- Линия 2 -->
+        <div class="line yang"></div> <!-- Линия 1 -->
+        <div class="label-info">Линия 2: Тип связи<br>Линия 1: Тип молекулы</div>
+    </div>
+
+    <div style="margin-top: 30px; text-align: center; color: #888; max-width: 400px; font-size: 14px;">
+        Каждая "ступенька" ДНК — это <b>двойной переключатель</b>. 
+        3 ступеньки кодона дают 2+2+2 = 6 линий гексаграммы.
     </div>
 </div>
 
