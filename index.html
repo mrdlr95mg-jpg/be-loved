@@ -2,81 +2,74 @@
 <html>
 <head>
 <style>
-    body { background: #050505; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+    body { background: #050505; color: #eee; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 20px; }
+    .main-stage { display: flex; align-items: center; gap: 50px; height: 500px; perspective: 1000px; }
     
-    .dna-container { perspective: 1000px; width: 400px; height: 450px; position: relative; }
-    .codon-unit { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; animation: rotate 15s linear infinite; }
+    /* Спираль ДНК по краям */
+    .helix-side { width: 40px; height: 400px; border-left: 2px solid #444; border-right: 2px solid #444; position: relative; opacity: 0.3; }
     
-    @keyframes rotate { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
+    /* Центральный Кодон CCC (Инь) */
+    .codon-focus { transform-style: preserve-3d; animation: rot 15s linear infinite; }
+    @keyframes rot { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
 
-    .base-pair {
-        position: absolute; width: 220px; height: 4px; left: 90px;
-        display: flex; justify-content: space-between; align-items: center;
-        transform-style: preserve-3d;
+    .pair-step { width: 220px; height: 60px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; position: relative; }
+    
+    /* Линии Инь (прерывистые) */
+    .yin-nuc { 
+        width: 90px; height: 35px; border: 1px solid #ff0055; background: rgba(255, 0, 85, 0.05); 
+        display: flex; justify-content: center; gap: 6px; align-items: center; border-radius: 4px;
     }
+    .yin-nuc div { width: 30px; height: 4px; background: #ff0055; box-shadow: 0 0 8px #ff0055; }
 
-    .nucleotide {
-        width: 100px; height: 50px; border: 1px solid rgba(255, 0, 150, 0.2);
-        background: rgba(255, 0, 150, 0.03); border-radius: 4px;
-        display: flex; flex-direction: column; align-items: center; justify-content: center;
-        font-size: 10px; color: #ff0096; transition: 0.5s;
-    }
+    /* Акцентная 4-я линия */
+    .active-line { border: 2px solid #fff; background: rgba(255,255,255,0.2); box-shadow: 0 0 20px #fff; }
+    .active-line div { background: #fff; box-shadow: 0 0 10px #fff; }
 
-    /* Прерывистая линия Инь (символ 2-х ворот) */
-    .yin-line-container { width: 44px; height: 4px; display: flex; justify-content: space-between; margin-top: 8px; }
-    .yin-segment { width: 18px; height: 4px; background: #ff0096; box-shadow: 0 0 8px #ff0096; }
-
-    /* Акцент на 2-й линии (Правая сторона нижней ступеньки) */
-    .active-2 { 
-        background: #ff0096 !important; border: 2px solid #fff !important; 
-        box-shadow: 0 0 40px #ff0096; color: #fff !important; transform: scale(1.15);
-    }
-    .active-2 .yin-segment { background: #fff; box-shadow: none; }
-
-    .bridge { width: 40px; height: 1px; background: rgba(255,255,255,0.1); border-style: dashed; }
-
-    .step-label { position: absolute; left: -110px; color: #444; font-size: 11px; width: 100px; text-align: right; }
+    .tag { font-size: 10px; color: #888; position: absolute; top: -15px; width: 100%; text-align: center; }
 </style>
 </head>
 <body>
 
-    <h2 style="font-weight: 200; letter-spacing: 4px;">ВОРОТА 2 <span style="color:#ff0096">●</span> ЛИНИЯ 2</h2>
-    <p style="color: #666; font-size: 14px;">Кодон UUU (Фенилаланин) — Чистый Инь</p>
+    <h2>ВОРОТА 2 (CCC) ● ЛИНИЯ 4</h2>
+    <div style="color: #ff0055; font-size: 0.8rem; margin-bottom: 20px;">Гексаграмма "Исполнение" (Все линии Инь)</div>
 
-    <div class="dna-container">
-        <div class="codon-unit">
-            
-            <!-- Пара 3 (Линии 5 и 6) -->
-            <div class="base-pair" style="top: 50px; transform: rotateY(120deg);">
-                <div class="step-label">Пара 3 (U-A)</div>
-                <div class="nucleotide">Линия 5<div class="yin-line-container"><div class="yin-segment"></div><div class="yin-segment"></div></div></div>
-                <div class="bridge"></div>
-                <div class="nucleotide">Линия 6<div class="yin-line-container"><div class="yin-segment"></div><div class="yin-segment"></div></div></div>
+    <div class="main-stage">
+        <div class="helix-side"></div>
+
+        <div class="codon-focus">
+            <!-- Пара 3 (Линии 5-6) -->
+            <div class="pair-step" style="transform: rotateY(40deg);">
+                <div class="tag">Пара 3 (C-G)</div>
+                <div class="yin-nuc"><div></div><div></div></div>
+                <div style="width:30px; height:1px; background:#333"></div>
+                <div class="yin-nuc"><div></div><div></div></div>
             </div>
 
-            <!-- Пара 2 (Линии 3 и 4) -->
-            <div class="base-pair" style="top: 150px; transform: rotateY(60deg);">
-                <div class="step-label">Пара 2 (U-A)</div>
-                <div class="nucleotide">Линия 3<div class="yin-line-container"><div class="yin-segment"></div><div class="yin-segment"></div></div></div>
-                <div class="bridge"></div>
-                <div class="nucleotide">Линия 4<div class="yin-line-container"><div class="yin-segment"></div><div class="yin-segment"></div></div></div>
+            <!-- Пара 2 (Линии 3-4) -->
+            <div class="pair-step" style="transform: rotateY(20deg);">
+                <div class="tag">Пара 2 (C-G)</div>
+                <div class="yin-nuc"><div></div><div></div></div>
+                <div style="width:30px; height:1px; background:#333"></div>
+                <!-- АКТИВИРОВАННАЯ 4 ЛИНИЯ -->
+                <div class="yin-nuc active-line"><div></div><div></div></div>
             </div>
 
-            <!-- Пара 1 (Линии 1 и 2) -->
-            <div class="base-pair" style="top: 250px; transform: rotateY(0deg);">
-                <div class="step-label">Пара 1 (U-A)</div>
-                <div class="nucleotide">Линия 1<div class="yin-line-container"><div class="yin-segment"></div><div class="yin-segment"></div></div></div>
-                <div class="bridge"></div>
-                <!-- АКТИВАЦИЯ 2 ЛИНИИ -->
-                <div class="nucleotide active-2">ЛИНИЯ 2<div class="yin-line-container"><div class="yin-segment"></div><div class="yin-segment"></div></div></div>
+            <!-- Пара 1 (Линии 1-2) -->
+            <div class="pair-step">
+                <div class="tag">Пара 1 (C-G)</div>
+                <div class="yin-nuc"><div></div><div></div></div>
+                <div style="width:30px; height:1px; background:#333"></div>
+                <div class="yin-nuc"><div></div><div></div></div>
             </div>
-
         </div>
+
+        <div class="helix-side"></div>
     </div>
 
-    <div style="margin-top: 30px; text-align: center; font-size: 0.9rem; color: #888; border-top: 1px solid #222; padding-top: 15px;">
-        <span style="color: #ff0096;">Геометрия:</span> Кодон UUU состоит из 6 прерывистых линий (Инь). <br>
-        <b>2-я линия</b> — это «внутренний гений», правая часть фундамента кодона.
+    <div style="max-width: 600px; font-size: 0.85rem; line-height: 1.4; color: #aaa; text-align: center; border-top: 1px solid #333; padding-top: 15px;">
+        <b>Хиральность:</b> Все "кубики" (аминокислоты), из которых строится белок по этому коду CCC — "левые". <br>
+        <b>Парадокс:</b> Чтобы эта 4-я линия "заговорила", нужен <b>белок</b>-фермент, который расплетет спираль. <br>
+        Без белка ДНК — это мертвая библиотека. Без ДНК белок — это здание без чертежа.
     </div>
 
 </body>
