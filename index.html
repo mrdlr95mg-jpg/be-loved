@@ -1,42 +1,79 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<style>
-    .bio-card { font-family: sans-serif; border: 2px solid #2c3e50; border-radius: 10px; padding: 20px; max-width: 500px; background: #f9f9f9; }
-    .dna-header { color: #e74c3c; font-weight: bold; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
-    .process { margin: 15px 0; padding-left: 10px; border-left: 3px solid #3498db; }
-    .plus { color: #27ae60; font-weight: bold; }
-    .minus { color: #c0392b; font-weight: bold; }
-    .comment { font-size: 0.9em; color: #7f8c8d; font-style: italic; }
-</style>
+    <meta charset="UTF-8">
+    <title>Переменные Дизайна Человека</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; max-width: 600px; }
+        h2 { color: #333; margin-bottom: 30px; }
+        
+        .bodygraph-mock { display: grid; grid-template-columns: 1fr 120px 1fr; grid-template-rows: 1fr 1fr; gap: 20px; align-items: center; position: relative; }
+        
+        /* Голова (центр) */
+        .head-shape { grid-column: 2; grid-row: 1 / span 2; background: #eee; border: 2px solid #ccc; height: 180px; border-radius: 50% 50% 40% 40%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #999; z-index: 1; }
+
+        /* Стрелки */
+        .variable { padding: 15px; border-radius: 12px; transition: transform 0.3s; cursor: help; position: relative; border: 2px solid transparent; }
+        .variable:hover { transform: scale(1.05); }
+        
+        /* Левая сторона (Красная - Дизайн/Тело) */
+        .design { border-color: #ff4d4d; color: #b30000; background: #fff5f5; }
+        /* Правая сторона (Черная - Личность/Ум) */
+        .personality { border-color: #333; color: #333; background: #f9f9f9; }
+
+        .label { font-size: 0.8em; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; display: block; }
+        .source { font-size: 0.9em; background: rgba(0,0,0,0.05); padding: 4px 8px; border-radius: 4px; display: inline-block; margin-top: 5px; }
+
+        /* Линии-указатели */
+        .arrow-icon { font-size: 24px; display: block; margin: 5px 0; }
+    </style>
 </head>
 <body>
 
-<div class="bio-card">
-    <div class="dna-header">🧬 МОЛЕКУЛЯРНЫЙ ПРОТОКОЛ ВОССТАНОВЛЕНИЯ</div>
-    
-    <div class="process">
-        <strong>🍞 Дрожжи / Сахар (Input):</strong><br>
-        <span class="minus">-- Эффект:</span> Активация ферментов роста грибка. На уровне ДНК стимулируется переход Candida из формы покоя в агрессивную нитчатую форму.
-    </div>
+<div class="container">
+    <h2>Твои 4 Переменные</h2>
+    <div class="bodygraph-mock">
+        
+        <!-- ВЕРХ СЛЕВА: ПИТАНИЕ -->
+        <div class="variable design">
+            <span class="label">Питание (Тело)</span>
+            <span class="arrow-icon">←</span>
+            <div class="source">☀️ / 🌍 Дизайна</div>
+            <p style="font-size: 11px;">Как ты усваиваешь пищу и мир</p>
+        </div>
 
-    <div class="process">
-        <strong>🧪 Целестодерм (Blocker):</strong><br>
-        <span class="plus">++ Эффект:</span> Блокирует синтез простагландинов (сигналов боли и зуда). <br>
-        <span class="minus">-- Риск:</span> При избытке тормозит деление здоровых клеток (ДНК-репликацию), истончая кожу.
-    </div>
+        <div class="head-shape">УМ</div>
 
-    <div class="process">
-        <strong>🧴 Декспантенол (Builder):</strong><br>
-        <span class="plus">++ Эффект:</span> Превращается в пантотеновую кислоту (Кофермент А). Это "топливо" для синтеза новых липидов и восстановления клеточных мембран.
-    </div>
+        <!-- ВЕРХ СПРАВА: МОТИВАЦИЯ -->
+        <div class="variable personality">
+            <span class="label">Мотивация (Ум)</span>
+            <span class="arrow-icon">→</span>
+            <div class="source">☀️ / 🌍 Личности</div>
+            <p style="font-size: 11px;">Что заставляет тебя думать</p>
+        </div>
 
-    <div class="process">
-        <strong>🥦 Клетчатка / Овощи (System Update):</strong><br>
-        <span class="plus">++ Эффект:</span> Связывает токсины в кишечнике, снижая системное воспаление, которое "транслируется" на кожу мошонки и ануса.
-    </div>
+        <!-- НИЗ СЛЕВА: СРЕДА -->
+        <div class="variable design">
+            <span class="label">Среда (Место)</span>
+            <span class="arrow-icon">←</span>
+            <div class="source">☊ / ☋ Дизайна</div>
+            <p style="font-size: 11px;">Где твоему телу безопасно</p>
+        </div>
 
-    <p class="comment">* Резюме: Мази чинят "интерфейс", а питание меняет "исходный код" болезни.</p>
+        <!-- НИЗ СПРАВА: ПЕРСПЕКТИВА -->
+        <div class="variable personality">
+            <span class="label">Перспектива (Взгляд)</span>
+            <span class="arrow-icon">→</span>
+            <div class="source">☊ / ☋ Личности</div>
+            <p style="font-size: 11px;">Как ты видишь реальность</p>
+        </div>
+
+    </div>
+    <p style="margin-top: 30px; color: #666; font-size: 14px;">
+        Красные (слева) — это твоё <b>подсознание (тело)</b>.<br>
+        Черные (справа) — это твоё <b>сознание (личность)</b>.
+    </p>
 </div>
 
 </body>
