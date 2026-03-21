@@ -2,85 +2,99 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Смена Крестов в Human Design</title>
+    <title>Эволюция Инкарнационного Креста</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a1a2e; color: white; display: flex; flex-direction: column; align-items: center; padding: 40px; }
-        .wheel-container { position: relative; width: 600px; height: 150px; background: #16213e; border-radius: 75px; display: flex; align-items: center; padding: 0 50px; box-sizing: border-box; border: 2px solid #485460; overflow: hidden; }
-        .line-marker { flex: 1; text-align: center; position: relative; z-index: 2; transition: all 0.5s; font-weight: bold; opacity: 0.4; }
-        .line-marker.active { opacity: 1; transform: scale(1.3); color: #00d2ff; }
-        .line-marker span { display: block; font-size: 12px; margin-top: 5px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0c29; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; overflow: hidden; }
+        .stage { position: relative; width: 450px; height: 450px; border: 2px solid #34495e; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+        .axis { position: absolute; width: 100%; height: 2px; background: rgba(255,255,255,0.1); }
+        .axis.vert { transform: rotate(90deg); }
         
-        #pointer { position: absolute; width: 60px; height: 60px; background: rgba(0, 210, 255, 0.2); border: 2px solid #00d2ff; border-radius: 50%; left: 50px; transition: left 0.8s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1; box-shadow: 0 0 20px #00d2ff; }
+        /* Планеты */
+        .planet { position: absolute; width: 20px; height: 20px; border-radius: 50%; z-index: 10; transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+        .p-sun { background: #f1c40f; box-shadow: 0 0 15px #f1c40f; } /* Солнце Личности */
+        .p-earth { background: #27ae60; box-shadow: 0 0 15px #27ae60; } /* Земля Личности */
+        .d-sun { background: #e74c3c; box-shadow: 0 0 15px #e74c3c; } /* Солнце Дизайна */
+        .d-earth { background: #c0392b; box-shadow: 0 0 15px #c0392b; } /* Земля Дизайна */
 
-        .info-card { margin-top: 40px; background: #0f3460; padding: 25px; border-radius: 15px; width: 500px; text-align: center; border-left: 5px solid #00d2ff; }
-        .cross-title { font-size: 24px; margin-bottom: 10px; color: #e94560; text-transform: uppercase; letter-spacing: 2px; }
-        .cross-desc { font-size: 16px; line-height: 1.5; color: #a2a8d3; }
+        .label-box { position: absolute; top: -60px; text-align: center; width: 300px; }
+        .profile-tag { font-size: 42px; font-weight: bold; color: #00d2ff; text-shadow: 0 0 10px #00d2ff; }
+        .cross-type { font-size: 18px; text-transform: uppercase; letter-spacing: 3px; margin-top: 10px; }
         
-        .controls { margin-top: 20px; }
-        button { padding: 10px 20px; cursor: pointer; background: #e94560; border: none; color: white; border-radius: 5px; font-weight: bold; transition: 0.3s; }
-        button:hover { background: #ff5e78; }
+        .controls { margin-top: 50px; display: flex; gap: 20px; }
+        button { padding: 12px 25px; border: none; border-radius: 25px; cursor: pointer; background: #3498db; color: white; font-weight: bold; transition: 0.3s; }
+        button:hover { background: #2980b9; transform: translateY(-2px); }
+        .desc { max-width: 400px; text-align: center; margin-top: 20px; color: #bdc3c7; font-size: 14px; line-height: 1.4; }
     </style>
 </head>
 <body>
 
-    <h1>Эволюция Креста (Линии 1-6)</h1>
-
-    <div class="wheel-container">
-        <div id="pointer"></div>
-        <div class="line-marker" id="m1">1<span>Исследователь</span></div>
-        <div class="line-marker" id="m2">2<span>Отшельник</span></div>
-        <div class="line-marker" id="m3">3<span>Мученик</span></div>
-        <div class="line-marker" id="m4">4<span>Опортунист</span></div>
-        <div class="line-marker" id="m5">5<span>Еретик</span></div>
-        <div class="line-marker" id="m6">6<span>Ролевая модель</span></div>
+    <div class="label-box">
+        <div id="profile" class="profile-tag">1 / 3</div>
+        <div id="type" class="cross-type">Правоугольный Крест</div>
     </div>
 
-    <div class="info-card">
-        <div id="cross-type" class="cross-title">Правоугольный Крест</div>
-        <div id="cross-info" class="cross-desc">Личная судьба. Вы здесь, чтобы познать себя и свой путь через собственный опыт. Другие люди — лишь декорации.</div>
+    <div class="stage">
+        <div class="axis"></div>
+        <div class="axis vert"></div>
+        
+        <!-- Личность (Черное/Цветное) -->
+        <div id="psun" class="planet p-sun"></div>
+        <div id="pearth" class="planet p-earth"></div>
+        
+        <!-- Дизайн (Красное) -->
+        <div id="dsun" class="planet d-sun"></div>
+        <div id="dearth" class="planet d-earth"></div>
     </div>
 
     <div class="controls">
-        <button onclick="prev()">⬅ Назад</button>
-        <button onclick="next()">Вперед (По Линиям) ➡</button>
+        <button onclick="changeStep(-1)">⬅ Назад</button>
+        <button onclick="changeStep(1)">Следующий этап ➡</button>
+    </div>
+
+    <div id="desc" class="desc">
+        Линии 1, 2, 3: Личная судьба. Весь фокус внутри вашей собственной геометрии.
     </div>
 
 <script>
-    let currentLine = 1;
-    const markers = document.querySelectorAll('.line-marker');
-    const pointer = document.getElementById('pointer');
-    const typeTitle = document.getElementById('cross-type');
-    const infoText = document.getElementById('cross-info');
-
-    const data = {
-        1: { title: "Правоугольный (Personal)", text: "1 Линия: Фундамент. Вы погружены в изучение предмета. Личная геометрия." },
-        2: { title: "Правоугольный (Personal)", text: "2 Линия: Дар. Вы естественны в своем процессе, не нуждаетесь в учителях." },
-        3: { title: "Правоугольный (Personal)", text: "3 Линия: Связи. Вы учитесь на ошибках. Процесс 'проб и ошибок' — ваш путь." },
-        4: { title: "Джакста-позиция (Fixed)", text: "4 Линия: Влияние. Редкая фиксированная судьба. Переход от личного к коллективному." },
-        5: { title: "Левоугольный (Interpersonal)", text: "5 Линия: Проекции. Ваша судьба неразрывно связана с другими. Вы — спаситель или изгой." },
-        6: { title: "Левоугольный (Interpersonal)", text: "6 Линия: Мудрость. Наблюдение за целым миром. Выход за пределы личного опыта." }
-    };
+    let step = 0;
+    const steps = [
+        { p: "1 / 3", t: "Правоугольный", a: 0, d: "Линии 1, 2, 3: Личная судьба. Вы здесь, чтобы исследовать мир для себя.", c: "#00d2ff" },
+        { p: "4 / 6", t: "Правоугольный (Финал)", a: 45, d: "Линия 4 в личности: Вы начинаете замечать других, но крест всё еще 'Правый'.", c: "#00d2ff" },
+        { p: "4 / 1", t: "Джакста-позиция", a: 60, d: "Уникальная точка 'Фиксированной судьбы'. Тонкая грань между личным и общим.", c: "#f1c40f" },
+        { p: "5 / 1", t: "Левоугольный", a: 90, d: "Линия 5: Трансперсональная карма. Вы здесь для взаимодействия и влияния на других.", c: "#e74c3c" },
+        { p: "6 / 2", t: "Левоугольный", a: 130, d: "Линия 6: Ролевая модель. Переход к наблюдению за всем циклом целиком.", c: "#e74c3c" }
+    ];
 
     function update() {
-        markers.forEach(m => m.classList.remove('active'));
-        document.getElementById('m' + currentLine).classList.add('active');
-        
-        pointer.style.left = (50 + (currentLine - 1) * 83) + 'px';
-        
-        typeTitle.innerText = data[currentLine].title;
-        infoText.innerText = data[currentLine].text;
+        const s = steps[step];
+        document.getElementById('profile').innerText = s.p;
+        document.getElementById('type').innerText = s.t;
+        document.getElementById('type').style.color = s.c;
+        document.getElementById('desc').innerText = s.d;
 
-        // Цветовая индикация смены креста
-        if (currentLine <= 3) typeTitle.style.color = "#00d2ff"; // Голубой (Личный)
-        else if (currentLine == 4) typeTitle.style.color = "#fbc531"; // Желтый (Фикс)
-        else typeTitle.style.color = "#e94560"; // Красный (Трансперсональный)
+        const radius = 180;
+        const angle = s.a;
+
+        // Личность
+        setPos('psun', angle, radius);
+        setPos('pearth', angle + 180, radius);
+        
+        // Дизайн (отстает на ~88 градусов)
+        setPos('dsun', angle - 88, radius);
+        setPos('dearth', angle + 180 - 88, radius);
     }
 
-    function next() {
-        if (currentLine < 6) { currentLine++; update(); }
+    function setPos(id, deg, r) {
+        const rad = deg * Math.PI / 180;
+        const x = Math.cos(rad) * r;
+        const y = Math.sin(rad) * r;
+        const el = document.getElementById(id);
+        el.style.transform = `translate(${x}px, ${y}px)`;
     }
-    function prev() {
-        if (currentLine > 1) { currentLine--; update(); }
+
+    function changeStep(dir) {
+        step = (step + dir + steps.length) % steps.length;
+        update();
     }
 
     update();
