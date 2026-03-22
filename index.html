@@ -1,103 +1,111 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>Эволюция Инкарнационного Креста</title>
+    <title>3D Механика Лунных Узлов</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0f0c29; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; overflow: hidden; }
-        .stage { position: relative; width: 450px; height: 450px; border: 2px solid #34495e; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
-        .axis { position: absolute; width: 100%; height: 2px; background: rgba(255,255,255,0.1); }
-        .axis.vert { transform: rotate(90deg); }
-        
-        /* Планеты */
-        .planet { position: absolute; width: 20px; height: 20px; border-radius: 50%; z-index: 10; transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
-        .p-sun { background: #f1c40f; box-shadow: 0 0 15px #f1c40f; } /* Солнце Личности */
-        .p-earth { background: #27ae60; box-shadow: 0 0 15px #27ae60; } /* Земля Личности */
-        .d-sun { background: #e74c3c; box-shadow: 0 0 15px #e74c3c; } /* Солнце Дизайна */
-        .d-earth { background: #c0392b; box-shadow: 0 0 15px #c0392b; } /* Земля Дизайна */
-
-        .label-box { position: absolute; top: -60px; text-align: center; width: 300px; }
-        .profile-tag { font-size: 42px; font-weight: bold; color: #00d2ff; text-shadow: 0 0 10px #00d2ff; }
-        .cross-type { font-size: 18px; text-transform: uppercase; letter-spacing: 3px; margin-top: 10px; }
-        
-        .controls { margin-top: 50px; display: flex; gap: 20px; }
-        button { padding: 12px 25px; border: none; border-radius: 25px; cursor: pointer; background: #3498db; color: white; font-weight: bold; transition: 0.3s; }
-        button:hover { background: #2980b9; transform: translateY(-2px); }
-        .desc { max-width: 400px; text-align: center; margin-top: 20px; color: #bdc3c7; font-size: 14px; line-height: 1.4; }
+        body { margin: 0; background: #050510; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; display: flex; flex-direction: column; align-items: center; }
+        canvas { display: block; }
+        .info { position: absolute; top: 20px; text-align: center; pointer-events: none; width: 100%; }
+        .node-label { position: absolute; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.7); border: 1px solid #444; font-size: 14px; max-width: 200px; }
+        #south { color: #ff7675; border-color: #ff7675; }
+        #north { color: #74b9ff; border-color: #74b9ff; }
+        .controls { position: absolute; bottom: 30px; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 20px; backdrop-filter: blur(5px); text-align: center; }
     </style>
 </head>
 <body>
 
-    <div class="label-box">
-        <div id="profile" class="profile-tag">1 / 3</div>
-        <div id="type" class="cross-type">Правоугольный Крест</div>
-    </div>
+<div class="info">
+    <h1>Геометрия Лунных Узлов</h1>
+    <p>Пересечение пути Земли и Луны</p>
+</div>
 
-    <div class="stage">
-        <div class="axis"></div>
-        <div class="axis vert"></div>
-        
-        <!-- Личность (Черное/Цветное) -->
-        <div id="psun" class="planet p-sun"></div>
-        <div id="pearth" class="planet p-earth"></div>
-        
-        <!-- Дизайн (Красное) -->
-        <div id="dsun" class="planet d-sun"></div>
-        <div id="dearth" class="planet d-earth"></div>
-    </div>
+<div id="south" class="node-label"><b>Южный Узел (Кету)</b><br>Прошлое, Среда, фундамент. То, что нам уже знакомо.</div>
+<div id="north" class="node-label"><b>Северный Узел (Раху)</b><br>Будущее, Перспектива. То, к чему мы движемся.</div>
 
-    <div class="controls">
-        <button onclick="changeStep(-1)">⬅ Назад</button>
-        <button onclick="changeStep(1)">Следующий этап ➡</button>
-    </div>
+<div class="controls">
+    Узлы движутся <b>навстречу</b> планетам (ретроградно).<br>
+    Они определяют не "кто вы", а "в каком мире вы живете".
+</div>
 
-    <div id="desc" class="desc">
-        Линии 1, 2, 3: Личная судьба. Весь фокус внутри вашей собственной геометрии.
-    </div>
-
+<script src="https://cdnjs.cloudflare.com"></script>
 <script>
-    let step = 0;
-    const steps = [
-        { p: "1 / 3", t: "Правоугольный", a: 0, d: "Линии 1, 2, 3: Личная судьба. Вы здесь, чтобы исследовать мир для себя.", c: "#00d2ff" },
-        { p: "4 / 6", t: "Правоугольный (Финал)", a: 45, d: "Линия 4 в личности: Вы начинаете замечать других, но крест всё еще 'Правый'.", c: "#00d2ff" },
-        { p: "4 / 1", t: "Джакста-позиция", a: 60, d: "Уникальная точка 'Фиксированной судьбы'. Тонкая грань между личным и общим.", c: "#f1c40f" },
-        { p: "5 / 1", t: "Левоугольный", a: 90, d: "Линия 5: Трансперсональная карма. Вы здесь для взаимодействия и влияния на других.", c: "#e74c3c" },
-        { p: "6 / 2", t: "Левоугольный", a: 130, d: "Линия 6: Ролевая модель. Переход к наблюдению за всем циклом целиком.", c: "#e74c3c" }
-    ];
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-    function update() {
-        const s = steps[step];
-        document.getElementById('profile').innerText = s.p;
-        document.getElementById('type').innerText = s.t;
-        document.getElementById('type').style.color = s.c;
-        document.getElementById('desc').innerText = s.d;
+    // Центральная Земля
+    const earthGeo = new THREE.SphereGeometry(0.5, 32, 32);
+    const earthMat = new THREE.MeshPhongMaterial({ color: 0x22a6b3, emissive: 0x111111 });
+    const earth = new THREE.Mesh(earthGeo, earthMat);
+    scene.add(earth);
 
-        const radius = 180;
-        const angle = s.a;
+    const light = new THREE.PointLight(0xffffff, 1.5);
+    light.position.set(5, 5, 5);
+    scene.add(light);
+    scene.add(new THREE.AmbientLight(0x404040));
 
-        // Личность
-        setPos('psun', angle, radius);
-        setPos('pearth', angle + 180, radius);
+    // Орбита Солнца (Эклиптика) - Белая
+    const eclipticGeo = new THREE.TorusGeometry(4, 0.01, 16, 100);
+    const eclipticMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.3 });
+    const ecliptic = new THREE.Mesh(eclipticGeo, eclipticMat);
+    ecliptic.rotation.x = Math.PI / 2;
+    scene.add(ecliptic);
+
+    // Орбита Луны - Наклоненная
+    const moonOrbitGroup = new THREE.Group();
+    const moonOrbitGeo = new THREE.TorusGeometry(4, 0.02, 16, 100);
+    const moonOrbitMat = new THREE.MeshBasicMaterial({ color: 0x6c5ce7, transparent: true, opacity: 0.5 });
+    const moonOrbit = new THREE.Mesh(moonOrbitGeo, moonOrbitMat);
+    moonOrbit.rotation.x = Math.PI / 2;
+    moonOrbitGroup.add(moonOrbit);
+    moonOrbitGroup.rotation.z = 0.15; // Угол наклона
+    scene.add(moonOrbitGroup);
+
+    // Точки Узлов
+    const nodeGeo = new THREE.SphereGeometry(0.15, 16, 16);
+    const northNode = new THREE.Mesh(nodeGeo, new THREE.MeshBasicMaterial({ color: 0x74b9ff }));
+    const southNode = new THREE.Mesh(nodeGeo, new THREE.MeshBasicMaterial({ color: 0xff7675 }));
+    scene.add(northNode);
+    scene.add(southNode);
+
+    camera.position.z = 8;
+    camera.position.y = 4;
+    camera.lookAt(0,0,0);
+
+    let angle = 0;
+    function animate() {
+        requestAnimationFrame(animate);
+        angle += 0.005; // Скорость прецессии узлов
+
+        // Расчет точек пересечения (Узлов)
+        // В упрощенной 3D модели они находятся на оси пересечения двух плоскостей
+        const x = Math.cos(angle) * 4;
+        const z = Math.sin(angle) * 4;
         
-        // Дизайн (отстает на ~88 градусов)
-        setPos('dsun', angle - 88, radius);
-        setPos('dearth', angle + 180 - 88, radius);
+        northNode.position.set(x, 0, z);
+        southNode.position.set(-x, 0, -z);
+
+        // Привязка ярлыков
+        updateLabel('north', northNode);
+        updateLabel('south', southNode);
+
+        moonOrbitGroup.rotation.y = angle; // Вращение линии узлов
+        renderer.render(scene, camera);
     }
 
-    function setPos(id, deg, r) {
-        const rad = deg * Math.PI / 180;
-        const x = Math.cos(rad) * r;
-        const y = Math.sin(rad) * r;
+    function updateLabel(id, obj) {
+        const vector = obj.position.clone().project(camera);
+        const x = (vector.x *  .5 + .5) * window.innerWidth;
+        const y = (vector.y * -.5 + .5) * window.innerHeight;
         const el = document.getElementById(id);
-        el.style.transform = `translate(${x}px, ${y}px)`;
+        el.style.left = x + 'px';
+        el.style.top = y + 'px';
     }
 
-    function changeStep(dir) {
-        step = (step + dir + steps.length) % steps.length;
-        update();
-    }
-
-    update();
+    animate();
 </script>
 </body>
 </html>
