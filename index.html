@@ -1,90 +1,66 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>3D Lunar Nodes Visualization</title>
-    <style>
-        body { margin: 0; background: #050505; color: white; font-family: sans-serif; overflow: hidden; }
-        #info { position: absolute; top: 10px; left: 10px; pointer-events: none; }
-        canvas { display: block; }
-    </style>
-</head>
-<body>
-    <div id="info">
-        <b>Лунные узлы: Механика</b><br>
-        Пересечение плоскости эклиптики (желтая) и орбиты Луны (белая)
-    </div>
-    <script src="https://cdnjs.cloudflare.com"></script>
-    <script>
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+<body style="margin:0; background:#050505; display:flex; justify-content:center; align-items:center; height:100vh; overflow:hidden; color:white; font-family:sans-serif;">
 
-        // 1. Земля в центре
-        const earthGeo = new THREE.SphereGeometry(0.5, 32, 32);
-        const earthMat = new THREE.MeshPhongMaterial({ color: 0x2233ff, emissive: 0x112244 });
-        const earth = new THREE.Mesh(earthGeo, earthMat);
-        scene.add(earth);
+<div style="position:absolute; top:20px; text-align:center; width:100%;">
+    <h2 style="color:#ffcc00; margin:0;">Механика Лунных Узлов</h2>
+    <p style="opacity:0.7;">Пересечение орбиты Луны (белая) и Эклиптики (желтая)</p>
+</div>
 
-        // 2. Плоскость эклиптики (Путь Солнца)
-        const eclipticGeo = new THREE.RingGeometry(4.5, 5, 64);
-        const eclipticMat = new THREE.MeshBasicMaterial({ color: 0xffcc00, side: THREE.DoubleSide, transparent: true, opacity: 0.3 });
-        const ecliptic = new THREE.Mesh(eclipticGeo, eclipticMat);
-        ecliptic.rotation.x = Math.PI / 2;
-        scene.add(ecliptic);
+<svg viewBox="0 0 800 600" width="100%" height="100%">
+    <!-- Определяем градиент для объема Земли -->
+    <defs>
+        <radialGradient id="earthGrad">
+            <stop offset="30%" stop-color="#3366ff" />
+            <stop offset="100%" stop-color="#001133" />
+        </radialGradient>
+    </defs>
 
-        // 3. Орбита Луны (наклонная)
-        const moonOrbitGroup = new THREE.Group();
-        const moonOrbitGeo = new THREE.TorusGeometry(4.75, 0.02, 16, 100);
-        const moonOrbitMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-        const moonOrbit = new THREE.Mesh(moonOrbitGeo, moonOrbitMat);
-        moonOrbit.rotation.x = Math.PI / 2;
-        moonOrbitGroup.add(moonOrbit);
-        
-        // Наклон орбиты (реальный ~5.14 градусов, здесь чуть больше для наглядности)
-        moonOrbitGroup.rotation.z = Math.PI / 8; 
-        moonOrbitGroup.rotation.x = 0.15; 
-        scene.add(moonOrbitGroup);
+    <g transform="translate(400, 300)">
+        <!-- 1. Эклиптика (Плоскость Солнца) - вид под углом -->
+        <ellipse cx="0" cy="0" rx="300" ry="80" fill="none" stroke="#ffcc00" stroke-width="2" stroke-dasharray="10,5" opacity="0.5" />
+        <ellipse cx="0" cy="0" rx="300" ry="80" fill="#ffcc00" opacity="0.05" />
 
-        // 4. Лунные Узлы (точки пересечения)
-        const nodeGeo = new THREE.SphereGeometry(0.15, 16, 16);
-        const nodeMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-        
-        const northNode = new THREE.Mesh(nodeGeo, nodeMat);
-        northNode.position.set(4.75, 0, 0); // Точка на оси пересечения
-        scene.add(northNode);
+        <!-- 2. Орбита Луны (наклонена относительно эклиптики) -->
+        <!-- Мы поворачиваем эллипс вокруг центра -->
+        <g transform="rotate(15)">
+            <ellipse cx="0" cy="0" rx="300" ry="100" fill="none" stroke="white" stroke-width="3" />
+            <ellipse cx="0" cy="0" rx="300" ry="100" fill="white" opacity="0.03" />
+        </g>
 
-        const southNode = new THREE.Mesh(nodeGeo, nodeMat);
-        southNode.position.set(-4.75, 0, 0);
-        scene.add(southNode);
+        <!-- 3. Земля в центре -->
+        <circle r="30" fill="url(#earthGrad)" />
+        <circle r="30" fill="none" stroke="#5588ff" stroke-width="1" opacity="0.5" />
 
-        // Свет
-        const light = new THREE.PointLight(0xffffff, 1, 100);
-        light.position.set(10, 10, 10);
-        scene.add(light);
-        scene.add(new THREE.AmbientLight(0x404040));
+        <!-- 4. ЛУННЫЕ УЗЛЫ (Точки пересечения двух эллипсов) -->
+        <!-- Северный Узел -->
+        <g transform="translate(295, 10)">
+            <circle r="8" fill="red" />
+            <circle r="12" fill="none" stroke="red" stroke-width="1">
+                <animate attributeName="r" values="8;15;8" dur="2s" repeatCount="indefinite" />
+                <animate attributeName="opacity" values="1;0;1" dur="2s" repeatCount="indefinite" />
+            </circle>
+            <text x="15" y="-15" fill="white" font-size="14" font-weight="bold">Северный Узел (Раху)</text>
+        </g>
 
-        camera.position.set(8, 5, 8);
-        camera.lookAt(0, 0, 0);
+        <!-- Южный Узел -->
+        <g transform="translate(-295, -10)">
+            <circle r="8" fill="red" />
+            <circle r="12" fill="none" stroke="red" stroke-width="1">
+                <animate attributeName="r" values="8;15;8" dur="2s" repeatCount="indefinite" />
+                <animate attributeName="opacity" values="1;0;1" dur="2s" repeatCount="indefinite" />
+            </circle>
+            <text x="-160" y="25" fill="white" font-size="14" font-weight="bold">Южный Узел (Кету)</text>
+        </g>
 
-        // Анимация вращения камеры
-        function animate() {
-            requestAnimationFrame(animate);
-            const time = Date.now() * 0.0005;
-            camera.position.x = Math.cos(time) * 10;
-            camera.position.z = Math.sin(time) * 10;
-            camera.lookAt(0, 0, 0);
-            renderer.render(scene, camera);
-        }
-        
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+        <!-- Линия узлов -->
+        <line x1="-295" y1="-10" x2="295" y2="10" stroke="red" stroke-width="1" stroke-dasharray="5,5" opacity="0.6" />
+    </g>
+</svg>
 
-        animate();
-    </script>
+<div style="position:absolute; bottom:20px; font-size:12px; opacity:0.5; max-width:400px; text-align:center;">
+    Красные точки — это математические пересечения. Когда Луна проходит через них, она буквально «пронзает» плоскость, по которой движется Солнце.
+</div>
+
 </body>
 </html>
