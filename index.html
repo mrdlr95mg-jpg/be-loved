@@ -1,39 +1,97 @@
 <!DOCTYPE html>
 <html>
-<body style="margin:0; background:#050505; display:flex; justify-content:center; align-items:center; height:100vh; overflow:hidden; color:white; font-family:sans-serif;">
+<head>
+    <style>
+        body { margin: 0; background: #111; color: white; font-family: sans-serif; text-align: center; }
+        #label { position: absolute; width: 100%; top: 20px; }
+    </style>
+</head>
+<body>
+    <div id="label">
+        <b>Визуализация "Два Обруча"</b><br>
+        Желтый — путь Солнца | Белый — путь Луны<br>
+        <span style="color:red">Красные точки</span> — это и есть Лунные Узлы (места пересечения)
+    </div>
+    <script src="https://cdnjs.cloudflare.com"></script>
+    <script>
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
 
-<div style="position:absolute; top:20px; text-align:center; width:100%;">
-    <h2 style="color:#ffcc00; margin:0;">Механика Лунных Узлов</h2>
-    <p style="opacity:0.7;">Пересечение орбиты Луны (белая) и Эклиптики (желтая)</p>
-</div>
+        // 1. ЗЕМЛЯ (Мы в центре)
+        const earth = new THREE.Mesh(
+            new THREE.SphereGeometry(0.4, 32, 32),
+            new THREE.MeshPhongMaterial({ color: 0x22aaee })
+        );
+        scene.add(earth);
 
-<svg viewBox="0 0 800 600" width="100%" height="100%">
-    <!-- Определяем градиент для объема Земли -->
-    <defs>
-        <radialGradient id="earthGrad">
-            <stop offset="30%" stop-color="#3366ff" />
-            <stop offset="100%" stop-color="#001133" />
-        </radialGradient>
-    </defs>
+        // 2. ПУТЬ СОЛНЦА (Большой диск/обруч) - Эклиптика
+        // Представь это как поверхность стола
+        const sunPathGeo = new THREE.TorusGeometry(5, 0.03, 16, 100);
+        const sunPathMat = new THREE.MeshBasicMaterial({ color: 0xffcc00 });
+        const sunPath = new THREE.Mesh(sunPathGeo, sunPathMat);
+        sunPath.rotation.x = Math.PI / 2; // Кладем горизонтально
+        scene.add(sunPath);
 
-    <g transform="translate(400, 300)">
-        <!-- 1. Эклиптика (Плоскость Солнца) - вид под углом -->
-        <ellipse cx="0" cy="0" rx="300" ry="80" fill="none" stroke="#ffcc00" stroke-width="2" stroke-dasharray="10,5" opacity="0.5" />
-        <ellipse cx="0" cy="0" rx="300" ry="80" fill="#ffcc00" opacity="0.05" />
+        // Прозрачная "вода" для наглядности плоскости стола
+        const plane = new THREE.Mesh(
+            new THREE.CircleGeometry(5, 64),
+            new THREE.MeshBasicMaterial({ color: 0xffcc00, transparent: true, opacity: 0.1, side: THREE.DoubleSide })
+        );
+        plane.rotation.x = Math.PI / 2;
+        scene.add(plane);
 
-        <!-- 2. Орбита Луны (наклонена относительно эклиптики) -->
-        <!-- Мы поворачиваем эллипс вокруг центра -->
-        <g transform="rotate(15)">
-            <ellipse cx="0" cy="0" rx="300" ry="100" fill="none" stroke="white" stroke-width="3" />
-            <ellipse cx="0" cy="0" rx="300" ry="100" fill="white" opacity="0.03" />
-        </g>
+        // 3. ПУТЬ ЛУНЫ (Маленький обруч, вставленный КРИВО)
+        const moonOrbitGroup = new THREE.Group();
+        const moonPathGeo = new THREE.TorusGeometry(3, 0.05, 16, 100);
+        const moonPathMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const moonPath = new THREE.Mesh(moonPathGeo, moonPathMat);
+        moonPath.rotation.x = Math.PI / 2;
+        moonOrbitGroup.add(moonPath);
+        
+        // КЛЮЧЕВОЙ МОМЕНТ: Наклоняем лунный путь относительно солнечного
+        moonOrbitGroup.rotation.z = 0.5; // Наклон в бок
+        moonOrbitGroup.rotation.x = 0.3; // Наклон вперед
+        scene.add(moonOrbitGroup);
 
-        <!-- 3. Земля в центре -->
-        <circle r="30" fill="url(#earthGrad)" />
-        <circle r="30" fill="none" stroke="#5588ff" stroke-width="1" opacity="0.5" />
+        // 4. ЛУННЫЕ УЗЛЫ (Точки, где белый обруч протыкает желтую "воду")
+        const nodeGeo = new THREE.SphereGeometry(0.2, 16, 16);
+        const nodeMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
 
-        <!-- 4. ЛУННЫЕ УЗЛЫ (Точки пересечения двух эллипсов) -->
-        <!-- Северный Узел -->
+        // Северный узел (где Луна идет вверх над столом)
+        const nodeN = new THREE.Mesh(nodeGeo, nodeMat);
+        nodeN.position.set(3, 0, 0); 
+        scene.add(nodeN);
+
+        // Южный узел (где Луна уходит вниз под стол)
+        const nodeS = new THREE.Mesh(nodeGeo, nodeMat);
+        nodeS.position.set(-3, 0, 0);
+        scene.add(nodeS);
+
+        // Свет
+        const light = new THREE.PointLight(0xffffff, 1.5);
+        light.position.set(5, 5, 5);
+        scene.add(light);
+        scene.add(new THREE.AmbientLight(0x444444));
+
+        camera.position.set(7, 6, 7);
+        camera.lookAt(0, 0, 0);
+
+        function animate() {
+            requestAnimationFrame(animate);
+            // Медленно крутим камеру, чтобы рассмотреть наклон со всех сторон
+            const t = Date.now() * 0.0005;
+            camera.position.x = Math.sin(t) * 10;
+            camera.position.z = Math.cos(t) * 10;
+            camera.lookAt(0, 0, 0);
+            renderer.render(scene, camera);
+        }
+        animate();
+    </script>
+</body>
+</html>
         <g transform="translate(295, 10)">
             <circle r="8" fill="red" />
             <circle r="12" fill="none" stroke="red" stroke-width="1">
