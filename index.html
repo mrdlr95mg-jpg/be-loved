@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>3D Lunar Nodes - Mechanical View</title>
     <style>
-        body { margin: 0; background: #000; overflow: hidden; color: white; font-family: sans-serif; }
-        #ui { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.7); padding: 15px; border-radius: 8px; pointer-events: none; }
-        .legend { display: flex; align-items: center; margin-bottom: 5px; }
-        .dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 10px; }
+        body { margin: 0; background-color: #050505; color: #fff; font-family: sans-serif; overflow: hidden; }
+        #overlay { position: absolute; padding: 20px; pointer-events: none; text-shadow: 1px 1px 2px #000; }
+        .node-label { color: #ff3333; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div id="ui">
-        <div class="legend"><div class="dot" style="background: #ffcc00"></div> Солнце (Центр)</div>
-        <div class="legend"><div class="dot" style="background: #22aaee"></div> Земля (Орбита — Эклиптика)</div>
-        <div class="legend"><div class="dot" style="background: #ffffff"></div> Луна (Орбита наклонена)</div>
-        <div class="legend"><div class="dot" style="background: #ff0000"></div> <b>УЗЛЫ</b> (Точки пересечения)</div>
-        <p style="font-size: 0.8em; opacity: 0.8;">Узлы — это места, где Луна "пробивает"<br>плоскость орбиты Земли.</p>
+    <div id="overlay">
+        <h2>Механика Лунных Узлов</h2>
+        <p>Голубой шар в центре — <b>Земля</b></p>
+        <p>Сетка — <b>Плоскость Эклиптики</b> (путь Солнца)</p>
+        <p>Белое кольцо — <b>Орбита Луны</b> (наклонена на 5°)</p>
+        <p class="node-label">Красные сферы — ЛУННЫЕ УЗЛЫ</p>
+        <p style="font-size: 0.9em; opacity: 0.7;">Это просто точки пересечения двух плоскостей.</p>
     </div>
+
     <script src="https://cdnjs.cloudflare.com"></script>
     <script>
         const scene = new THREE.Scene();
@@ -24,88 +26,77 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // 1. СОЛНЦЕ
-        const sun = new THREE.Mesh(
-            new THREE.SphereGeometry(1, 32, 32),
-            new THREE.MeshBasicMaterial({ color: 0xffcc00 })
-        );
-        scene.add(sun);
+        // 1. СЕТКА (Плоскость Эклиптики / "Пол" Солнечной системы)
+        const grid = new THREE.GridHelper(20, 20, 0x444444, 0x222222);
+        scene.add(grid);
 
-        // 2. ОРБИТА ЗЕМЛИ (Эклиптика)
-        const earthOrbitGeo = new THREE.TorusGeometry(10, 0.02, 16, 100);
-        const earthOrbitMat = new THREE.MeshBasicMaterial({ color: 0x444444 });
-        const earthOrbit = new THREE.Mesh(earthOrbitGeo, earthOrbitMat);
-        earthOrbit.rotation.x = Math.PI / 2;
-        scene.add(earthOrbit);
-
-        // Плоскость эклиптики (визуальный "пол")
-        const floor = new THREE.Mesh(
-            new THREE.CircleGeometry(10, 64),
-            new THREE.MeshBasicMaterial({ color: 0xffcc00, transparent: true, opacity: 0.05, side: THREE.DoubleSide })
-        );
-        floor.rotation.x = Math.PI / 2;
-        scene.add(floor);
-
-        // 3. ЗЕМЛЯ И ЕЕ ЛУННАЯ СИСТЕМА
-        const earthSystem = new THREE.Group();
-        scene.add(earthSystem);
-
+        // 2. ЗЕМЛЯ
         const earth = new THREE.Mesh(
-            new THREE.SphereGeometry(0.4, 32, 32),
-            new THREE.MeshPhongMaterial({ color: 0x22aaee })
+            new THREE.SphereGeometry(0.6, 32, 32),
+            new THREE.MeshPhongMaterial({ color: 0x0077ff, emissive: 0x050505 })
         );
-        earthSystem.add(earth);
+        scene.add(earth);
 
-        // Наклоненная орбита Луны
-        const moonOrbitGroup = new THREE.Group();
-        const moonPath = new THREE.Mesh(
-            new THREE.TorusGeometry(3, 0.03, 16, 100),
-            new THREE.MeshBasicMaterial({ color: 0xffffff })
-        );
-        moonPath.rotation.x = Math.PI / 2;
-        moonOrbitGroup.add(moonPath);
-        
-        // КЛЮЧЕВОЙ НАКЛОН (5 градусов)
-        moonOrbitGroup.rotation.x = 0.25; 
-        earthSystem.add(moonOrbitGroup);
+        // 3. ОРБИТА ЛУНЫ (Наклоненное кольцо)
+        const orbitGroup = new THREE.Group();
+        const torusGeo = new THREE.TorusGeometry(7, 0.05, 16, 100);
+        const torusMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.6 });
+        const orbitRing = new THREE.Mesh(torusGeo, torusMat);
+        orbitRing.rotation.x = Math.PI / 2;
+        orbitGroup.add(orbitRing);
 
-        // 4. ЛУННЫЕ УЗЛЫ (Красные метки)
-        const nodeGeo = new THREE.SphereGeometry(0.15, 16, 16);
+        // Наклон орбиты (сделаем 15 градусов вместо 5 для наглядности)
+        orbitGroup.rotation.x = 0.25; 
+        scene.add(orbitGroup);
+
+        // 4. ЛУННЫЕ УЗЛЫ (Красные точки в местах "прокола" сетки)
+        const nodeGeo = new THREE.SphereGeometry(0.3, 16, 16);
         const nodeMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
 
-        const nNode = new THREE.Mesh(nodeGeo, nodeMat);
-        nNode.position.set(3, 0, 0); // На линии пересечения
-        moonOrbitGroup.add(nNode);
+        // Северный узел
+        const nodeN = new THREE.Mesh(nodeGeo, nodeMat);
+        nodeN.position.set(7, 0, 0); 
+        scene.add(nodeN);
 
-        const sNode = new THREE.Mesh(nodeGeo, nodeMat);
-        sNode.position.set(-3, 0, 0);
-        moonOrbitGroup.add(sNode);
+        // Южный узел
+        const nodeS = new THREE.Mesh(nodeGeo, nodeMat);
+        nodeS.position.set(-7, 0, 0);
+        scene.add(nodeS);
+
+        // Линия узлов (соединяет их через центр Земли)
+        const lineMat = new THREE.LineBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.3 });
+        const lineGeo = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(-7, 0, 0),
+            new THREE.Vector3(7, 0, 0)
+        ]);
+        const nodeLine = new THREE.Line(lineGeo, lineMat);
+        scene.add(nodeLine);
 
         // Свет
-        const light = new THREE.PointLight(0xffffff, 2, 50);
+        const light = new THREE.PointLight(0xffffff, 1.2, 100);
+        light.position.set(10, 10, 10);
         scene.add(light);
-        scene.add(new THREE.AmbientLight(0x222222));
+        scene.add(new THREE.AmbientLight(0x404040));
 
-        camera.position.set(15, 12, 15);
+        camera.position.set(12, 8, 12);
         camera.lookAt(0, 0, 0);
 
-        let angle = 0;
         function animate() {
             requestAnimationFrame(animate);
-            angle += 0.005;
-
-            // Двигаем Землю вокруг Солнца
-            earthSystem.position.x = Math.cos(angle) * 10;
-            earthSystem.position.z = Math.sin(angle) * 10;
-
-            // Вращаем камеру для обзора
-            camera.position.x = Math.cos(angle * 0.2) * 18;
-            camera.position.z = Math.sin(angle * 0.2) * 18;
-            camera.lookAt(earthSystem.position);
-
+            // Медленное вращение камеры, чтобы видеть объем
+            const timer = Date.now() * 0.0003;
+            camera.position.x = Math.cos(timer) * 15;
+            camera.position.z = Math.sin(timer) * 15;
+            camera.lookAt(0, 0, 0);
             renderer.render(scene, camera);
         }
         animate();
+
+        window.onresize = () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        };
     </script>
 </body>
 </html>
