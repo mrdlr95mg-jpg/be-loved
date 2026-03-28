@@ -1,39 +1,52 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>3D Lunar Nodes - Mechanical View</title>
-    <style>
-        body { margin: 0; background-color: #050505; color: #fff; font-family: sans-serif; overflow: hidden; }
-        #overlay { position: absolute; padding: 20px; pointer-events: none; text-shadow: 1px 1px 2px #000; }
-        .node-label { color: #ff3333; font-weight: bold; }
-    </style>
-</head>
-<body>
-    <div id="overlay">
-        <h2>Механика Лунных Узлов</h2>
-        <p>Голубой шар в центре — <b>Земля</b></p>
-        <p>Сетка — <b>Плоскость Эклиптики</b> (путь Солнца)</p>
-        <p>Белое кольцо — <b>Орбита Луны</b> (наклонена на 5°)</p>
-        <p class="node-label">Красные сферы — ЛУННЫЕ УЗЛЫ</p>
-        <p style="font-size: 0.9em; opacity: 0.7;">Это просто точки пересечения двух плоскостей.</p>
+<body style="background: #050505; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0;">
+
+    <div style="text-align: center; margin-bottom: 20px;">
+        <h2 style="color: #ffcc00;">Механика Лунных Узлов (Вид сбоку)</h2>
+        <p>Желтая линия — плоскость пути Солнца (Эклиптика)<br>
+        Белый овал — наклонная орбита Луны</p>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com"></script>
-    <script>
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+    <svg width="600" height="400" viewBox="0 0 600 400">
+        <!-- 1. Плоскость эклиптики (вид сбоку как тонкий диск) -->
+        <ellipse cx="300" cy="200" rx="250" ry="20" fill="rgba(255, 204, 0, 0.1)" stroke="#ffcc00" stroke-width="2" />
+        <line x1="50" y1="200" x2="550" y2="200" stroke="#ffcc00" stroke-width="1" stroke-dasharray="5,5" />
 
-        // 1. СЕТКА (Плоскость Эклиптики / "Пол" Солнечной системы)
-        const grid = new THREE.GridHelper(20, 20, 0x444444, 0x222222);
-        scene.add(grid);
+        <!-- 2. Земля в центре -->
+        <circle cx="300" cy="200" r="15" fill="#22aaee" />
+        <text x="285" y="235" fill="#22aaee" font-size="12">Земля</text>
 
-        // 2. ЗЕМЛЯ
-        const earth = new THREE.Mesh(
-            new THREE.SphereGeometry(0.6, 32, 32),
-            new THREE.MeshPhongMaterial({ color: 0x0077ff, emissive: 0x050505 })
+        <!-- 3. Наклоненная орбита Луны (Белый овал под углом) -->
+        <g transform="rotate(10, 300, 200)">
+            <ellipse cx="300" cy="200" rx="200" ry="80" fill="none" stroke="white" stroke-width="3" opacity="0.8" />
+            
+            <!-- Луна на орбите -->
+            <circle cx="430" cy="140" r="8" fill="#ddd" />
+            <text x="445" y="140" fill="white" font-size="12">Луна</text>
+        </g>
+
+        <!-- 4. ЛУННЫЕ УЗЛЫ (Точки, где белый овал пересекает желтую линию) -->
+        <!-- Северный узел -->
+        <circle cx="496" cy="200" r="10" fill="red" stroke="white" stroke-width="2" />
+        <text x="515" y="205" fill="red" font-weight="bold">Северный Узел</text>
+
+        <!-- Южный узел -->
+        <circle cx="104" cy="200" r="10" fill="red" stroke="white" stroke-width="2" />
+        <text x="10" y="205" fill="red" font-weight="bold">Южный Узел</text>
+
+        <!-- Ось Узлов -->
+        <line x1="104" y1="200" x2="496" y2="200" stroke="red" stroke-width="1" opacity="0.5" />
+    </svg>
+
+    <div style="max-width: 500px; margin-top: 20px; font-size: 0.9em; line-height: 1.4; opacity: 0.8;">
+        <b>Что здесь происходит:</b><br>
+        Орбита Луны "разрезает" плоскость эклиптики. Красные точки — это места разреза. <br><br>
+        Когда Луна летит по своему белому кольцу и оказывается в красной точке — это и есть момент работы Узла в твоей карте.
+    </div>
+
+</body>
+</html>
         );
         scene.add(earth);
 
