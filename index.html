@@ -1,115 +1,113 @@
 <!DOCTYPE html>
 <html>
-<body style="background: #050505; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0;">
-
-    <div style="text-align: center; margin-bottom: 20px;">
-        <h2 style="color: #ffcc00;">Механика Лунных Узлов (Вид сбоку)</h2>
-        <p>Желтая линия — плоскость пути Солнца (Эклиптика)<br>
-        Белый овал — наклонная орбита Луны</p>
+<head>
+    <style>
+        body { margin: 0; background: #050505; color: white; font-family: sans-serif; overflow: hidden; }
+        #ui { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 10px; border: 1px solid #444; }
+        .marker { display: flex; align-items: center; margin: 5px 0; font-size: 14px; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 10px; }
+    </style>
+</head>
+<body>
+    <div id="ui">
+        <b>Сатурн на орбите</b>
+        <div class="marker"><div class="dot" style="background: #a67c52"></div> Сатурн (планета)</div>
+        <div class="marker"><div class="dot" style="background: #00f2ff"></div> Водолей 22°</div>
+        <div class="marker"><div class="dot" style="background: #ff00ff"></div> Рыбы 10°</div>
+        <small style="opacity: 0.6">Кольцо разделено на знаки Зодиака</small>
     </div>
+    <script src="https://cdnjs.cloudflare.com"></script>
+    <script>
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
 
-    <svg width="600" height="400" viewBox="0 0 600 400">
-        <!-- 1. Плоскость эклиптики (вид сбоку как тонкий диск) -->
-        <ellipse cx="300" cy="200" rx="250" ry="20" fill="rgba(255, 204, 0, 0.1)" stroke="#ffcc00" stroke-width="2" />
-        <line x1="50" y1="200" x2="550" y2="200" stroke="#ffcc00" stroke-width="1" stroke-dasharray="5,5" />
+        // 1. СОЛНЦЕ (Центр)
+        const sun = new THREE.Mesh(new THREE.SphereGeometry(0.8, 32, 32), new THREE.MeshBasicMaterial({ color: 0xffaa00 }));
+        scene.add(sun);
 
-        <!-- 2. Земля в центре -->
-        <circle cx="300" cy="200" r="15" fill="#22aaee" />
-        <text x="285" y="235" fill="#22aaee" font-size="12">Земля</text>
+        // 2. ЗОДИАКАЛЬНОЕ КОЛЬЦО (Разметка неба)
+        const zodiacRadius = 12;
+        for (let i = 0; i < 12; i++) {
+            const segmentGeo = new THREE.RingGeometry(zodiacRadius, zodiacRadius + 0.5, 32, 1, (i * Math.PI * 2) / 12, (Math.PI * 2) / 12 - 0.05);
+            const color = i % 2 === 0 ? 0x222222 : 0x333333;
+            const segment = new THREE.Mesh(segmentGeo, new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide }));
+            segment.rotation.x = Math.PI / 2;
+            scene.add(segment);
+        }
 
-        <!-- 3. Наклоненная орбита Луны (Белый овал под углом) -->
-        <g transform="rotate(10, 300, 200)">
-            <ellipse cx="300" cy="200" rx="200" ry="80" fill="none" stroke="white" stroke-width="3" opacity="0.8" />
-            
-            <!-- Луна на орбите -->
-            <circle cx="430" cy="140" r="8" fill="#ddd" />
-            <text x="445" y="140" fill="white" font-size="12">Луна</text>
-        </g>
-
-        <!-- 4. ЛУННЫЕ УЗЛЫ (Точки, где белый овал пересекает желтую линию) -->
-        <!-- Северный узел -->
-        <circle cx="496" cy="200" r="10" fill="red" stroke="white" stroke-width="2" />
-        <text x="515" y="205" fill="red" font-weight="bold">Северный Узел</text>
-
-        <!-- Южный узел -->
-        <circle cx="104" cy="200" r="10" fill="red" stroke="white" stroke-width="2" />
-        <text x="10" y="205" fill="red" font-weight="bold">Южный Узел</text>
-
-        <!-- Ось Узлов -->
-        <line x1="104" y1="200" x2="496" y2="200" stroke="red" stroke-width="1" opacity="0.5" />
-    </svg>
-
-    <div style="max-width: 500px; margin-top: 20px; font-size: 0.9em; line-height: 1.4; opacity: 0.8;">
-        <b>Что здесь происходит:</b><br>
-        Орбита Луны "разрезает" плоскость эклиптики. Красные точки — это места разреза. <br><br>
-        Когда Луна летит по своему белому кольцу и оказывается в красной точке — это и есть момент работы Узла в твоей карте.
-    </div>
-
-</body>
-</html>
+        // 3. ОРБИТА САТУРНА
+        const orbitRadius = 10;
+        const orbitPath = new THREE.Mesh(
+            new THREE.TorusGeometry(orbitRadius, 0.02, 16, 100),
+            new THREE.MeshBasicMaterial({ color: 0x555555 })
         );
-        scene.add(earth);
+        orbitPath.rotation.x = Math.PI / 2;
+        scene.add(orbitPath);
 
-        // 3. ОРБИТА ЛУНЫ (Наклоненное кольцо)
-        const orbitGroup = new THREE.Group();
-        const torusGeo = new THREE.TorusGeometry(7, 0.05, 16, 100);
-        const torusMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.6 });
-        const orbitRing = new THREE.Mesh(torusGeo, torusMat);
-        orbitRing.rotation.x = Math.PI / 2;
-        orbitGroup.add(orbitRing);
+        // Функция перевода Градус Зодиака -> Радианы на сцене
+        // В астрологии 0° Овна - это точка отсчета. 
+        // Водолей - 11-й знак (300°+), Рыбы - 12-й (330°+)
+        function getPos(deg) {
+            const rad = (deg - 90) * (Math.PI / 180); // -90 чтобы выровнять с осями Three.js
+            return { x: Math.cos(rad) * orbitRadius, z: Math.sin(rad) * orbitRadius };
+        }
 
-        // Наклон орбиты (сделаем 15 градусов вместо 5 для наглядности)
-        orbitGroup.rotation.x = 0.25; 
-        scene.add(orbitGroup);
+        // 4. ТОЧКИ НА ОРБИТЕ
+        const markerGeo = new THREE.SphereGeometry(0.2, 16, 16);
+        
+        // Водолей 22° (300 + 22 = 322°)
+        const pos1 = getPos(322);
+        const m1 = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0x00f2ff }));
+        m1.position.set(pos1.x, 0, pos1.z);
+        scene.add(m1);
 
-        // 4. ЛУННЫЕ УЗЛЫ (Красные точки в местах "прокола" сетки)
-        const nodeGeo = new THREE.SphereGeometry(0.3, 16, 16);
-        const nodeMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        // Рыбы 10° (330 + 10 = 340°)
+        const pos2 = getPos(340);
+        const m2 = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0xff00ff }));
+        m2.position.set(pos2.x, 0, pos2.z);
+        scene.add(m2);
 
-        // Северный узел
-        const nodeN = new THREE.Mesh(nodeGeo, nodeMat);
-        nodeN.position.set(7, 0, 0); 
-        scene.add(nodeN);
-
-        // Южный узел
-        const nodeS = new THREE.Mesh(nodeGeo, nodeMat);
-        nodeS.position.set(-7, 0, 0);
-        scene.add(nodeS);
-
-        // Линия узлов (соединяет их через центр Земли)
-        const lineMat = new THREE.LineBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.3 });
-        const lineGeo = new THREE.BufferGeometry().setFromPoints([
-            new THREE.Vector3(-7, 0, 0),
-            new THREE.Vector3(7, 0, 0)
-        ]);
-        const nodeLine = new THREE.Line(lineGeo, lineMat);
-        scene.add(nodeLine);
+        // 5. САТУРН
+        const saturnGroup = new THREE.Group();
+        const saturnBody = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 32), new THREE.MeshPhongMaterial({ color: 0xceb8b0 }));
+        const ringGeo = new THREE.TorusGeometry(0.9, 0.05, 2, 64);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0xa67c52, side: THREE.DoubleSide });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.x = Math.PI / 2.5;
+        saturnGroup.add(saturnBody);
+        saturnGroup.add(ring);
+        scene.add(saturnGroup);
 
         // Свет
-        const light = new THREE.PointLight(0xffffff, 1.2, 100);
-        light.position.set(10, 10, 10);
+        const light = new THREE.PointLight(0xffffff, 1.5, 50);
+        light.position.set(5, 5, 5);
         scene.add(light);
-        scene.add(new THREE.AmbientLight(0x404040));
+        scene.add(new THREE.AmbientLight(0x333333));
 
-        camera.position.set(12, 8, 12);
+        camera.position.set(12, 15, 12);
         camera.lookAt(0, 0, 0);
 
+        let time = 0;
         function animate() {
             requestAnimationFrame(animate);
-            // Медленное вращение камеры, чтобы видеть объем
-            const timer = Date.now() * 0.0003;
-            camera.position.x = Math.cos(timer) * 15;
-            camera.position.z = Math.sin(timer) * 15;
+            time += 0.002;
+            
+            // Сатурн движется по кругу (очень медленно)
+            const sAngle = time * 0.5 - 1.2; // Стартовая позиция
+            saturnGroup.position.x = Math.cos(sAngle) * orbitRadius;
+            saturnGroup.position.z = Math.sin(sAngle) * orbitRadius;
+
+            // Вращение камеры
+            camera.position.x = Math.cos(time * 0.1) * 20;
+            camera.position.z = Math.sin(time * 0.1) * 20;
             camera.lookAt(0, 0, 0);
+
             renderer.render(scene, camera);
         }
         animate();
-
-        window.onresize = () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        };
     </script>
 </body>
 </html>
