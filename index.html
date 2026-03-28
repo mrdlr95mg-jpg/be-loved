@@ -5,7 +5,7 @@
     <title>Сатурн на орбите</title>
     <style>
         body { margin: 0; background: #050505; color: white; font-family: sans-serif; overflow: hidden; }
-        #ui { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 10px; border: 1px solid #444; pointer-events: none; z-index: 10; }
+        #ui { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 10px; border: 1px solid #444; z-index: 10; pointer-events: none; }
         .marker { display: flex; align-items: center; margin: 5px 0; font-size: 14px; }
         .dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 10px; }
     </style>
@@ -19,14 +19,16 @@
         <small style="opacity: 0.6">Кольцо разделено на знаки Зодиака</small>
     </div>
 
-    <!-- ИСПРАВЛЕННАЯ ССЫЛКА НА БИБЛИОТЕКУ -->
+    <!-- Исправленная ссылка на библиотеку -->
     <script src="https://cdnjs.cloudflare.com"></script>
 
     <script>
+        // Инициализация сцены
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(renderer.domElement);
 
         // 1. СОЛНЦЕ
@@ -55,6 +57,7 @@
         orbitPath.rotation.x = Math.PI / 2;
         scene.add(orbitPath);
 
+        // Функция перевода градусов в позицию
         function getPos(deg) {
             const rad = (deg - 90) * (Math.PI / 180);
             return { x: Math.cos(rad) * orbitRadius, z: Math.sin(rad) * orbitRadius };
@@ -62,23 +65,19 @@
 
         // 4. ТОЧКИ НА ОРБИТЕ
         const markerGeo = new THREE.SphereGeometry(0.2, 16, 16);
-        
-        const pos1 = getPos(322); // Водолей 22
         const m1 = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0x00f2ff }));
+        const pos1 = getPos(322);
         m1.position.set(pos1.x, 0, pos1.z);
         scene.add(m1);
 
-        const pos2 = getPos(340); // Рыбы 10
         const m2 = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0xff00ff }));
+        const pos2 = getPos(340);
         m2.position.set(pos2.x, 0, pos2.z);
         scene.add(m2);
 
         // 5. САТУРН
         const saturnGroup = new THREE.Group();
-        const saturnBody = new THREE.Mesh(
-            new THREE.SphereGeometry(0.5, 32, 32), 
-            new THREE.MeshPhongMaterial({ color: 0xceb8b0, shininess: 10 })
-        );
+        const saturnBody = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 32), new THREE.MeshPhongMaterial({ color: 0xceb8b0 }));
         const ringGeo = new THREE.TorusGeometry(0.9, 0.05, 2, 64);
         const ringMat = new THREE.MeshBasicMaterial({ color: 0xa67c52, side: THREE.DoubleSide });
         const ring = new THREE.Mesh(ringGeo, ringMat);
@@ -88,34 +87,33 @@
         scene.add(saturnGroup);
 
         // СВЕТ
-        const light = new THREE.PointLight(0xffffff, 2, 100);
+        const light = new THREE.PointLight(0xffffff, 1.5, 100);
         light.position.set(10, 10, 10);
         scene.add(light);
-        scene.add(new THREE.AmbientLight(0x444444)); // Сделал чуть ярче фон
+        scene.add(new THREE.AmbientLight(0x404040, 2)); // Сделал ярче
 
-        camera.position.set(15, 18, 15);
+        camera.position.set(15, 15, 15);
         camera.lookAt(0, 0, 0);
 
+        // АНИМАЦИЯ
         let time = 0;
         function animate() {
             requestAnimationFrame(animate);
             time += 0.002;
             
-            // Движение Сатурна
-            const sAngle = time * 0.3 - 1.2;
+            const sAngle = time * 0.2 - 1.2;
             saturnGroup.position.x = Math.cos(sAngle) * orbitRadius;
             saturnGroup.position.z = Math.sin(sAngle) * orbitRadius;
-            saturnGroup.rotation.y += 0.01; // Вращение планеты вокруг оси
+            saturnGroup.rotation.y += 0.01;
 
-            // Вращение камеры
-            camera.position.x = Math.cos(time * 0.1) * 22;
-            camera.position.z = Math.sin(time * 0.1) * 22;
+            camera.position.x = Math.cos(time * 0.1) * 20;
+            camera.position.z = Math.sin(time * 0.1) * 20;
             camera.lookAt(0, 0, 0);
 
             renderer.render(scene, camera);
         }
 
-        // Авто-ресайз при изменении окна
+        // Обработка изменения размера окна
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
