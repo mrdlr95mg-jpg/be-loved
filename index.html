@@ -2,81 +2,85 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Программные партнеры Гексаграмм</title>
+    <title>Программные партнеры: Числовой порядок</title>
     <style>
-        body { background: #1a1a1a; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-        .container { position: relative; width: 800px; height: 800px; }
-        svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-        .hex-label { font-size: 12px; fill: #888; cursor: pointer; transition: 0.3s; transform-box: fill-box; transform-origin: center; }
-        .hex-label:hover { fill: #fff; font-weight: bold; }
-        .partner-line { stroke: rgba(255, 255, 255, 0.1); stroke-width: 1; transition: 0.3s; }
-        .hex-group:hover .partner-line { stroke: #00d4ff; stroke-width: 2; opacity: 1; }
-        .hex-group:hover .hex-label { fill: #00d4ff; }
-        .center-info { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none; }
-        h1 { margin-bottom: 0; font-size: 20px; color: #00d4ff; }
-        p { color: #666; font-size: 14px; }
+        body { background: #0f1215; color: #e0e0e0; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; overflow: hidden; }
+        .container { position: relative; width: 750px; height: 750px; }
+        svg { width: 100%; height: 100%; }
+        
+        .hex-node { cursor: pointer; transition: 0.3s; }
+        .hex-text { font-size: 14px; font-weight: bold; fill: #666; transition: 0.3s; pointer-events: none; }
+        
+        /* Линия связи между партнерами */
+        .partner-arc { fill: none; stroke: rgba(0, 212, 255, 0.15); stroke-width: 2; stroke-linecap: round; transition: 0.4s; }
+        
+        /* Эффекты при наведении */
+        .hex-group:hover .partner-arc { stroke: #00d4ff; stroke-width: 4; filter: drop-shadow(0 0 5px #00d4ff); }
+        .hex-group:hover .hex-text { fill: #fff; }
+        
+        .info { position: absolute; text-align: center; width: 200px; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 1px solid #333; padding: 15px; border-radius: 50%; background: rgba(255,255,255,0.02); }
+        h2 { font-size: 16px; color: #00d4ff; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
     </style>
 </head>
 <body>
 
-    <div class="center-info">
-        <h1>ПРОГРАММНЫЕ ПАРТНЕРЫ</h1>
-        <p>Наведите на гексаграмму,<br>чтобы увидеть её пару</p>
+    <div class="info">
+        <h2>Программные пары</h2>
+        <p style="font-size: 11px; color: #555;">Гексаграммы по порядку<br>1-2, 3-4, 5-6...</p>
     </div>
 
     <div class="container">
-        <svg id="wheel" viewBox="0 0 800 800"></svg>
+        <svg id="canvas" viewBox="0 0 800 800"></svg>
     </div>
 
 <script>
-    // Порядок гексаграмм на колесе (от 41 по часовой стрелке)
-    const wheelOrder = [
-        41, 19, 13, 49, 30, 55, 37, 63, 22, 36, 25, 17, 21, 51, 42, 3, 27, 24, 2, 23, 8, 20, 16, 35, 45, 12, 15, 52, 39, 53, 62, 56,
-        31, 33, 7, 4, 29, 59, 40, 64, 47, 6, 46, 18, 48, 57, 32, 50, 28, 44, 1, 43, 14, 34, 9, 5, 26, 11, 10, 58, 38, 54, 61, 60
-    ];
-
-    const svg = document.getElementById('wheel');
-    const radius = 350;
+    const svg = document.getElementById('canvas');
     const centerX = 400;
     const centerY = 400;
+    const radius = 340;
 
-    wheelOrder.forEach((hex, i) => {
-        const angle = (i * 360 / 64) * (Math.PI / 180);
-        const x = centerX + radius * Math.cos(angle);
-        const y = centerY + radius * Math.sin(angle);
+    // Генерируем 32 пары (1-2, 3-4, ... 63-64)
+    for (let i = 1; i <= 63; i += 2) {
+        const pairGroup = document.createElementNS("http://w3.org", "g");
+        pairGroup.setAttribute("class", "hex-group");
 
-        // Находим оппозицию (партнера) через 32 позиции
-        const partnerIndex = (i + 32) % 64;
-        const partnerAngle = (partnerIndex * 360 / 64) * (Math.PI / 180);
-        const px = centerX + radius * Math.cos(partnerAngle);
-        const py = centerY + radius * Math.sin(partnerAngle);
+        // Углы для двух партнеров (располагаем их рядом)
+        const angle1 = (i - 1) * (360 / 64) * (Math.PI / 180);
+        const angle2 = i * (360 / 64) * (Math.PI / 180);
 
-        const group = document.createElementNS("http://w3.org", "g");
-        group.setAttribute("class", "hex-group");
+        const x1 = centerX + radius * Math.cos(angle1);
+        const y1 = centerY + radius * Math.sin(angle1);
+        const x2 = centerX + radius * Math.cos(angle2);
+        const y2 = centerY + radius * Math.sin(angle2);
 
-        // Линия к партнеру
-        const line = document.createElementNS("http://w3.org", "line");
-        line.setAttribute("x1", x);
-        line.setAttribute("y1", y);
-        line.setAttribute("x2", px);
-        line.setAttribute("y2", py);
-        line.setAttribute("class", "partner-line");
+        // Рисуем дугу/линию объединения между ними
+        const arc = document.createElementNS("http://w3.org", "path");
+        // Небольшой изгиб для красоты
+        const midR = radius + 25;
+        const midX = centerX + midR * Math.cos((angle1 + angle2) / 2);
+        const midY = centerY + midR * Math.sin((angle1 + angle2) / 2);
         
-        // Текст (номер гексаграммы)
-        const text = document.createElementNS("http://w3.org", "text");
-        text.setAttribute("x", x);
-        text.setAttribute("y", y);
-        text.setAttribute("class", "hex-label");
-        text.setAttribute("text-anchor", "middle");
-        text.setAttribute("alignment-baseline", "central");
-        // Поворачиваем текст обратно, чтобы он читался горизонтально
-        text.setAttribute("transform", `rotate(90, ${x}, ${y})`); 
-        text.textContent = hex;
+        arc.setAttribute("d", `M ${x1} ${y1} Q ${midX} ${midY} ${x2} ${y2}`);
+        arc.setAttribute("class", "partner-arc");
 
-        group.appendChild(line);
-        group.appendChild(text);
-        svg.appendChild(group);
-    });
+        // Функция для создания текста
+        const createLabel = (x, y, num) => {
+            const txt = document.createElementNS("http://w3.org", "text");
+            txt.setAttribute("x", x);
+            txt.setAttribute("y", y);
+            txt.setAttribute("class", "hex-text");
+            txt.setAttribute("text-anchor", "middle");
+            txt.setAttribute("alignment-baseline", "central");
+            txt.textContent = num;
+            return txt;
+        };
+
+        pairGroup.appendChild(arc);
+        pairGroup.appendChild(createLabel(x1, y1, i));
+        pairGroup.appendChild(createLabel(x2, y2, i + 1));
+        
+        svg.appendChild(pairGroup);
+    }
 </script>
 </body>
 </html>
