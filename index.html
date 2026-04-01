@@ -2,85 +2,100 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Программные партнеры: Числовой порядок</title>
+    <title>Программные партнеры по цветам</title>
     <style>
-        body { background: #0f1215; color: #e0e0e0; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; overflow: hidden; }
-        .container { position: relative; width: 750px; height: 750px; }
+        body { background: #0a0c0e; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        .container { position: relative; width: 800px; height: 800px; }
         svg { width: 100%; height: 100%; }
         
-        .hex-node { cursor: pointer; transition: 0.3s; }
-        .hex-text { font-size: 14px; font-weight: bold; fill: #666; transition: 0.3s; pointer-events: none; }
+        .hex-text { font-size: 13px; font-weight: bold; transition: 0.3s; pointer-events: none; }
+        .partner-link { fill: none; stroke-width: 3; stroke-linecap: round; opacity: 0.4; transition: 0.4s; }
         
-        /* Линия связи между партнерами */
-        .partner-arc { fill: none; stroke: rgba(0, 212, 255, 0.15); stroke-width: 2; stroke-linecap: round; transition: 0.4s; }
+        /* Эффект при наведении на группу пары */
+        .pair-group:hover .partner-link { opacity: 1; stroke-width: 6; filter: drop-shadow(0 0 8px currentColor); }
+        .pair-group:hover .hex-text { fill: #fff !important; font-size: 16px; }
         
-        /* Эффекты при наведении */
-        .hex-group:hover .partner-arc { stroke: #00d4ff; stroke-width: 4; filter: drop-shadow(0 0 5px #00d4ff); }
-        .hex-group:hover .hex-text { fill: #fff; }
-        
-        .info { position: absolute; text-align: center; width: 200px; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 1px solid #333; padding: 15px; border-radius: 50%; background: rgba(255,255,255,0.02); }
-        h2 { font-size: 16px; color: #00d4ff; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
+        .legend { position: absolute; bottom: 20px; font-size: 12px; color: #555; text-align: center; }
     </style>
 </head>
 <body>
 
-    <div class="info">
-        <h2>Программные пары</h2>
-        <p style="font-size: 11px; color: #555;">Гексаграммы по порядку<br>1-2, 3-4, 5-6...</p>
-    </div>
-
     <div class="container">
         <svg id="canvas" viewBox="0 0 800 800"></svg>
     </div>
+    <div class="legend">Наведите на число, чтобы подсветить программную пару</div>
 
 <script>
     const svg = document.getElementById('canvas');
-    const centerX = 400;
-    const centerY = 400;
-    const radius = 340;
+    const cx = 400, cy = 400, r = 340;
 
-    // Генерируем 32 пары (1-2, 3-4, ... 63-64)
-    for (let i = 1; i <= 63; i += 2) {
-        const pairGroup = document.createElementNS("http://w3.org", "g");
-        pairGroup.setAttribute("class", "hex-group");
+    // Список программных партнеров (1-2, 3-50, 4-49 и т.д. согласно рейв-мандале)
+    // Для примера возьмем логику оппозиции 32 шага, но в порядке возрастания
+    const pairs = [];
+    const used = new Set();
+    
+    // Генерируем пары (разница в 32 позиции на колесе)
+    // Примечание: 1-2, 51-57 и т.д. — это пары, стоящие друг напротив друга
+    const wheelOrder = [
+        41, 19, 13, 49, 30, 55, 37, 63, 22, 36, 25, 17, 21, 51, 42, 3, 
+        27, 24, 2, 23, 8, 20, 16, 35, 45, 12, 15, 52, 39, 53, 62, 56, 
+        31, 33, 7, 4, 29, 59, 40, 64, 47, 6, 46, 18, 48, 57, 32, 50, 
+        28, 44, 1, 43, 14, 34, 9, 5, 26, 11, 10, 58, 38, 54, 61, 60
+    ];
 
-        // Углы для двух партнеров (располагаем их рядом)
-        const angle1 = (i - 1) * (360 / 64) * (Math.PI / 180);
-        const angle2 = i * (360 / 64) * (Math.PI / 180);
+    for(let i=0; i<32; i++) {
+        pairs.push([wheelOrder[i], wheelOrder[i+32]]);
+    }
 
-        const x1 = centerX + radius * Math.cos(angle1);
-        const y1 = centerY + radius * Math.sin(angle1);
-        const x2 = centerX + radius * Math.cos(angle2);
-        const y2 = centerY + radius * Math.sin(angle2);
+    // Рисуем гексаграммы по порядку 1, 2, 3...
+    const hexCoords = {};
+    for (let i = 1; i <= 64; i++) {
+        const angle = (i - 1) * (360 / 64) * (Math.PI / 180) - Math.PI/2;
+        hexCoords[i] = {
+            x: cx + r * Math.cos(angle),
+            y: cy + r * Math.sin(angle),
+            angle: angle
+        };
+    }
 
-        // Рисуем дугу/линию объединения между ними
-        const arc = document.createElementNS("http://w3.org", "path");
-        // Небольшой изгиб для красоты
-        const midR = radius + 25;
-        const midX = centerX + midR * Math.cos((angle1 + angle2) / 2);
-        const midY = centerY + midR * Math.sin((angle1 + angle2) / 2);
+    pairs.forEach((pair, index) => {
+        const [h1, h2] = pair;
+        const color = `hsl(${(index * 360 / 32)}, 70%, 60%)`;
         
-        arc.setAttribute("d", `M ${x1} ${y1} Q ${midX} ${midY} ${x2} ${y2}`);
-        arc.setAttribute("class", "partner-arc");
+        const group = document.createElementNS("http://w3.org", "g");
+        group.setAttribute("class", "pair-group");
+        group.style.color = color; // Для использования currentColor
 
-        // Функция для создания текста
-        const createLabel = (x, y, num) => {
-            const txt = document.createElementNS("http://w3.org", "text");
-            txt.setAttribute("x", x);
-            txt.setAttribute("y", y);
-            txt.setAttribute("class", "hex-text");
-            txt.setAttribute("text-anchor", "middle");
-            txt.setAttribute("alignment-baseline", "central");
-            txt.textContent = num;
-            return txt;
+        // Линия-дуга между партнерами
+        const link = document.createElementNS("http://w3.org", "path");
+        const c1 = hexCoords[h1], c2 = hexCoords[h2];
+        
+        // Рисуем дугу через внутренний радиус
+        const midR = r - 60;
+        const midX = cx + midR * Math.cos((c1.angle + c2.angle)/2);
+        const midY = cy + midR * Math.sin((c1.angle + c2.angle)/2);
+        
+        link.setAttribute("d", `M ${c1.x} ${c1.y} Q ${midX} ${midY} ${c2.x} ${c2.y}`);
+        link.setAttribute("class", "partner-link");
+        link.setAttribute("stroke", color);
+
+        const label = (h) => {
+            const t = document.createElementNS("http://w3.org", "text");
+            t.setAttribute("x", hexCoords[h].x);
+            t.setAttribute("y", hexCoords[h].y);
+            t.setAttribute("class", "hex-text");
+            t.setAttribute("text-anchor", "middle");
+            t.setAttribute("alignment-baseline", "central");
+            t.setAttribute("fill", color);
+            t.textContent = h;
+            return t;
         };
 
-        pairGroup.appendChild(arc);
-        pairGroup.appendChild(createLabel(x1, y1, i));
-        pairGroup.appendChild(createLabel(x2, y2, i + 1));
-        
-        svg.appendChild(pairGroup);
-    }
+        group.appendChild(link);
+        group.appendChild(label(h1));
+        group.appendChild(label(h2));
+        svg.appendChild(group);
+    });
 </script>
 </body>
 </html>
