@@ -1,62 +1,82 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-<style>
-    body { background: #0a0a0c; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-    .dna-container { position: relative; width: 400px; height: 600px; display: flex; flex-direction: column; align-items: center; }
-    
-    /* Стилизация ступеней спирали */
-    .step { display: flex; align-items: center; margin: 5px 0; perspective: 500px; transition: 0.5s; }
-    .base { width: 80px; height: 30px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; box-shadow: 0 0 10px rgba(255,255,255,0.1); }
-    
-    /* Цвета оснований */
-    .A { background: #ff4757; color: white; } /* Аденин */
-    .T { background: #2f3542; color: #747d8c; border: 1px solid #57606f; } /* Тимин */
-    .G { background: #2ed573; color: white; } /* Гуанин */
-    .C { background: #1e90ff; color: white; } /* Цитозин */
-
-    .connector { width: 100px; height: 2px; background: rgba(255,255,255,0.2); margin: 0 10px; }
-
-    /* Визуализация Гексаграммы */
-    .hex-display { position: absolute; right: -150px; top: 50%; transform: translateY(-50%); border-left: 2px solid #535c68; padding-left: 20px; }
-    .hex-line { width: 50px; height: 6px; margin: 4px 0; background: #f1c40f; box-shadow: 0 0 8px #f1c40f; }
-    .hex-line.broken { background: none; border-top: 6px dashed #f1c40f; box-shadow: none; }
-    
-    .bracket { position: absolute; left: -40px; top: 0; bottom: 0; border: 2px solid #f1c40f; border-right: none; width: 20px; border-radius: 10px 0 0 10px; }
-    .label { position: absolute; left: -180px; top: 50%; transform: translateY(-50%); color: #f1c40f; font-size: 12px; text-align: right; width: 130px; }
-</style>
+    <meta charset="UTF-8">
+    <title>Программные партнеры Гексаграмм</title>
+    <style>
+        body { background: #1a1a1a; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        .container { position: relative; width: 800px; height: 800px; }
+        svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+        .hex-label { font-size: 12px; fill: #888; cursor: pointer; transition: 0.3s; transform-box: fill-box; transform-origin: center; }
+        .hex-label:hover { fill: #fff; font-weight: bold; }
+        .partner-line { stroke: rgba(255, 255, 255, 0.1); stroke-width: 1; transition: 0.3s; }
+        .hex-group:hover .partner-line { stroke: #00d4ff; stroke-width: 2; opacity: 1; }
+        .hex-group:hover .hex-label { fill: #00d4ff; }
+        .center-info { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none; }
+        h1 { margin-bottom: 0; font-size: 20px; color: #00d4ff; }
+        p { color: #666; font-size: 14px; }
+    </style>
 </head>
 <body>
 
-<div class="dna-container">
-    <!-- Группа из 3-х нуклеотидов (Кодон = Гексаграмма) -->
-    <div style="position: relative; border: 1px rgba(241, 196, 15, 0.3) dashed; padding: 10px; border-radius: 10px;">
-        <div class="label">ОДИН КОДОН<br>(Гексаграмма И-Цзин)</div>
-        <div class="bracket"></div>
-        
-        <!-- Нуклеотид 1 (2 линии) -->
-        <div class="step"><div class="base G">G (Ян-Инь)</div><div class="connector"></div><div class="base C">C</div></div>
-        <!-- Нуклеотид 2 (2 линии) -->
-        <div class="step"><div class="base A">A (Инь-Ян)</div><div class="connector"></div><div class="base T">T</div></div>
-        <!-- Нуклеотид 3 (2 линии) -->
-        <div class="step"><div class="base T">T (Ян-Ян)</div><div class="connector"></div><div class="base A">A</div></div>
-
-        <!-- Результирующая гексаграмма -->
-        <div class="hex-display">
-            <div class="hex-line"></div> <!-- Линия 6 (от T) -->
-            <div class="hex-line"></div> <!-- Линия 5 (от T) -->
-            <div class="hex-line"></div> <!-- Линия 4 (от A) -->
-            <div class="hex-line broken"></div> <!-- Линия 3 (от A) -->
-            <div class="hex-line broken"></div> <!-- Линия 2 (от G) -->
-            <div class="hex-line"></div> <!-- Линия 1 (от G) -->
-            <div style="margin-top: 10px; font-size: 10px; color: #95a5a6;">Гексаграмма №5<br>"Ожидание"</div>
-        </div>
+    <div class="center-info">
+        <h1>ПРОГРАММНЫЕ ПАРТНЕРЫ</h1>
+        <p>Наведите на гексаграмму,<br>чтобы увидеть её пару</p>
     </div>
-    <p style="margin-top: 40px; color: #7f8c8d; font-size: 14px; text-align: center;">
-        Каждая "ступенька" спирали — это 2 линии.<br>
-        3 ступеньки вместе создают код из 6 линий.
-    </p>
-</div>
 
+    <div class="container">
+        <svg id="wheel" viewBox="0 0 800 800"></svg>
+    </div>
+
+<script>
+    // Порядок гексаграмм на колесе (от 41 по часовой стрелке)
+    const wheelOrder = [
+        41, 19, 13, 49, 30, 55, 37, 63, 22, 36, 25, 17, 21, 51, 42, 3, 27, 24, 2, 23, 8, 20, 16, 35, 45, 12, 15, 52, 39, 53, 62, 56,
+        31, 33, 7, 4, 29, 59, 40, 64, 47, 6, 46, 18, 48, 57, 32, 50, 28, 44, 1, 43, 14, 34, 9, 5, 26, 11, 10, 58, 38, 54, 61, 60
+    ];
+
+    const svg = document.getElementById('wheel');
+    const radius = 350;
+    const centerX = 400;
+    const centerY = 400;
+
+    wheelOrder.forEach((hex, i) => {
+        const angle = (i * 360 / 64) * (Math.PI / 180);
+        const x = centerX + radius * Math.cos(angle);
+        const y = centerY + radius * Math.sin(angle);
+
+        // Находим оппозицию (партнера) через 32 позиции
+        const partnerIndex = (i + 32) % 64;
+        const partnerAngle = (partnerIndex * 360 / 64) * (Math.PI / 180);
+        const px = centerX + radius * Math.cos(partnerAngle);
+        const py = centerY + radius * Math.sin(partnerAngle);
+
+        const group = document.createElementNS("http://w3.org", "g");
+        group.setAttribute("class", "hex-group");
+
+        // Линия к партнеру
+        const line = document.createElementNS("http://w3.org", "line");
+        line.setAttribute("x1", x);
+        line.setAttribute("y1", y);
+        line.setAttribute("x2", px);
+        line.setAttribute("y2", py);
+        line.setAttribute("class", "partner-line");
+        
+        // Текст (номер гексаграммы)
+        const text = document.createElementNS("http://w3.org", "text");
+        text.setAttribute("x", x);
+        text.setAttribute("y", y);
+        text.setAttribute("class", "hex-label");
+        text.setAttribute("text-anchor", "middle");
+        text.setAttribute("alignment-baseline", "central");
+        // Поворачиваем текст обратно, чтобы он читался горизонтально
+        text.setAttribute("transform", `rotate(90, ${x}, ${y})`); 
+        text.textContent = hex;
+
+        group.appendChild(line);
+        group.appendChild(text);
+        svg.appendChild(group);
+    });
+</script>
 </body>
 </html>
