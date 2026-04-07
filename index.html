@@ -2,100 +2,105 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Программные партнеры по цветам</title>
+    <title>Визуализация Дизайна Человека: Цвет, Тон, База</title>
     <style>
-        body { background: #0a0c0e; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-        .container { position: relative; width: 800px; height: 800px; }
-        svg { width: 100%; height: 100%; }
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; background: #f0f2f5; padding: 20px; }
+        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
+        .level { margin-bottom: 20px; }
+        .label { font-weight: bold; margin-bottom: 8px; display: flex; justify-content: space-between; }
+        .progress-bg { background: #eee; height: 24px; border-radius: 12px; overflow: hidden; position: relative; }
+        .progress-fill { height: 100%; transition: width 0.1s linear; }
         
-        .hex-text { font-size: 13px; font-weight: bold; transition: 0.3s; pointer-events: none; }
-        .partner-link { fill: none; stroke-width: 3; stroke-linecap: round; opacity: 0.4; transition: 0.4s; }
-        
-        /* Эффект при наведении на группу пары */
-        .pair-group:hover .partner-link { opacity: 1; stroke-width: 6; filter: drop-shadow(0 0 8px currentColor); }
-        .pair-group:hover .hex-text { fill: #fff !important; font-size: 16px; }
-        
-        .legend { position: absolute; bottom: 20px; font-size: 12px; color: #555; text-align: center; }
+        #color-bar { background: #6c5ce7; }
+        #tone-bar { background: #00cec9; }
+        #base-bar { background: #ff7675; }
+
+        .arrow-box { margin-top: 20px; padding: 15px; border: 2px dashed #ccc; text-align: center; border-radius: 10px; }
+        .arrow { font-size: 40px; font-weight: bold; color: #2d3436; }
+        .speed-control { margin-top: 20px; font-size: 0.9em; color: #636e72; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <svg id="canvas" viewBox="0 0 800 800"></svg>
+<div class="container">
+    <h2>Фрактальное время HD</h2>
+    
+    <!-- ЦВЕТ -->
+    <div class="level">
+        <div class="label"><span>ЦВЕТ (1 из 6)</span> <span id="color-val">1</span></div>
+        <div class="progress-bg"><div id="color-bar" class="progress-fill" style="width: 0%"></div></div>
     </div>
-    <div class="legend">Наведите на число, чтобы подсветить программную пару</div>
+
+    <!-- ТОН -->
+    <div class="level">
+        <div class="label"><span>ТОН (1 из 6)</span> <span id="tone-val">1</span></div>
+        <div class="progress-bg"><div id="tone-bar" class="progress-fill" style="width: 0%"></div></div>
+    </div>
+
+    <!-- БАЗА -->
+    <div class="level">
+        <div class="label"><span>БАЗА (1 из 5)</span> <span id="base-val">1</span></div>
+        <div class="progress-bg"><div id="base-bar" class="progress-fill" style="width: 0%"></div></div>
+    </div>
+
+    <!-- СТРЕЛКА -->
+    <div class="arrow-box">
+        <div>Направление стрелки (зависит от тона):</div>
+        <div id="arrow-dir" class="arrow">←</div>
+        <div id="arrow-text">ЛЕВАЯ (Активная)</div>
+    </div>
+
+    <div class="speed-control">
+        * Скорость увеличена для демонстрации (1 сек = 1 база)
+    </div>
+</div>
 
 <script>
-    const svg = document.getElementById('canvas');
-    const cx = 400, cy = 400, r = 340;
+    let color = 1, tone = 1, base = 1;
+    let baseProgress = 0;
 
-    // Список программных партнеров (1-2, 3-50, 4-49 и т.д. согласно рейв-мандале)
-    // Для примера возьмем логику оппозиции 32 шага, но в порядке возрастания
-    const pairs = [];
-    const used = new Set();
-    
-    // Генерируем пары (разница в 32 позиции на колесе)
-    // Примечание: 1-2, 51-57 и т.д. — это пары, стоящие друг напротив друга
-    const wheelOrder = [
-        41, 19, 13, 49, 30, 55, 37, 63, 22, 36, 25, 17, 21, 51, 42, 3, 
-        27, 24, 2, 23, 8, 20, 16, 35, 45, 12, 15, 52, 39, 53, 62, 56, 
-        31, 33, 7, 4, 29, 59, 40, 64, 47, 6, 46, 18, 48, 57, 32, 50, 
-        28, 44, 1, 43, 14, 34, 9, 5, 26, 11, 10, 58, 38, 54, 61, 60
-    ];
+    function update() {
+        baseProgress += 5; // шаг анимации
 
-    for(let i=0; i<32; i++) {
-        pairs.push([wheelOrder[i], wheelOrder[i+32]]);
+        if (baseProgress >= 100) {
+            baseProgress = 0;
+            base++;
+            if (base > 5) {
+                base = 1;
+                tone++;
+                if (tone > 6) {
+                    tone = 1;
+                    color++;
+                    if (color > 6) color = 1;
+                }
+            }
+        }
+
+        // Обновление баров
+        document.getElementById('base-bar').style.width = baseProgress + '%';
+        document.getElementById('tone-bar').style.width = ((tone - 1) * 16.6 + (base - 1) * 3.3) + '%';
+        document.getElementById('color-bar').style.width = ((color - 1) * 16.6) + '%';
+
+        // Обновление цифр
+        document.getElementById('color-val').innerText = color;
+        document.getElementById('tone-val').innerText = tone;
+        document.getElementById('base-val').innerText = base;
+
+        // Логика стрелки (1-3 влево, 4-6 вправо)
+        const arrow = document.getElementById('arrow-dir');
+        const text = document.getElementById('arrow-text');
+        if (tone <= 3) {
+            arrow.innerText = '←';
+            text.innerText = 'ЛЕВАЯ (Стратегическая / Фокус)';
+            text.style.color = '#2d3436';
+        } else {
+            arrow.innerText = '→';
+            text.innerText = 'ПРАВАЯ (Восприимчивая / Периферия)';
+            text.style.color = '#e17055';
+        }
     }
 
-    // Рисуем гексаграммы по порядку 1, 2, 3...
-    const hexCoords = {};
-    for (let i = 1; i <= 64; i++) {
-        const angle = (i - 1) * (360 / 64) * (Math.PI / 180) - Math.PI/2;
-        hexCoords[i] = {
-            x: cx + r * Math.cos(angle),
-            y: cy + r * Math.sin(angle),
-            angle: angle
-        };
-    }
-
-    pairs.forEach((pair, index) => {
-        const [h1, h2] = pair;
-        const color = `hsl(${(index * 360 / 32)}, 70%, 60%)`;
-        
-        const group = document.createElementNS("http://w3.org", "g");
-        group.setAttribute("class", "pair-group");
-        group.style.color = color; // Для использования currentColor
-
-        // Линия-дуга между партнерами
-        const link = document.createElementNS("http://w3.org", "path");
-        const c1 = hexCoords[h1], c2 = hexCoords[h2];
-        
-        // Рисуем дугу через внутренний радиус
-        const midR = r - 60;
-        const midX = cx + midR * Math.cos((c1.angle + c2.angle)/2);
-        const midY = cy + midR * Math.sin((c1.angle + c2.angle)/2);
-        
-        link.setAttribute("d", `M ${c1.x} ${c1.y} Q ${midX} ${midY} ${c2.x} ${c2.y}`);
-        link.setAttribute("class", "partner-link");
-        link.setAttribute("stroke", color);
-
-        const label = (h) => {
-            const t = document.createElementNS("http://w3.org", "text");
-            t.setAttribute("x", hexCoords[h].x);
-            t.setAttribute("y", hexCoords[h].y);
-            t.setAttribute("class", "hex-text");
-            t.setAttribute("text-anchor", "middle");
-            t.setAttribute("alignment-baseline", "central");
-            t.setAttribute("fill", color);
-            t.textContent = h;
-            return t;
-        };
-
-        group.appendChild(link);
-        group.appendChild(label(h1));
-        group.appendChild(label(h2));
-        svg.appendChild(group);
-    });
+    setInterval(update, 50); // Запуск цикла
 </script>
 </body>
 </html>
